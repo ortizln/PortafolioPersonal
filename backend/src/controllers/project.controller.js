@@ -8,7 +8,7 @@ const projectController = {
         where: { userId: req.user.id, deletedAt: null },
         include: {
           images: true,
-          technologies: { include: { tech: true } },
+          technologies: { include: { technology: true } },
           categories: { include: { category: true } }
         },
         orderBy: { order: 'asc' }
@@ -26,7 +26,7 @@ const projectController = {
         where: { id: req.params.id },
         include: {
           images: true,
-          technologies: { include: { tech: true } },
+          technologies: { include: { technology: true } },
           categories: { include: { category: true } }
         }
       });
@@ -74,7 +74,7 @@ const projectController = {
         },
         include: {
           images: true,
-          technologies: { include: { tech: true } },
+          technologies: { include: { technology: true } },
           categories: { include: { category: true } }
         }
       });
@@ -137,7 +137,7 @@ const projectController = {
         },
         include: {
           images: true,
-          technologies: { include: { tech: true } },
+          technologies: { include: { technology: true } },
           categories: { include: { category: true } }
         }
       });
