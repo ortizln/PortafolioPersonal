@@ -1,0 +1,138 @@
+<div class="certificate-list">
+  <header class="page-header">
+    <div>
+      <h1>Certificates</h1>
+      <p>Manage your professional certifications and credentials</p>
+    </div>
+    <button type="button" class="btn-gradient" (click)="openAdd()">+ Add Certificate</button>
+  </header>
+
+  <div class="loading-state" *ngIf="loading">Loading certificates...</div>
+
+  <div class="empty-state" *ngIf="!loading && certificates.length === 0 && !showForm">
+    No certificates yet. Add your first one!
+  </div>
+
+  <div class="form-overlay" *ngIf="showForm">
+    <div class="form-card">
+      <h2>{{ editingId ? 'Edit Certificate' : 'New Certificate' }}</h2>
+      <form [formGroup]="certForm" (ngSubmit)="save()">
+        <div class="form-grid">
+          <div class="form-group">
+            <label for="name">Name</label>
+            <input id="name" class="form-control" formControlName="name" placeholder="Certificate name" />
+          </div>
+          <div class="form-group">
+            <label for="issuingOrganization">Issuing Organization</label>
+            <input id="issuingOrganization" class="form-control" formControlName="issuingOrganization" placeholder="e.g. Google, AWS" />
+          </div>
+          <div class="form-group">
+            <label for="issueDate">Issue Date</label>
+            <input id="issueDate" class="form-control" formControlName="issueDate" type="date" />
+          </div>
+          <div class="form-group">
+            <label for="expiryDate">Expiration Date</label>
+            <input id="expiryDate" class="form-control" formControlName="expiryDate" type="date" [disabled]="certForm.get('doesNotExpire')?.value" />
+          </div>
+          <div class="form-group checkbox-group">
+            <input id="doesNotExpire" formControlName="doesNotExpire" type="checkbox" class="checkbox-control" />
+            <label for="doesNotExpire">Does not expire</label>
+          </div>
+          <div class="form-group">
+            <label for="credentialId">Credential ID</label>
+            <input id="credentialId" class="form-control" formControlName="credentialId" placeholder="Credential identifier" />
+          </div>
+          <div class="form-group">
+            <label for="credentialUrl">Credential URL</label>
+            <input id="credentialUrl" class="form-control" formControlName="credentialUrl" placeholder="https://credential.example.com" />
+          </div>
+          <div class="form-group">
+            <label for="category">Category</label>
+            <input id="category" class="form-control" formControlName="category" placeholder="e.g. Cloud, DevOps" />
+          </div>
+          <div class="form-group">
+            <label for="educationId">Related Education</label>
+            <select id="educationId" class="form-control" formControlName="educationId">
+              <option [ngValue]="null">None</option>
+              <option *ngFor="let edu of educationList" [ngValue]="edu.id">{{ edu.institution }} - {{ edu.degree }}</option>
+            </select>
+          </div>
+          <div class="form-group full-width">
+            <label for="description">Description</label>
+            <textarea id="description" class="form-control" formControlName="description" rows="3" placeholder="Certificate description"></textarea>
+          </div>
+
+          <div class="form-group full-width" *ngIf="editingId">
+            <label>Certificate Files</label>
+            <div class="file-upload-area">
+              <input #fileInput type="file" (change)="uploadFile($event)" accept=".pdf,.png,.jpg,.jpeg" style="display:none" />
+              <button type="button" class="btn-secondary" (click)="fileInput.click()">+ Upload File</button>
+              <span class="file-hint">PDF, PNG, JPG accepted</span>
+            </div>
+            <div class="file-list" *ngIf="certFiles.length > 0">
+              <div class="file-item" *ngFor="let f of certFiles">
+                <span class="file-icon">{{ f.fileType?.includes('pdf') ? '📄' : '🖼' }}</span>
+                <span class="file-name">{{ f.fileName }}</span>
+                <a [href]="f.fileUrl" target="_blank" class="file-preview-link">Preview</a>
+                <button type="button" class="file-remove" (click)="removeCertFile(f)">&times;</button>
+              </div>
+            </div>
+          </div>
+
+          <div class="form-actions">
+            <button type="button" class="btn-secondary" (click)="cancelForm()">Cancel</button>
+            <button type="submit" class="btn-primary" [disabled]="saving">
+              <span class="spinner" *ngIf="saving"></span>
+              {{ saving ? 'Saving...' : (editingId ? 'Update' : 'Create') }}
+            </button>
+          </div>
+        </div>
+      </form>
+    </div>
+  </div>
+
+  <div class="card-grid" *ngIf="certificates.length > 0">
+    <div class="cert-card" *ngFor="let cert of certificates">
+      <div class="cert-card-top">
+        <div class="cert-icon">
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+            <circle cx="12" cy="8" r="4"/>
+            <path d="M20 21a8 8 0 1 0-16 0"/>
+            <path d="M12 12v5l2 2"/>
+          </svg>
+        </div>
+        <div class="cert-info">
+          <div class="cert-name">{{ cert.name }}</div>
+          <div class="cert-org">{{ cert.issuer }}</div>
+        </div>
+      </div>
+      <div class="cert-meta">
+        <span class="cert-date">Issued: {{ cert.issueDate | date:'MMM yyyy' }}</span>
+        <span *ngIf="cert.expirationDate" class="cert-expiry">Expires: {{ cert.expirationDate | date:'MMM yyyy' }}</span>
+        <span *ngIf="!cert.expirationDate && cert.doesNotExpire" class="cert-noexpire">No expiration</span>
+        <span class="badge-category" *ngIf="cert.category">{{ cert.category }}</span>
+      </div>
+      <div class="cert-description" *ngIf="cert.description">{{ cert.description }}</div>
+      <div class="cert-links" *ngIf="cert.credentialUrl">
+        <a [href]="cert.credentialUrl" target="_blank" rel="noopener" class="credential-link">
+          <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M18 13v6a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2V8a2 2 0 0 1 2-2h6"/><polyline points="15 3 21 3 21 9"/><line x1="10" y1="14" x2="21" y2="3"/></svg>
+          View Credential
+        </a>
+      </div>
+      <div class="cert-files" *ngIf="cert.files?.length">
+        <span class="files-label">Files:</span>
+        <a *ngFor="let f of cert.files" [href]="f.fileUrl" target="_blank" class="file-link">{{ f.fileName }}</a>
+      </div>
+      <div class="cert-actions">
+        <button type="button" class="btn-accent" (click)="openEdit(cert)">Edit</button>
+        <button type="button" class="btn-danger" (click)="deleteCertificate(cert.id)">Delete</button>
+      </div>
+    </div>
+  </div>
+
+  <div class="toast-container">
+    <div *ngFor="let toast of toasts" class="toast" [ngClass]="toast.type">
+      {{ toast.message }}
+    </div>
+  </div>
+</div>

@@ -1,0 +1,50 @@
+<div class="header">
+  <h2>Categories</h2>
+  <button class="btn-add" (click)="openCreate()"><i class="bi bi-plus-lg"></i> Add Category</button>
+</div>
+
+@if (showForm) {
+  <div class="glass-form">
+    <h3>{{ editingCategory ? 'Edit' : 'New' }} Category</h3>
+    <div class="form-grid">
+      <div class="form-group">
+        <label>Name</label>
+        <input type="text" [(ngModel)]="form.name" placeholder="e.g. Frontend" (input)="onNameChange(form.name)" />
+      </div>
+      <div class="form-group full-width">
+        <label>Description</label>
+        <textarea [(ngModel)]="form.description" placeholder="Category description"></textarea>
+      </div>
+    </div>
+    <div class="form-actions">
+      <button class="btn-submit" (click)="submitForm()" [disabled]="isSubmitting || !form.name.trim()">
+        {{ editingCategory ? 'Update' : 'Create' }}
+      </button>
+      <button class="btn-cancel" (click)="cancelForm()">Cancel</button>
+    </div>
+  </div>
+}
+
+<div class="categories-list">
+  @for (cat of categories; track cat.id) {
+    <div class="category-card">
+      <div class="category-info">
+        <div class="cat-name">{{ cat.name }}</div>
+        <div class="cat-slug">/{{ cat.slug }}</div>
+        @if (cat.description) {
+          <div class="cat-desc">{{ cat.description }}</div>
+        }
+      </div>
+      <div class="project-count">
+        <span class="count">{{ cat.projectCount }}</span>
+        <span class="label">Projects</span>
+      </div>
+      <div class="card-actions">
+        <button class="btn-edit" (click)="openEdit(cat)">Edit</button>
+        <button class="btn-delete" (click)="deleteCategory(cat.id)">Delete</button>
+      </div>
+    </div>
+  } @empty {
+    <p style="color: var(--text-secondary); text-align: center; padding: 40px;">No categories added yet.</p>
+  }
+</div>

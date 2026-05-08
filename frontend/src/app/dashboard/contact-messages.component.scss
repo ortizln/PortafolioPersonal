@@ -1,0 +1,270 @@
+:host {
+  --glass-bg: rgba(255, 255, 255, 0.05);
+  --glass-border: rgba(255, 255, 255, 0.1);
+  --glass-shadow: 0 8px 32px rgba(0, 0, 0, 0.3);
+  --accent: #6c5ce7;
+  --accent-dim: rgba(108, 92, 231, 0.2);
+  --text-primary: #e0e0e0;
+  --text-secondary: #a0a0a0;
+  --danger: #e74c3c;
+  --success: #2ecc71;
+  --surface: #1a1a2e;
+  --card-radius: 16px;
+  display: block;
+  padding: 24px;
+  color: var(--text-primary);
+  font-family: 'Segoe UI', system-ui, sans-serif;
+}
+
+.header {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  margin-bottom: 24px;
+
+  h2 {
+    margin: 0;
+    font-size: 1.5rem;
+    font-weight: 600;
+  }
+
+  .unread-count {
+    padding: 4px 14px;
+    border-radius: 20px;
+    background: var(--accent-dim);
+    color: var(--accent);
+    font-size: 0.8rem;
+    font-weight: 600;
+  }
+}
+
+.messages-list {
+  display: flex;
+  flex-direction: column;
+  gap: 12px;
+}
+
+.message-card {
+  padding: 16px 20px;
+  border-radius: var(--card-radius);
+  background: var(--glass-bg);
+  border: 1px solid var(--glass-border);
+  backdrop-filter: blur(16px);
+  box-shadow: var(--glass-shadow);
+  transition: transform 0.2s, box-shadow 0.2s;
+  cursor: pointer;
+
+  &:hover {
+    transform: translateY(-1px);
+    box-shadow: 0 12px 40px rgba(0, 0, 0, 0.4);
+  }
+
+  &.unread {
+    border-left: 3px solid var(--accent);
+  }
+}
+
+.message-header {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 12px;
+  margin-bottom: 6px;
+
+  .sender-info {
+    display: flex;
+    align-items: center;
+    gap: 10px;
+    min-width: 0;
+
+    .avatar {
+      width: 36px;
+      height: 36px;
+      border-radius: 50%;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      font-weight: 600;
+      font-size: 0.85rem;
+      background: var(--accent-dim);
+      color: var(--accent);
+      flex-shrink: 0;
+    }
+
+    .name {
+      font-weight: 600;
+      font-size: 0.95rem;
+    }
+
+    .email {
+      font-size: 0.75rem;
+      color: var(--text-secondary);
+    }
+  }
+
+  .badge {
+    padding: 3px 10px;
+    border-radius: 10px;
+    font-size: 0.65rem;
+    font-weight: 600;
+    text-transform: uppercase;
+    letter-spacing: 0.5px;
+    white-space: nowrap;
+
+    &.read {
+      background: rgba(255, 255, 255, 0.06);
+      color: var(--text-secondary);
+    }
+
+    &.unread {
+      background: var(--accent-dim);
+      color: var(--accent);
+    }
+  }
+}
+
+.message-subject {
+  margin-top: 2px;
+  margin-bottom: 8px;
+  font-size: 0.85rem;
+  font-weight: 500;
+  color: var(--text-primary);
+}
+
+.message-preview {
+  font-size: 0.8rem;
+  color: var(--text-secondary);
+  line-height: 1.4;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+.message-full {
+  margin-top: 12px;
+  padding: 16px;
+  border-radius: 12px;
+  background: rgba(0, 0, 0, 0.2);
+  border: 1px solid var(--glass-border);
+
+  p {
+    margin: 0 0 12px;
+    font-size: 0.85rem;
+    line-height: 1.6;
+    color: var(--text-primary);
+    white-space: pre-wrap;
+  }
+}
+
+.message-footer {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 10px;
+  margin-top: 8px;
+
+  .date {
+    font-size: 0.75rem;
+    color: var(--text-secondary);
+  }
+
+  .actions {
+    display: flex;
+    gap: 6px;
+
+    button {
+      padding: 6px 14px;
+      border: none;
+      border-radius: 8px;
+      font-size: 0.78rem;
+      cursor: pointer;
+      transition: opacity 0.2s;
+
+      &.btn-read {
+        background: var(--accent-dim);
+        color: var(--accent);
+        &:hover { opacity: 0.8; }
+      }
+
+      &.btn-delete {
+        background: rgba(231, 76, 60, 0.15);
+        color: var(--danger);
+        &:hover { opacity: 0.8; }
+      }
+    }
+  }
+}
+
+.delete-confirm-overlay {
+  position: fixed;
+  inset: 0;
+  background: rgba(0, 0, 0, 0.6);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  z-index: 1000;
+}
+
+.delete-confirm {
+  padding: 24px 32px;
+  border-radius: var(--card-radius);
+  background: var(--surface);
+  border: 1px solid var(--glass-border);
+  box-shadow: var(--glass-shadow);
+  text-align: center;
+  max-width: 380px;
+
+  p {
+    margin: 0 0 16px;
+    font-size: 0.9rem;
+    line-height: 1.5;
+  }
+
+  .confirm-actions {
+    display: flex;
+    gap: 10px;
+    justify-content: center;
+
+    button {
+      padding: 8px 20px;
+      border: none;
+      border-radius: 10px;
+      font-size: 0.85rem;
+      font-weight: 500;
+      cursor: pointer;
+      transition: opacity 0.2s;
+
+      &.btn-confirm {
+        background: var(--danger);
+        color: #fff;
+        &:hover { opacity: 0.85; }
+      }
+
+      &.btn-cancel {
+        background: rgba(255, 255, 255, 0.08);
+        color: var(--text-secondary);
+        &:hover { opacity: 0.8; }
+      }
+    }
+  }
+}
+
+.empty-state {
+  text-align: center;
+  padding: 60px 20px;
+  border-radius: var(--card-radius);
+  background: var(--glass-bg);
+  border: 1px dashed var(--glass-border);
+
+  i {
+    font-size: 2.5rem;
+    color: var(--text-secondary);
+    margin-bottom: 12px;
+  }
+
+  p {
+    margin: 0;
+    color: var(--text-secondary);
+    font-size: 0.9rem;
+  }
+}

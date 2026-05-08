@@ -1,0 +1,127 @@
+<div class="skill-list">
+  <header class="page-header">
+    <div>
+      <h1>Skills</h1>
+      <p>Manage your professional skills and proficiency levels</p>
+    </div>
+    <button type="button" class="btn-gradient" (click)="openAdd()">+ Add Skill</button>
+  </header>
+
+  <div class="loading-state" *ngIf="loading">Loading skills...</div>
+
+  <div class="empty-state" *ngIf="!loading && skills.length === 0 && !showForm">
+    No skills yet. Add your first one!
+  </div>
+
+  <div class="form-overlay" *ngIf="showForm">
+    <div class="form-card">
+      <h2>{{ editingId ? 'Edit Skill' : 'New Skill' }}</h2>
+      <form [formGroup]="skillForm" (ngSubmit)="save()">
+        <div class="form-grid">
+          <div class="form-group">
+            <label for="name">Skill Name</label>
+            <input id="name" class="form-control" formControlName="name" placeholder="e.g. Angular, TypeScript" />
+          </div>
+          <div class="form-group">
+            <label for="category">Category</label>
+            <select id="category" class="form-control" formControlName="category">
+              <option *ngFor="let cat of categories" [value]="cat">{{ cat }}</option>
+            </select>
+          </div>
+          <div class="form-group">
+            <label for="percentage">Proficiency: {{ skillForm.get('percentage')?.value }}%</label>
+            <div class="range-group">
+              <input id="percentage" class="range-control" formControlName="percentage" type="range" min="0" max="100" step="1" />
+              <input class="form-control range-input" formControlName="percentage" type="number" min="0" max="100" />
+            </div>
+          </div>
+          <div class="form-group">
+            <label for="level">Level Label</label>
+            <input id="level" class="form-control" formControlName="level" placeholder="e.g. Expert, Advanced" />
+          </div>
+          <div class="form-group">
+            <label for="icon">Icon (emoji or class)</label>
+            <input id="icon" class="form-control" formControlName="icon" placeholder="e.g. 🔧, fab fa-angular" />
+          </div>
+          <div class="form-group">
+            <label for="color">Color</label>
+            <div class="color-group">
+              <input id="color" class="color-control" formControlName="color" type="color" />
+              <input class="form-control" formControlName="color" type="text" placeholder="#64ffda" />
+            </div>
+          </div>
+          <div class="form-group">
+            <label for="order">Order</label>
+            <input id="order" class="form-control" formControlName="order" type="number" min="0" />
+          </div>
+          <div class="form-actions">
+            <button type="button" class="btn-secondary" (click)="cancelForm()">Cancel</button>
+            <button type="submit" class="btn-primary" [disabled]="saving">
+              <span class="spinner" *ngIf="saving"></span>
+              {{ saving ? 'Saving...' : (editingId ? 'Update' : 'Create') }}
+            </button>
+          </div>
+        </div>
+      </form>
+    </div>
+  </div>
+
+  <!-- Category tabs -->
+  <div class="category-tabs" *ngIf="skills.length > 0">
+    <button class="tab-btn" [class.active]="activeCategory === 'All'" (click)="setCategory('All')">All</button>
+    <button class="tab-btn" *ngFor="let cat of categories" [class.active]="activeCategory === cat" (click)="setCategory(cat)">
+      {{ cat }}
+      <span class="tab-count" *ngIf="getCategoryCount(cat) > 0">{{ getCategoryCount(cat) }}</span>
+    </button>
+  </div>
+
+  <!-- Category groups -->
+  <div class="skill-groups" *ngIf="activeCategory === 'All'">
+    <div class="skill-group" *ngFor="let cat of categories">
+      <ng-container *ngIf="getGroupSkills(cat).length > 0">
+        <div class="group-header">
+          <h3>{{ cat }}</h3>
+          <span class="group-avg">
+            Avg: {{ getCategoryPercentage(cat) }}%
+          </span>
+        </div>
+        <div class="skill-bars">
+          <div class="skill-bar-item" *ngFor="let skill of getGroupSkills(cat)" (click)="openEdit(skill)">
+            <div class="skill-bar-info">
+              <span class="skill-bar-icon" *ngIf="skill.icon">{{ skill.icon }}</span>
+              <span class="skill-bar-name">{{ skill.name }}</span>
+              <span class="skill-bar-level" *ngIf="skill.level">{{ skill.level }}</span>
+            </div>
+            <div class="skill-bar-track">
+              <div class="skill-bar-fill" [style.width.%]="skill.percentage" [style.background]="getBarColor(skill)"></div>
+            </div>
+            <span class="skill-bar-pct">{{ skill.percentage }}%</span>
+            <button type="button" class="btn-delete-skill" (click)="deleteWithEvent($event, skill.id)" title="Delete skill">&times;</button>
+          </div>
+        </div>
+      </ng-container>
+    </div>
+  </div>
+
+  <!-- Flat filtered list -->
+  <div class="skill-bars" *ngIf="activeCategory !== 'All' && filteredSkills.length > 0">
+    <div class="skill-bar-item" *ngFor="let skill of filteredSkills" (click)="openEdit(skill)">
+      <div class="skill-bar-info">
+        <span class="skill-bar-icon" *ngIf="skill.icon">{{ skill.icon }}</span>
+        <span class="skill-bar-name">{{ skill.name }}</span>
+        <span class="skill-bar-level" *ngIf="skill.level">{{ skill.level }}</span>
+      </div>
+      <div class="skill-bar-track">
+        <div class="skill-bar-fill" [style.width.%]="skill.percentage" [style.background]="getBarColor(skill)"></div>
+      </div>
+      <span class="skill-bar-pct">{{ skill.percentage }}%</span>
+      <button type="button" class="btn-delete-skill" (click)="deleteWithEvent($event, skill.id)" title="Delete skill">&times;</button>
+    </div>
+  </div>
+
+  <div class="toast-container">
+    <div *ngFor="let toast of toasts" class="toast" [ngClass]="toast.type">
+      {{ toast.message }}
+    </div>
+  </div>
+</div>

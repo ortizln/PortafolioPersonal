@@ -1,0 +1,67 @@
+<div class="header">
+  <h2>Settings</h2>
+  <button class="btn-add" (click)="openCreate()"><i class="bi bi-plus-lg"></i> Add Setting</button>
+</div>
+
+@if (showForm) {
+  <div class="glass-form">
+    <h3>{{ editingSetting ? 'Edit' : 'New' }} Setting</h3>
+    <div class="form-grid">
+      <div class="form-group">
+        <label>Key</label>
+        <input type="text" [(ngModel)]="form.key" placeholder="snake_case_key" />
+      </div>
+      <div class="form-group">
+        <label>Edit Mode</label>
+        <select [(ngModel)]="form.editMode">
+          <option value="text">Text</option>
+          <option value="json">JSON</option>
+        </select>
+      </div>
+      <div class="form-group full-width">
+        <label>Value</label>
+        <textarea [(ngModel)]="form.value" placeholder="Setting value"></textarea>
+      </div>
+      <div class="form-group full-width">
+        <label>Description</label>
+        <input type="text" [(ngModel)]="form.description" placeholder="What this setting controls" />
+      </div>
+    </div>
+    <div class="form-actions">
+      <button class="btn-submit" (click)="submitForm()" [disabled]="isSubmitting || !form.key.trim()">
+        {{ editingSetting ? 'Update' : 'Create' }}
+      </button>
+      <button class="btn-cancel" (click)="cancelForm()">Cancel</button>
+    </div>
+  </div>
+}
+
+<div class="settings-list">
+  @for (setting of settings; track setting.id) {
+    <div class="setting-card">
+      <div class="setting-header">
+        <span class="setting-key">{{ setting.key }}</span>
+        <button class="edit-mode-toggle" (click)="toggleEditMode(setting)">
+          {{ setting.editMode === 'text' ? 'Switch to JSON' : 'Switch to Text' }}
+        </button>
+      </div>
+      @if (setting.description) {
+        <div class="setting-description">{{ setting.description }}</div>
+      }
+      <div class="setting-value">
+        @if (setting.editMode === 'text') {
+          <pre (click)="openEdit(setting)">{{ setting.value }}</pre>
+        } @else {
+          <textarea [(ngModel)]="setting.value" (blur)="saveSettings()"></textarea>
+          <button class="format-json-btn" (click)="formatJson(setting)">Format</button>
+        }
+      </div>
+      <div class="setting-actions">
+        <button class="btn-edit" (click)="openEdit(setting)">Edit</button>
+        <button class="btn-delete" (click)="deleteSetting(setting.id)">Delete</button>
+      </div>
+    </div>
+  } @empty {
+    <p style="color: var(--text-secondary); text-align: center; padding: 40px;">No settings added yet.</p>
+  }
+</div>

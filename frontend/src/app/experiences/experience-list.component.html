@@ -1,0 +1,104 @@
+<div class="experience-list">
+  <header class="page-header">
+    <div>
+      <h1>Experience</h1>
+      <p>Manage your work history and professional experience</p>
+    </div>
+    <button type="button" class="btn-gradient" (click)="openAdd()">+ Add Experience</button>
+  </header>
+
+  <div class="loading-state" *ngIf="loading">Loading experiences...</div>
+
+  <div class="empty-state" *ngIf="!loading && experiences.length === 0 && !showForm">
+    No experiences yet. Add your first one!
+  </div>
+
+  <!-- Inline form -->
+  <div class="form-overlay" *ngIf="showForm">
+    <div class="form-card">
+      <h2>{{ editingId ? 'Edit Experience' : 'New Experience' }}</h2>
+      <form [formGroup]="experienceForm" (ngSubmit)="save()">
+        <div class="form-grid">
+          <div class="form-group">
+            <label for="company">Company</label>
+            <input id="company" class="form-control" formControlName="company" placeholder="Company name" />
+          </div>
+          <div class="form-group">
+            <label for="position">Position</label>
+            <input id="position" class="form-control" formControlName="position" placeholder="Job title" />
+          </div>
+          <div class="form-group">
+            <label for="location">Location</label>
+            <input id="location" class="form-control" formControlName="location" placeholder="City, Country" />
+          </div>
+          <div class="form-group">
+            <label for="technologies">Technologies</label>
+            <input id="technologies" class="form-control" formControlName="technologies" placeholder="Angular, Node.js, ..." />
+          </div>
+          <div class="form-group">
+            <label for="startDate">Start Date</label>
+            <input id="startDate" class="form-control" formControlName="startDate" type="date" />
+          </div>
+          <div class="form-group">
+            <label for="endDate">End Date</label>
+            <input id="endDate" class="form-control" formControlName="endDate" type="date" [disabled]="experienceForm.get('isCurrent')?.value" />
+          </div>
+          <div class="form-group full-width checkbox-group">
+            <input id="isCurrent" class="checkbox-control" formControlName="isCurrent" type="checkbox" />
+            <label for="isCurrent">I currently work here</label>
+          </div>
+          <div class="form-group full-width">
+            <label for="description">Description</label>
+            <textarea id="description" class="form-control" formControlName="description" rows="3" placeholder="Describe your role and responsibilities"></textarea>
+          </div>
+          <div class="form-group full-width">
+            <label for="achievements">Achievements</label>
+            <textarea id="achievements" class="form-control" formControlName="achievements" rows="2" placeholder="Key achievements (one per line)"></textarea>
+          </div>
+          <div class="form-actions">
+            <button type="button" class="btn-secondary" (click)="cancelForm()">Cancel</button>
+            <button type="submit" class="btn-primary" [disabled]="saving">
+              <span class="spinner" *ngIf="saving"></span>
+              {{ saving ? 'Saving...' : (editingId ? 'Update' : 'Create') }}
+            </button>
+          </div>
+        </div>
+      </form>
+    </div>
+  </div>
+
+  <!-- Timeline -->
+  <div class="timeline" *ngIf="experiences.length > 0">
+    <div class="timeline-item" *ngFor="let exp of experiences">
+      <div class="timeline-dot"></div>
+      <div class="timeline-card">
+        <div class="timeline-card-header">
+          <div>
+            <div class="timeline-company">{{ exp.company }}</div>
+            <div class="timeline-position">{{ exp.position }}</div>
+            <div class="timeline-dates">
+              <span>{{ exp.startDate | date:'MMM yyyy' }}</span>
+              <span>&mdash;</span>
+              <span>{{ exp.isCurrent ? 'Present' : (exp.endDate | date:'MMM yyyy') }}</span>
+              <span class="current-badge" *ngIf="exp.isCurrent">Current</span>
+            </div>
+          </div>
+        </div>
+        <div class="timeline-description" *ngIf="exp.description">{{ exp.description }}</div>
+        <div class="timeline-meta" *ngIf="exp.location">
+          <span>{{ exp.location }}</span>
+        </div>
+        <div class="timeline-actions">
+          <button type="button" class="btn-accent" (click)="openEdit(exp)">Edit</button>
+          <button type="button" class="btn-danger" (click)="deleteExperience(exp.id)">Delete</button>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <div class="toast-container">
+    <div *ngFor="let toast of toasts" class="toast" [class]="toast.type">
+      {{ toast.message }}
+    </div>
+  </div>
+</div>

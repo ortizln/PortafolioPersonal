@@ -1,0 +1,65 @@
+<div class="header">
+  <h2>Languages</h2>
+  <button class="btn-add" (click)="openCreate()"><i class="bi bi-plus-lg"></i> Add Language</button>
+</div>
+
+@if (showForm) {
+  <div class="glass-form">
+    <h3>{{ editingLanguage ? 'Edit' : 'New' }} Language</h3>
+    <div class="form-grid">
+      <div class="form-group">
+        <label>Name</label>
+        <input type="text" [(ngModel)]="form.name" placeholder="e.g. English" />
+      </div>
+      <div class="form-group">
+        <label>Level</label>
+        <select [(ngModel)]="form.level">
+          <option value="Beginner">Beginner</option>
+          <option value="Intermediate">Intermediate</option>
+          <option value="Advanced">Advanced</option>
+          <option value="Native">Native</option>
+        </select>
+      </div>
+      <div class="form-group">
+        <label>Percentage ({{ form.percentage }}%)</label>
+        <input type="range" min="0" max="100" [(ngModel)]="form.percentage" />
+      </div>
+      <div class="form-group">
+        <label>Certification</label>
+        <input type="text" [(ngModel)]="form.certification" placeholder="e.g. TOEFL 110" />
+      </div>
+    </div>
+    <div class="form-actions">
+      <button class="btn-submit" (click)="submitForm()" [disabled]="isSubmitting || !form.name.trim()">
+        {{ editingLanguage ? 'Update' : 'Create' }}
+      </button>
+      <button class="btn-cancel" (click)="cancelForm()">Cancel</button>
+    </div>
+  </div>
+}
+
+<div class="language-list">
+  @for (lang of languages; track lang.id) {
+    <div class="language-card">
+      <div class="language-info">
+        <span class="name">{{ lang.name }}</span>
+        <span class="level-badge" [class]="lang.level">{{ lang.level }}</span>
+      </div>
+      <div class="progress-section">
+        <div class="progress-bar">
+          <div class="progress-fill" [style.width.%]="lang.percentage"></div>
+        </div>
+        <span class="percentage">{{ lang.percentage }}%</span>
+      </div>
+      @if (lang.certification) {
+        <div class="certification"><strong>Certification:</strong> {{ lang.certification }}</div>
+      }
+      <div class="card-actions">
+        <button class="btn-edit" (click)="openEdit(lang)">Edit</button>
+        <button class="btn-delete" (click)="deleteLanguage(lang.id)">Delete</button>
+      </div>
+    </div>
+  } @empty {
+    <p style="color: var(--text-secondary); text-align: center; padding: 40px;">No languages added yet.</p>
+  }
+</div>

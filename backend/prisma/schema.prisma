@@ -1,0 +1,393 @@
+generator client {
+  provider = "prisma-client-js"
+}
+
+datasource db {
+  provider = "postgresql"
+  url      = env("DATABASE_URL")
+}
+
+enum Role {
+  ADMIN
+  USER
+}
+
+enum ProjectStatus {
+  IN_PROGRESS
+  COMPLETED
+  ON_HOLD
+  CANCELLED
+}
+
+enum SkillCategory {
+  FRONTEND
+  BACKEND
+  DEVOPS
+  DATABASE
+  DESIGN
+  CLOUD
+  MOBILE
+  OTHER
+}
+
+model User {
+  id            String   @id @default(uuid())
+  email         String   @unique
+  password      String
+  name          String
+  role          Role     @default(ADMIN)
+  isActive      Boolean  @default(true)
+  refreshToken  String?
+  lastLogin     DateTime?
+  createdAt     DateTime @default(now())
+  updatedAt     DateTime @updatedAt
+  deletedAt     DateTime?
+
+  profile       Profile?
+  experiences   Experience[]
+  educations    Education[]
+  certifications Certification[]
+  projects      Project[]
+  skills        Skill[]
+  languages     Language[]
+  socialLinks   SocialLink[]
+  repositories  Repository[]
+  auditLogs     AuditLog[]
+  contactMessages ContactMessage[]
+
+  @@map("users")
+}
+
+model Profile {
+  id            String   @id @default(uuid())
+  fullName      String
+  professionalTitle String
+  description   String?
+  biography     String?
+  aboutMe       String?
+  professionalStory String?
+  objectives    String?
+  workPhilosophy String?
+  specialties   String?
+  email         String?
+  phone         String?
+  location      String?
+  website       String?
+  profileImage  String?
+  bannerImage   String?
+  cvFile        String?
+  githubUrl     String?
+  linkedinUrl   String?
+  twitterUrl    String?
+  quickStats    Json?
+  createdAt     DateTime @default(now())
+  updatedAt     DateTime @updatedAt
+  deletedAt     DateTime?
+
+  userId        String   @unique
+  user          User     @relation(fields: [userId], references: [id])
+
+  @@map("profiles")
+}
+
+model Experience {
+  id            String   @id @default(uuid())
+  company       String
+  position      String
+  description   String?
+  startDate     DateTime
+  endDate       DateTime?
+  current       Boolean  @default(false)
+  location      String?
+  achievements  Json?
+  technologies  String[]
+  companyLogo   String?
+  createdAt     DateTime @default(now())
+  updatedAt     DateTime @updatedAt
+  deletedAt     DateTime?
+
+  userId        String
+  user          User     @relation(fields: [userId], references: [id])
+
+  @@map("experiences")
+}
+
+model Education {
+  id            String   @id @default(uuid())
+  institution   String
+  degree        String
+  field         String
+  level         String?
+  startDate     DateTime
+  endDate       DateTime?
+  current       Boolean  @default(false)
+  grade         String?
+  description   String?
+  createdAt     DateTime @default(now())
+  updatedAt     DateTime @updatedAt
+  deletedAt     DateTime?
+
+  userId        String
+  user          User     @relation(fields: [userId], references: [id])
+  certificates  Certification[]
+
+  @@map("educations")
+}
+
+model Certification {
+  id            String   @id @default(uuid())
+  name          String
+  issuingOrganization String
+  description   String?
+  issueDate     DateTime
+  expiryDate    DateTime?
+  credentialId  String?
+  credentialUrl String?
+  category      String?
+  imageUrl      String?
+  createdAt     DateTime @default(now())
+  updatedAt     DateTime @updatedAt
+  deletedAt     DateTime?
+
+  educationId   String?
+  education     Education? @relation(fields: [educationId], references: [id])
+  userId        String
+  user          User      @relation(fields: [userId], references: [id])
+  files         CertificateFile[]
+
+  @@map("certifications")
+}
+
+model CertificateFile {
+  id              String   @id @default(uuid())
+  filename        String
+  originalName    String
+  mimeType        String
+  size            Int
+  path            String
+  thumbnailPath   String?
+  createdAt       DateTime @default(now())
+
+  certificationId String
+  certification   Certification @relation(fields: [certificationId], references: [id])
+
+  @@map("certificate_files")
+}
+
+model Project {
+  id            String   @id @default(uuid())
+  title         String
+  description   String?
+  summary       String?
+  client        String?
+  status        ProjectStatus @default(IN_PROGRESS)
+  startDate     DateTime?
+  endDate       DateTime?
+  demoUrl       String?
+  githubUrl     String?
+  gitlabUrl     String?
+  videoUrl      String?
+  bannerImage   String?
+  architecture  String?
+  features      Json?
+  isFeatured    Boolean  @default(false)
+  order         Int      @default(0)
+  createdAt     DateTime @default(now())
+  updatedAt     DateTime @updatedAt
+  deletedAt     DateTime?
+
+  userId        String
+  user          User     @relation(fields: [userId], references: [id])
+  images        ProjectImage[]
+  technologies  ProjectTechnology[]
+  categories    ProjectCategory[]
+
+  @@map("projects")
+}
+
+model ProjectImage {
+  id            String   @id @default(uuid())
+  url           String
+  thumbnailUrl  String?
+  alt           String?
+  isPrimary     Boolean  @default(false)
+  order         Int      @default(0)
+  createdAt     DateTime @default(now())
+
+  projectId     String
+  project       Project  @relation(fields: [projectId], references: [id])
+
+  @@map("project_images")
+}
+
+model Technology {
+  id            String   @id @default(uuid())
+  name          String   @unique
+  description   String?
+  icon          String?
+  color         String?
+  category      String?
+  website       String?
+  createdAt     DateTime @default(now())
+  updatedAt     DateTime @updatedAt
+
+  projects      ProjectTechnology[]
+  skills        Skill[]
+
+  @@map("technologies")
+}
+
+model ProjectTechnology {
+  id            String   @id @default(uuid())
+  projectId     String
+  technologyId  String
+  project       Project    @relation(fields: [projectId], references: [id])
+  technology    Technology @relation(fields: [technologyId], references: [id])
+
+  @@unique([projectId, technologyId])
+  @@map("project_technologies")
+}
+
+model Skill {
+  id            String        @id @default(uuid())
+  name          String
+  percentage    Int
+  level         String?
+  icon          String?
+  color         String?
+  order         Int           @default(0)
+  category      SkillCategory @default(OTHER)
+  createdAt     DateTime      @default(now())
+  updatedAt     DateTime      @updatedAt
+  deletedAt     DateTime?
+
+  technologyId  String?
+  technology    Technology?   @relation(fields: [technologyId], references: [id])
+  userId        String
+  user          User          @relation(fields: [userId], references: [id])
+
+  @@map("skills")
+}
+
+model Language {
+  id            String   @id @default(uuid())
+  name          String
+  level         String
+  percentage    Int
+  certification String?
+  createdAt     DateTime @default(now())
+  updatedAt     DateTime @updatedAt
+  deletedAt     DateTime?
+
+  userId        String
+  user          User     @relation(fields: [userId], references: [id])
+
+  @@map("languages")
+}
+
+model SocialLink {
+  id            String   @id @default(uuid())
+  platform      String
+  url           String
+  icon          String?
+  order         Int      @default(0)
+  isActive      Boolean  @default(true)
+  createdAt     DateTime @default(now())
+  updatedAt     DateTime @updatedAt
+  deletedAt     DateTime?
+
+  userId        String
+  user          User     @relation(fields: [userId], references: [id])
+
+  @@map("social_links")
+}
+
+model Repository {
+  id            String   @id @default(uuid())
+  name          String
+  fullName      String
+  description   String?
+  url           String
+  platform      String
+  language      String?
+  stars         Int      @default(0)
+  forks         Int      @default(0)
+  isPrivate     Boolean  @default(false)
+  lastPushed    DateTime?
+  topics        String[]
+  createdAt     DateTime @default(now())
+  updatedAt     DateTime @updatedAt
+  deletedAt     DateTime?
+
+  userId        String
+  user          User     @relation(fields: [userId], references: [id])
+
+  @@map("repositories")
+}
+
+model ContactMessage {
+  id            String   @id @default(uuid())
+  name          String
+  email         String
+  subject       String?
+  message       String
+  isRead        Boolean  @default(false)
+  createdAt     DateTime @default(now())
+
+  userId        String?
+  user          User?    @relation(fields: [userId], references: [id])
+
+  @@map("contact_messages")
+}
+
+model Category {
+  id            String   @id @default(uuid())
+  name          String   @unique
+  description   String?
+  slug          String   @unique
+  createdAt     DateTime @default(now())
+  updatedAt     DateTime @updatedAt
+
+  projects      ProjectCategory[]
+
+  @@map("categories")
+}
+
+model ProjectCategory {
+  id            String   @id @default(uuid())
+  projectId     String
+  categoryId    String
+  project       Project   @relation(fields: [projectId], references: [id])
+  category      Category  @relation(fields: [categoryId], references: [id])
+
+  @@unique([projectId, categoryId])
+  @@map("project_categories")
+}
+
+model Setting {
+  id            String   @id @default(uuid())
+  key           String   @unique
+  value         Json?
+  description   String?
+  createdAt     DateTime @default(now())
+  updatedAt     DateTime @updatedAt
+
+  @@map("settings")
+}
+
+model AuditLog {
+  id            String   @id @default(uuid())
+  action        String
+  entity        String
+  entityId      String?
+  description   String?
+  metadata      Json?
+  ipAddress     String?
+  userAgent     String?
+  createdAt     DateTime @default(now())
+
+  userId        String?
+  user          User?    @relation(fields: [userId], references: [id])
+
+  @@map("audit_logs")
+}

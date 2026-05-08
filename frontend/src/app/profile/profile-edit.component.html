@@ -1,0 +1,142 @@
+<div class="profile-edit">
+  <header class="page-header">
+    <div>
+      <h1>Edit Profile</h1>
+      <p>Manage your personal information and public presence</p>
+    </div>
+    <div class="header-actions">
+      <button type="button" class="btn-primary" (click)="save()" [disabled]="saving || profileForm.invalid">
+        <span class="spinner" *ngIf="saving"></span>
+        {{ saving ? 'Saving...' : 'Save Profile' }}
+      </button>
+    </div>
+  </header>
+
+  <div class="loading-state" *ngIf="loading">Loading profile...</div>
+
+  <form [formGroup]="profileForm" (ngSubmit)="save()" *ngIf="!loading" class="two-column">
+    <!-- Left Column -->
+    <div class="card-glass">
+      <h2>Media</h2>
+
+      <div class="upload-area">
+        <img *ngIf="photoPreview" [src]="photoPreview" alt="Profile" class="photo-preview" />
+        <label class="upload-label">
+          <input type="file" accept="image/*" (change)="onPhotoSelected($event)" />
+          Upload Photo
+        </label>
+      </div>
+
+      <div class="upload-area">
+        <div class="preview-wrapper" *ngIf="bannerPreview">
+          <img [src]="bannerPreview" alt="Banner" class="banner-preview" />
+        </div>
+        <label class="upload-label">
+          <input type="file" accept="image/*" (change)="onBannerSelected($event)" />
+          Upload Banner
+        </label>
+      </div>
+
+      <div class="upload-area">
+        <div class="cv-info" *ngIf="cvName">CV: {{ cvName }}</div>
+        <label class="upload-label">
+          <input type="file" accept=".pdf,.doc,.docx" (change)="onCVSelected($event)" />
+          Upload CV
+        </label>
+      </div>
+    </div>
+
+    <!-- Right Column -->
+    <div class="card-glass">
+      <h2>Basic Information</h2>
+
+      <div class="form-group">
+        <label for="fullName">Full Name</label>
+        <input id="fullName" class="form-control" formControlName="fullName" placeholder="John Doe" />
+      </div>
+
+      <div class="form-group">
+        <label for="professionalTitle">Professional Title</label>
+        <input id="professionalTitle" class="form-control" formControlName="professionalTitle" placeholder="Full Stack Developer" />
+      </div>
+
+      <div class="form-group">
+        <label for="description">Description / Summary</label>
+        <textarea id="description" class="form-control" formControlName="description" placeholder="Brief professional summary"></textarea>
+      </div>
+
+      <div class="form-row">
+        <div class="form-group">
+          <label for="email">Email</label>
+          <input id="email" class="form-control" formControlName="email" type="email" placeholder="john@example.com" />
+        </div>
+        <div class="form-group">
+          <label for="phone">Phone</label>
+          <input id="phone" class="form-control" formControlName="phone" placeholder="+1 234 567 890" />
+        </div>
+      </div>
+
+      <div class="form-row">
+        <div class="form-group">
+          <label for="location">Location</label>
+          <input id="location" class="form-control" formControlName="location" placeholder="New York, USA" />
+        </div>
+        <div class="form-group">
+          <label for="website">Website</label>
+          <input id="website" class="form-control" formControlName="website" placeholder="https://johndoe.com" />
+        </div>
+      </div>
+    </div>
+
+    <!-- Full Width: Extended Profile -->
+    <div class="card-glass full-width">
+      <h2>Extended Profile</h2>
+
+      <div class="form-row">
+        <div class="form-group">
+          <label for="biography">Biography</label>
+          <textarea id="biography" class="form-control" formControlName="biography" rows="4" placeholder="Your personal biography"></textarea>
+        </div>
+        <div class="form-group">
+          <label for="aboutMe">About Me</label>
+          <textarea id="aboutMe" class="form-control" formControlName="aboutMe" rows="4" placeholder="Tell visitors about yourself"></textarea>
+        </div>
+      </div>
+
+      <div class="form-row">
+        <div class="form-group">
+          <label for="professionalStory">Professional Story</label>
+          <textarea id="professionalStory" class="form-control" formControlName="professionalStory" rows="3" placeholder="Your career journey"></textarea>
+        </div>
+        <div class="form-group">
+          <label for="workPhilosophy">Work Philosophy</label>
+          <textarea id="workPhilosophy" class="form-control" formControlName="workPhilosophy" rows="3" placeholder="Your approach to work"></textarea>
+        </div>
+      </div>
+
+      <div class="form-row">
+        <div class="form-group">
+          <label for="objectives">Objectives</label>
+          <textarea id="objectives" class="form-control" formControlName="objectives" rows="3" placeholder="Professional goals"></textarea>
+        </div>
+        <div class="form-group">
+          <label for="specialties">Specialties</label>
+          <textarea id="specialties" class="form-control" formControlName="specialties" rows="3" placeholder="Key areas of expertise"></textarea>
+        </div>
+      </div>
+
+      <div class="form-actions">
+        <button type="submit" class="btn-primary" [disabled]="saving || profileForm.invalid">
+          <span class="spinner" *ngIf="saving"></span>
+          {{ saving ? 'Saving...' : 'Save Profile' }}
+        </button>
+      </div>
+    </div>
+  </form>
+
+  <div class="toast-container">
+    <div *ngFor="let toast of toasts" class="toast" [class]="toast.type">
+      {{ toast.message }}
+    </div>
+  </div>
+</div>

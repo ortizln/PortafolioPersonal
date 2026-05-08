@@ -1,0 +1,186 @@
+<div class="project-list">
+  <header class="page-header">
+    <div>
+      <h1>Projects</h1>
+      <p>Manage your portfolio projects</p>
+    </div>
+    <button type="button" class="btn-gradient" (click)="openAdd()">+ Add Project</button>
+  </header>
+
+  <div class="loading-state" *ngIf="loading">Loading projects...</div>
+
+  <div class="empty-state" *ngIf="!loading && projects.length === 0 && !showForm">
+    No projects yet. Create your first one!
+  </div>
+
+  <div class="form-overlay" *ngIf="showForm">
+    <div class="form-card">
+      <h2>{{ editingId ? 'Edit Project' : 'New Project' }}</h2>
+      <form [formGroup]="projectForm" (ngSubmit)="save()">
+        <div class="form-grid">
+          <div class="form-group">
+            <label for="title">Title</label>
+            <input id="title" class="form-control" formControlName="title" placeholder="Project title" />
+          </div>
+          <div class="form-group">
+            <label for="client">Client</label>
+            <input id="client" class="form-control" formControlName="client" placeholder="Client name (optional)" />
+          </div>
+          <div class="form-group">
+            <label for="status">Status</label>
+            <select id="status" class="form-control" formControlName="status">
+              <option value="draft">Draft</option>
+              <option value="in_progress">In Progress</option>
+              <option value="completed">Completed</option>
+              <option value="archived">Archived</option>
+            </select>
+          </div>
+          <div class="form-group">
+            <label for="order">Order</label>
+            <input id="order" class="form-control" formControlName="order" type="number" />
+          </div>
+          <div class="form-group">
+            <label for="startDate">Start Date</label>
+            <input id="startDate" class="form-control" formControlName="startDate" type="date" />
+          </div>
+          <div class="form-group">
+            <label for="endDate">End Date</label>
+            <input id="endDate" class="form-control" formControlName="endDate" type="date" />
+          </div>
+          <div class="form-group">
+            <label for="demoUrl">Demo URL</label>
+            <input id="demoUrl" class="form-control" formControlName="demoUrl" placeholder="https://demo.example.com" />
+          </div>
+          <div class="form-group">
+            <label for="githubUrl">GitHub URL</label>
+            <input id="githubUrl" class="form-control" formControlName="githubUrl" placeholder="https://github.com/user/repo" />
+          </div>
+          <div class="form-group">
+            <label for="gitlabUrl">GitLab URL</label>
+            <input id="gitlabUrl" class="form-control" formControlName="gitlabUrl" placeholder="https://gitlab.com/user/repo" />
+          </div>
+          <div class="form-group">
+            <label for="videoUrl">Video URL</label>
+            <input id="videoUrl" class="form-control" formControlName="videoUrl" placeholder="https://youtube.com/watch?v=..." />
+          </div>
+          <div class="form-group checkbox-group">
+            <input id="isFeatured" formControlName="isFeatured" type="checkbox" class="checkbox-control" />
+            <label for="isFeatured">Featured project</label>
+          </div>
+          <div class="form-group">
+            <label for="architecture">Architecture</label>
+            <input id="architecture" class="form-control" formControlName="architecture" placeholder="e.g. Microservices, Monolith" />
+          </div>
+          <div class="form-group full-width">
+            <label>Category</label>
+            <div class="chip-group">
+              <button type="button" *ngFor="let cat of categories" class="chip" [class.active]="isCatSelected(cat.id)" (click)="toggleCategory(cat.id)">{{ cat.name }}</button>
+              <span *ngIf="categories.length === 0" class="chip-empty">No categories available</span>
+            </div>
+          </div>
+          <div class="form-group full-width">
+            <label>Technologies</label>
+            <div class="chip-group">
+              <button type="button" *ngFor="let tech of technologies" class="chip" [class.active]="isTechSelected(tech.id)" (click)="toggleTech(tech.id)" [ngStyle]="{'--chip-color': tech.color || 'var(--accent)'}">{{ tech.name }}</button>
+            </div>
+          </div>
+          <div class="form-group full-width">
+            <label for="description">Description</label>
+            <textarea id="description" class="form-control" formControlName="description" rows="4" placeholder="Full project description"></textarea>
+          </div>
+          <div class="form-group full-width">
+            <label for="summary">Summary</label>
+            <textarea id="summary" class="form-control" formControlName="summary" rows="2" placeholder="Short summary for cards"></textarea>
+          </div>
+          <div class="form-group full-width">
+            <label for="features">Features (JSON)</label>
+            <textarea id="features" class="form-control form-control--mono" formControlName="features" rows="4" placeholder='["Feature 1", "Feature 2"]'></textarea>
+          </div>
+
+          <div class="form-group full-width">
+            <label>Banner Image</label>
+            <input type="file" (change)="onBannerSelected($event)" accept=".png,.jpg,.jpeg,.webp" />
+          </div>
+
+          <div class="form-group full-width" *ngIf="editingId">
+            <label>Image Gallery</label>
+            <div class="gallery-upload-area">
+              <input #galleryInput type="file" (change)="uploadImages($event)" accept=".png,.jpg,.jpeg,.webp" multiple style="display:none" />
+              <button type="button" class="btn-secondary" (click)="galleryInput.click()">+ Add Images</button>
+              <span class="file-hint">PNG, JPG, WebP (multiple allowed)</span>
+            </div>
+            <div class="gallery-grid" *ngIf="projectImages.length > 0">
+              <div class="gallery-item" *ngFor="let img of projectImages; let i = index">
+                <img [src]="img.fileUrl" [alt]="'Image ' + (i+1)" />
+                <div class="gallery-overlay">
+                  <span class="primary-badge" *ngIf="img.isPrimary">Primary</span>
+                  <div class="gallery-actions">
+                    <button type="button" class="gallery-btn" *ngIf="!img.isPrimary" (click)="setPrimary(img)" title="Set as primary">⭐</button>
+                    <button type="button" class="gallery-btn gallery-btn--danger" (click)="removeImage(img)" title="Remove">&times;</button>
+                  </div>
+                </div>
+              </div>
+            </div>
+          </div>
+
+          <div class="form-actions">
+            <button type="button" class="btn-secondary" (click)="cancelForm()">Cancel</button>
+            <button type="submit" class="btn-primary" [disabled]="saving">
+              <span class="spinner" *ngIf="saving"></span>
+              {{ saving ? 'Saving...' : (editingId ? 'Update' : 'Create') }}
+            </button>
+          </div>
+        </div>
+      </form>
+    </div>
+  </div>
+
+  <div class="project-grid" *ngIf="projects.length > 0">
+    <div class="project-card" *ngFor="let project of projects">
+      <div class="project-banner" *ngIf="getPrimaryImage(project)">
+        <img [src]="getPrimaryImage(project)" [alt]="project.title" />
+        <span class="project-status" [ngClass]="getStatusClass(project.status || 'draft')">{{ project.status || 'Draft' }}</span>
+      </div>
+      <div class="project-banner project-banner--empty" *ngIf="!getPrimaryImage(project)">
+        <div class="banner-placeholder">
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" width="40" height="40"><rect x="3" y="3" width="18" height="18" rx="2"/><circle cx="8.5" cy="8.5" r="1.5"/><path d="m3 16 4-4 3 3 5-5 6 6"/></svg>
+        </div>
+        <span class="project-status badge-draft">Draft</span>
+      </div>
+      <div class="project-body">
+        <div class="project-category" *ngIf="project.category">
+          <span class="badge-category">{{ project.category.name }}</span>
+        </div>
+        <h3 class="project-title">{{ project.title }}</h3>
+        <p class="project-summary">{{ project.summary || project.description }}</p>
+        <div class="project-techs" *ngIf="project.technologies?.length">
+          <span class="tech-badge" *ngFor="let tech of project.technologies" [ngStyle]="{'--tech-color': tech.color || 'var(--accent)'}">{{ tech.name }}</span>
+        </div>
+        <div class="project-meta">
+          <span *ngIf="project.startDate">{{ project.startDate | date:'MMM yyyy' }}</span>
+          <span *ngIf="project.githubUrl" class="meta-link">
+            <a [href]="project.githubUrl" target="_blank" title="GitHub">GH</a>
+          </span>
+          <span *ngIf="project.demoUrl" class="meta-link">
+            <a [href]="project.demoUrl" target="_blank" title="Demo">🔗</a>
+          </span>
+          <span class="featured-star" *ngIf="project.isFeatured">★ Featured</span>
+        </div>
+      </div>
+      <div class="project-gallery-thumbs" *ngIf="project.images?.length > 1">
+        <img *ngFor="let img of project.images.slice(0, 4)" [src]="img.fileUrl" alt="" />
+        <span *ngIf="project.images.length > 4" class="more-count">+{{ project.images.length - 4 }}</span>
+      </div>
+      <div class="project-actions">
+        <button type="button" class="btn-accent" (click)="openEdit(project)">Edit</button>
+        <button type="button" class="btn-danger" (click)="deleteProject(project.id)">Delete</button>
+      </div>
+    </div>
+  </div>
+
+  <div class="toast-container">
+    <div *ngFor="let toast of toasts" class="toast" [ngClass]="toast.type">
+      {{ toast.message }}
+    </div>
+  </div>
+</div>
