@@ -131,6 +131,8 @@ const certificationController = {
         throw new AppError('No file provided', 400);
       }
 
+      const urlPath = `certificates/${req.file.filename}`;
+
       const file = await prisma.certificateFile.create({
         data: {
           certificationId: req.params.id,
@@ -138,7 +140,7 @@ const certificationController = {
           originalName: req.file.originalname,
           mimeType: req.file.mimetype,
           size: req.file.size,
-          path: req.file.path
+          path: urlPath
         }
       });
 

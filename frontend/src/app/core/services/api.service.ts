@@ -1,6 +1,6 @@
 import { Injectable, inject } from '@angular/core';
 import { HttpClient, HttpParams } from '@angular/common/http';
-import { Observable } from 'rxjs';
+import { Observable, map } from 'rxjs';
 import { environment } from '../../../environments/environment';
 import {
   User, Profile, Experience, Education, Certification,
@@ -44,22 +44,28 @@ export class ApiService {
     return this.http.put<Profile>(`${this.apiUrl}/profile`, data);
   }
 
-  uploadPhoto(file: File): Observable<{ url: string }> {
+  uploadPhoto(file: File): Observable<Profile> {
     const formData = new FormData();
     formData.append('profile', file);
-    return this.http.post<{ url: string }>(`${this.apiUrl}/profile/photo`, formData);
+    return this.http.post<Profile>(`${this.apiUrl}/profile/photo`, formData);
   }
 
-  uploadBanner(file: File): Observable<{ url: string }> {
+  uploadBanner(file: File): Observable<Profile> {
     const formData = new FormData();
     formData.append('banner', file);
-    return this.http.post<{ url: string }>(`${this.apiUrl}/profile/banner`, formData);
+    return this.http.post<Profile>(`${this.apiUrl}/profile/banner`, formData);
   }
 
-  uploadCV(file: File): Observable<{ url: string }> {
+  uploadCV(file: File): Observable<Profile> {
     const formData = new FormData();
     formData.append('resume', file);
-    return this.http.post<{ url: string }>(`${this.apiUrl}/profile/cv`, formData);
+    return this.http.post<Profile>(`${this.apiUrl}/profile/cv`, formData);
+  }
+
+  getUploadUrl(path: string | null | undefined): string {
+    if (!path) return '';
+    if (path.startsWith('http://') || path.startsWith('https://')) return path;
+    return `${environment.uploadUrl}/${path}`;
   }
 
   // Experiences
@@ -314,11 +320,15 @@ export class ApiService {
 
   // Stats
   getStats(): Observable<Record<string, number>> {
-    return this.http.get<Record<string, number>>(`${this.apiUrl}/stats`);
+    return this.http.get<{ stats: Record<string, number> }>(`${this.apiUrl}/stats`).pipe(
+      map((res) => res.stats)
+    );
   }
 
-  getProjectStats(): Observable<Record<string, number>> {
-    return this.http.get<Record<string, number>>(`${this.apiUrl}/stats/projects`);
+  getProjectStats(): Observable<Record<string, any>> {
+    return this.http.get<{ stats: Record<string, any> }>(`${this.apiUrl}/stats/projects`).pipe(
+      map((res) => res.stats)
+    );
   }
 
   // Public endpoints

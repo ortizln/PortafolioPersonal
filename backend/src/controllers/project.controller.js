@@ -53,7 +53,7 @@ const projectController = {
           description,
           summary,
           client,
-          status,
+          status: status ? status.toUpperCase() : 'DRAFT',
           startDate: startDate ? new Date(startDate) : null,
           endDate: endDate ? new Date(endDate) : null,
           demoUrl,
@@ -66,7 +66,7 @@ const projectController = {
           isFeatured: isFeatured || false,
           order: order || 0,
           technologies: technologyIds?.length ? {
-            create: technologyIds.map(techId => ({ techId }))
+            create: technologyIds.map(technologyId => ({ technologyId }))
           } : undefined,
           categories: categoryIds?.length ? {
             create: categoryIds.map(catId => ({ categoryId: catId }))
@@ -101,7 +101,7 @@ const projectController = {
         await prisma.projectTechnology.deleteMany({ where: { projectId: req.params.id } });
         if (technologyIds.length > 0) {
           await prisma.projectTechnology.createMany({
-            data: technologyIds.map(techId => ({ projectId: req.params.id, techId }))
+            data: technologyIds.map(techId => ({ projectId: req.params.id, technologyId: techId }))
           });
         }
       }
@@ -122,7 +122,7 @@ const projectController = {
           ...(description !== undefined && { description }),
           ...(summary !== undefined && { summary }),
           ...(client !== undefined && { client }),
-          ...(status !== undefined && { status }),
+          ...(status !== undefined && { status: status.toUpperCase() }),
           ...(startDate !== undefined && { startDate: startDate ? new Date(startDate) : null }),
           ...(endDate !== undefined && { endDate: endDate ? new Date(endDate) : null }),
           ...(demoUrl !== undefined && { demoUrl }),
@@ -185,18 +185,17 @@ const projectController = {
         throw new AppError('No file provided', 400);
       }
 
+      const urlPath = `projects/${req.file.filename}`;
+
       const image = await prisma.projectImage.create({
         data: {
           projectId: req.params.id,
-          filename: req.file.filename,
-          originalName: req.file.originalname,
-          mimeType: req.file.mimetype,
-          size: req.file.size,
-          path: req.file.path
+          url: urlPath,
+          isPrimary: req.body.isPrimary === 'true',
         }
       });
 
-      res.status(201).json({ image });
+      res.status(201).json(image);
     } catch (error) {
       next(error);
     }

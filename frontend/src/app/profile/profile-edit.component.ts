@@ -23,6 +23,8 @@ export class ProfileEditComponent implements OnInit {
   cvName: string | null = null;
   toasts: { message: string; type: 'success' | 'error'; id: number }[] = [];
   private toastId = 0;
+  private readonly maxSize = 20 * 1024 * 1024; // 20MB
+  private readonly maxSizeMB = 20;
 
   ngOnInit(): void {
     this.buildForm();
@@ -60,51 +62,62 @@ export class ProfileEditComponent implements OnInit {
       fullName: profile.fullName,
       professionalTitle: profile.professionalTitle,
       description: profile.description,
-      biography: profile.aboutMe,
+      biography: profile.biography,
       aboutMe: profile.aboutMe,
+      professionalStory: profile.professionalStory,
+      objectives: profile.objectives,
+      workPhilosophy: profile.workPhilosophy,
+      specialties: profile.specialties,
       email: profile.email,
       phone: profile.phone,
       location: profile.location,
       website: profile.website,
     });
-    this.photoPreview = profile.profileImage;
-    this.bannerPreview = profile.bannerImage;
+    this.photoPreview = this.apiService.getUploadUrl(profile.profileImage);
+    this.bannerPreview = this.apiService.getUploadUrl(profile.bannerImage);
+  }
+
+  private uploadFile(
+    file: File,
+    uploadFn: (f: File) => any,
+    setPreview: (url: string) => void,
+    label: string
+  ): void {
+    if (file.size > this.maxSize) {
+      this.showToast(`${label}: File exceeds ${this.maxSizeMB}MB limit`, 'error');
+      return;
+    }
+    uploadFn(file).subscribe({
+      next: (res: any) => {
+        if (res.profileImage) setPreview(this.apiService.getUploadUrl(res.profileImage));
+        if (res.bannerImage) setPreview(this.apiService.getUploadUrl(res.bannerImage));
+        this.showToast(`${label} uploaded`, 'success');
+      },
+      error: (err: any) => {
+        const msg = err.error?.error || `${label} upload failed`;
+        this.showToast(msg, 'error');
+      },
+    });
   }
 
   onPhotoSelected(event: Event): void {
     const file = (event.target as HTMLInputElement).files?.[0];
     if (!file) return;
-    this.apiService.uploadPhoto(file).subscribe({
-      next: (res) => {
-        this.photoPreview = res.url;
-        this.showToast('Photo uploaded', 'success');
-      },
-      error: () => this.showToast('Photo upload failed', 'error'),
-    });
+    this.photoPreview = URL.createObjectURL(file);
+    this.uploadFile(file, (f) => this.apiService.uploadPhoto(f), (url) => this.photoPreview = url, 'Photo');
   }
 
   onBannerSelected(event: Event): void {
     const file = (event.target as HTMLInputElement).files?.[0];
     if (!file) return;
-    this.apiService.uploadBanner(file).subscribe({
-      next: (res) => {
-        this.bannerPreview = res.url;
-        this.showToast('Banner uploaded', 'success');
-      },
-      error: () => this.showToast('Banner upload failed', 'error'),
-    });
+    this.bannerPreview = URL.createObjectURL(file);
+    this.uploadFile(file, (f) => this.apiService.uploadBanner(f), (url) => this.bannerPreview = url, 'Banner');
   }
 
   onCVSelected(event: Event): void {
     const file = (event.target as HTMLInputElement).files?.[0];
     if (!file) return;
-    this.apiService.uploadCV(file).subscribe({
-      next: (res) => {
-        this.cvName = file.name;
-        this.showToast('CV uploaded', 'success');
-      },
-      error: () => this.showToast('CV upload failed', 'error'),
-    });
+    this.uploadFile(file, (f) => this.apiService.uploadCV(f), () => this.cvName = file.name, 'CV');
   }
 
   save(): void {
@@ -116,6 +129,12 @@ export class ProfileEditComponent implements OnInit {
       fullName: form.fullName,
       professionalTitle: form.professionalTitle,
       description: form.description,
+      biography: form.biography,
+      aboutMe: form.aboutMe,
+      professionalStory: form.professionalStory,
+      objectives: form.objectives,
+      workPhilosophy: form.workPhilosophy,
+      specialties: form.specialties,
       email: form.email,
       phone: form.phone,
       location: form.location,

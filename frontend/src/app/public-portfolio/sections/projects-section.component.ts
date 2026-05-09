@@ -1,5 +1,6 @@
 import { Component, Input } from '@angular/core';
 import { NgFor, NgIf, NgClass } from '@angular/common';
+import { environment } from '../../../environments/environment';
 import { Project } from '../../core/models';
 
 @Component({
@@ -119,7 +120,10 @@ export class ProjectsSectionComponent {
 
   getPrimaryImage(project: Project): string | null {
     const primary = project.images?.find((img) => img.isPrimary);
-    return primary?.url || project.images?.[0]?.url || project.bannerImage || null;
+    const url = primary?.url || project.images?.[0]?.url || project.bannerImage || null;
+    if (!url) return null;
+    if (url.startsWith('http://') || url.startsWith('https://') || url.startsWith('data:')) return url;
+    return `${environment.uploadUrl}/${url}`;
   }
 
   openProject(project: Project): void {

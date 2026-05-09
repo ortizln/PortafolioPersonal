@@ -1,11 +1,12 @@
 import { Component, Input } from '@angular/core';
 import { NgFor, NgIf } from '@angular/common';
+import { UploadUrlPipe } from '../../shared/upload-url.pipe';
 import { Profile, SocialLink } from '../../core/models';
 
 @Component({
   selector: 'app-hero-section',
   standalone: true,
-  imports: [NgFor, NgIf],
+  imports: [NgFor, NgIf, UploadUrlPipe],
   template: `
     <section id="home" class="hero-section">
       <div class="particles">
@@ -17,7 +18,7 @@ import { Profile, SocialLink } from '../../core/models';
           <div class="hero-photo-glow"></div>
           <img
             class="hero-photo"
-            [src]="profile?.profileImage || 'assets/default-avatar.svg'"
+            [src]="(profile?.profileImage | uploadUrl) || 'assets/default-avatar.svg'"
             [alt]="profile?.fullName"
           />
         </div>
@@ -49,7 +50,7 @@ import { Profile, SocialLink } from '../../core/models';
         </div>
 
         <div class="hero-actions">
-          <a *ngIf="profile?.cvFile" [href]="profile!.cvFile" target="_blank" class="btn-primary">
+          <a *ngIf="profile?.cvFile" [href]="profile!.cvFile | uploadUrl" target="_blank" class="btn-primary">
             <i class="bi bi-download"></i> Download CV
           </a>
         </div>

@@ -1,11 +1,12 @@
 import { Component, Input } from '@angular/core';
 import { NgFor, NgIf } from '@angular/common';
+import { UploadUrlPipe } from '../../shared/upload-url.pipe';
 import { Profile } from '../../core/models';
 
 @Component({
   selector: 'app-about-section',
   standalone: true,
-  imports: [NgFor, NgIf],
+  imports: [NgFor, NgIf, UploadUrlPipe],
   template: `
     <section id="about" class="about-section">
       <div class="container">
@@ -20,7 +21,7 @@ import { Profile } from '../../core/models';
             <div class="about-image-card">
               <img
                 class="about-image"
-                [src]="profile?.profileImage || 'assets/default-avatar.svg'"
+                [src]="(profile?.profileImage | uploadUrl) || 'assets/default-avatar.svg'"
                 [alt]="profile?.fullName"
               />
               <div class="about-image-decoration"></div>

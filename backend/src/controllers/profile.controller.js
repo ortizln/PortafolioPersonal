@@ -10,7 +10,7 @@ const profileController = {
 
       if (!profile) throw new AppError('Profile not found', 404);
 
-      res.json({ profile });
+      res.json(profile);
     } catch (error) {
       next(error);
     }
@@ -24,7 +24,7 @@ const profileController = {
         create: { userId: req.user.id, ...req.body }
       });
 
-      res.json({ profile });
+      res.json(profile);
     } catch (error) {
       next(error);
     }
@@ -34,13 +34,15 @@ const profileController = {
     try {
       if (!req.file) throw new AppError('No file uploaded', 400);
 
+      const urlPath = `images/${req.file.filename}`;
+
       const profile = await prisma.profile.upsert({
         where: { userId: req.user.id },
-        update: { profileImage: req.file.path },
-        create: { userId: req.user.id, fullName: '', professionalTitle: '', profileImage: req.file.path }
+        update: { profileImage: urlPath },
+        create: { userId: req.user.id, fullName: '', professionalTitle: '', profileImage: urlPath }
       });
 
-      res.json({ profile });
+      res.json(profile);
     } catch (error) {
       next(error);
     }
@@ -50,13 +52,15 @@ const profileController = {
     try {
       if (!req.file) throw new AppError('No file uploaded', 400);
 
+      const urlPath = `banners/${req.file.filename}`;
+
       const profile = await prisma.profile.upsert({
         where: { userId: req.user.id },
-        update: { bannerImage: req.file.path },
-        create: { userId: req.user.id, fullName: '', professionalTitle: '', bannerImage: req.file.path }
+        update: { bannerImage: urlPath },
+        create: { userId: req.user.id, fullName: '', professionalTitle: '', bannerImage: urlPath }
       });
 
-      res.json({ profile });
+      res.json(profile);
     } catch (error) {
       next(error);
     }
@@ -66,13 +70,15 @@ const profileController = {
     try {
       if (!req.file) throw new AppError('No file uploaded', 400);
 
+      const urlPath = `resumes/${req.file.filename}`;
+
       const profile = await prisma.profile.upsert({
         where: { userId: req.user.id },
-        update: { cvFile: req.file.path },
-        create: { userId: req.user.id, fullName: '', professionalTitle: '', cvFile: req.file.path }
+        update: { cvFile: urlPath },
+        create: { userId: req.user.id, fullName: '', professionalTitle: '', cvFile: urlPath }
       });
 
-      res.json({ profile });
+      res.json(profile);
     } catch (error) {
       next(error);
     }

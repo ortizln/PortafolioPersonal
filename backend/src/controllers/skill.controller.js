@@ -45,7 +45,7 @@ const skillController = {
           icon,
           color,
           order: order || 0,
-          category,
+          category: category ? category.toUpperCase() : 'OTHER',
           technologyId: technologyId || null
         }
       });
@@ -77,7 +77,7 @@ const skillController = {
           ...(icon !== undefined && { icon }),
           ...(color !== undefined && { color }),
           ...(order !== undefined && { order }),
-          ...(category !== undefined && { category }),
+          ...(category !== undefined && { category: category.toUpperCase() }),
           ...(technologyId !== undefined && { technologyId: technologyId || null })
         }
       });

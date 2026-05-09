@@ -14,7 +14,14 @@ const errorHandler = (err, req, res, next) => {
   }
 
   if (err.name === 'MulterError') {
-    return res.status(400).json({ error: `Upload error: ${err.message}` });
+    const message = err.code === 'LIMIT_FILE_SIZE'
+      ? `File too large. Maximum size is ${Math.round(parseInt(process.env.MAX_FILE_SIZE) / (1024 * 1024)) || 5}MB.`
+      : `Upload error: ${err.message}`;
+    return res.status(400).json({ error: message });
+  }
+
+  if (err.message && err.message.includes('not allowed')) {
+    return res.status(400).json({ error: err.message });
   }
 
   const statusCode = err.statusCode || 500;

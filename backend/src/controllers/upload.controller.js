@@ -11,6 +11,7 @@ const uploadController = {
       }
 
       const fieldname = req.file.fieldname;
+      const urlPath = `${fieldname}s/${req.file.filename}`;
 
       const file = await prisma.uploadedFile.create({
         data: {
@@ -18,7 +19,7 @@ const uploadController = {
           originalName: req.file.originalname,
           mimeType: req.file.mimetype,
           size: req.file.size,
-          path: req.file.path,
+          path: urlPath,
           fieldname
         }
       });
@@ -54,15 +55,18 @@ const uploadController = {
         }
       }
 
+      const urlPath = `${req.file.fieldname || 'image'}s/${req.file.filename}`;
+      const thumbUrlPath = thumbnailPath ? `thumbnails/thumb_${req.file.filename}` : null;
+
       const image = await prisma.uploadedFile.create({
         data: {
           filename: req.file.filename,
           originalName: req.file.originalname,
           mimeType: req.file.mimetype,
           size: req.file.size,
-          path: req.file.path,
+          path: urlPath,
           fieldname: req.file.fieldname || 'image',
-          thumbnail: thumbnailPath
+          thumbnail: thumbUrlPath
         }
       });
 
