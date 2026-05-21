@@ -24,18 +24,40 @@ import { Profile } from '../../core/models';
                 [src]="(profile?.profileImage | uploadUrl) || 'assets/default-avatar.svg'"
                 [alt]="profile?.fullName"
               />
-              <div class="about-image-decoration"></div>
+              <div class="glow-ring"></div>
+            </div>
+            <div class="exp-badge">
+              <span class="exp-number">{{ yearsActive }}+</span>
+              <span class="exp-label">Years Active</span>
             </div>
           </div>
 
           <div class="about-content" data-aos="fade-left">
-            <h3 class="about-greeting">{{ profile?.fullName }}</h3>
-            <p class="about-text">{{ profile?.aboutMe || profile?.description || 'No description available.' }}</p>
+            <h3 class="about-greeting">
+              <span class="greeting-wave">👋</span>
+              Hi, I'm <span class="greeting-name">{{ profile?.fullName }}</span>
+            </h3>
+            <p class="about-text">{{ profile?.aboutMe || profile?.biography || profile?.description || 'No description available.' }}</p>
 
-            <div class="about-specialties" *ngIf="specialties.length">
+            <div class="about-contact-row" *ngIf="profile?.email || profile?.phone || profile?.location">
+              <div class="contact-chip" *ngIf="profile?.email">
+                <i class="bi bi-envelope-fill"></i>
+                {{ profile!.email }}
+              </div>
+              <div class="contact-chip" *ngIf="profile?.phone">
+                <i class="bi bi-telephone-fill"></i>
+                {{ profile!.phone }}
+              </div>
+              <div class="contact-chip" *ngIf="profile?.location">
+                <i class="bi bi-geo-alt-fill"></i>
+                {{ profile!.location }}
+              </div>
+            </div>
+
+            <div class="about-specialties" *ngIf="specialtyList.length">
               <h4 class="specialties-title">Specialties</h4>
               <div class="specialties-tags">
-                <span class="specialty-tag" *ngFor="let s of specialties">
+                <span class="specialty-tag" *ngFor="let s of specialtyList">
                   <i class="bi bi-check-circle-fill"></i>
                   {{ s }}
                 </span>
@@ -51,12 +73,15 @@ import { Profile } from '../../core/models';
 export class AboutSectionComponent {
   @Input() profile: Profile | null = null;
 
-  specialties = [
-    'Full Stack Development',
-    'Cloud Architecture',
-    'API Design',
-    'Database Modeling',
-    'DevOps & CI/CD',
-    'UI/UX Design',
-  ];
+  get specialtyList(): string[] {
+    if (!this.profile?.specialties) return [];
+    return this.profile.specialties
+      .split(/[,;\n.]+/)
+      .map((s) => s.trim())
+      .filter((s) => s.length > 0);
+  }
+
+  get yearsActive(): number {
+    return 4;
+  }
 }

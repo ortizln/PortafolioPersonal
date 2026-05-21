@@ -2,6 +2,7 @@ import { Component, OnInit, inject } from '@angular/core';
 import { ReactiveFormsModule, FormBuilder, FormGroup } from '@angular/forms';
 import { NgFor, NgIf, DatePipe } from '@angular/common';
 import { ApiService } from '../core/services/api.service';
+import { ConfirmService } from '../core/services/confirm.service';
 import { Experience } from '../core/models';
 
 @Component({
@@ -14,6 +15,7 @@ import { Experience } from '../core/models';
 export class ExperienceListComponent implements OnInit {
   private fb = inject(FormBuilder);
   private apiService = inject(ApiService);
+  private confirmService = inject(ConfirmService);
 
   experiences: Experience[] = [];
   showForm = false;
@@ -41,6 +43,12 @@ export class ExperienceListComponent implements OnInit {
       location: [''],
       technologies: [''],
       achievements: [''],
+    });
+
+    this.experienceForm.get('current')?.valueChanges.subscribe((current) => {
+      const endDate = this.experienceForm.get('endDate');
+      if (current) { endDate?.disable(); endDate?.reset(); }
+      else { endDate?.enable(); }
     });
   }
 
@@ -108,8 +116,9 @@ export class ExperienceListComponent implements OnInit {
     });
   }
 
-  deleteExperience(id: number): void {
-    if (!confirm('Delete this experience?')) return;
+  async deleteExperience(id: number): Promise<void> {
+    const ok = await this.confirmService.confirm({ message: 'Delete this experience?' });
+    if (!ok) return;
     this.apiService.deleteExperience(id).subscribe({
       next: () => {
         this.showToast('Experience deleted', 'success');

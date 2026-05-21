@@ -1,6 +1,7 @@
 import { Component, OnInit } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { FormsModule } from '@angular/forms';
+import { ConfirmService } from '../core/services/confirm.service';
 
 interface Setting {
   id: string;
@@ -24,17 +25,23 @@ export class SettingsComponent implements OnInit {
   form = { key: '', value: '', description: '', editMode: 'text' as Setting['editMode'] };
   isSubmitting = false;
 
+  constructor(private confirmService: ConfirmService) {}
+
   ngOnInit(): void {
     this.loadSettings();
   }
 
   loadSettings(): void {
-    const stored = localStorage.getItem('portfolio_settings');
-    this.settings = stored ? JSON.parse(stored) : [
-      { id: '1', key: 'site_title', value: 'My Portfolio', description: 'Site title shown in the browser tab', editMode: 'text' },
-      { id: '2', key: 'site_description', value: 'Personal portfolio showcasing my work', description: 'Meta description for SEO', editMode: 'text' },
-      { id: '3', key: 'social_links', value: JSON.stringify({ github: 'https://github.com/user' }, null, 2), description: 'Social links configuration', editMode: 'json' },
-    ];
+    try {
+      const stored = localStorage.getItem('portfolio_settings');
+      this.settings = stored ? JSON.parse(stored) : [
+        { id: '1', key: 'site_title', value: 'My Portfolio', description: 'Site title shown in the browser tab', editMode: 'text' },
+        { id: '2', key: 'site_description', value: 'Personal portfolio showcasing my work', description: 'Meta description for SEO', editMode: 'text' },
+        { id: '3', key: 'social_links', value: JSON.stringify({ github: 'https://github.com/user' }, null, 2), description: 'Social links configuration', editMode: 'json' },
+      ];
+    } catch {
+      this.settings = [];
+    }
   }
 
   saveSettings(): void {
@@ -95,11 +102,11 @@ export class SettingsComponent implements OnInit {
     this.isSubmitting = false;
   }
 
-  deleteSetting(id: string): void {
-    if (confirm('Delete this setting?')) {
-      this.settings = this.settings.filter(s => s.id !== id);
-      this.saveSettings();
-    }
+  async deleteSetting(id: string): Promise<void> {
+    const ok = await this.confirmService.confirm({ message: 'Delete this setting?' });
+    if (!ok) return;
+    this.settings = this.settings.filter(s => s.id !== id);
+    this.saveSettings();
   }
 
   toggleEditMode(setting: Setting): void {

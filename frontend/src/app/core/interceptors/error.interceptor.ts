@@ -7,10 +7,13 @@ import { AuthService } from '../services/auth.service';
 export const errorInterceptor: HttpInterceptorFn = (req, next) => {
   const authService = inject(AuthService);
   const router = inject(Router);
+  let retryCount = 0;
+  const maxRetries = 1;
 
   return next(req).pipe(
     catchError((error: HttpErrorResponse) => {
-      if (error.status === 401 && !req.url.includes('/auth/refresh')) {
+      if (error.status === 401 && !req.url.includes('/auth/refresh') && retryCount < maxRetries) {
+        retryCount++;
         return authService.refreshToken().pipe(
           switchMap((tokens) => {
             const cloned = req.clone({
@@ -19,9 +22,7 @@ export const errorInterceptor: HttpInterceptorFn = (req, next) => {
             return next(cloned);
           }),
           catchError((refreshError) => {
-            localStorage.removeItem('accessToken');
-            localStorage.removeItem('refreshToken');
-            localStorage.removeItem('currentUser');
+            authService.clearStorage();
             router.navigate(['/auth/login']);
             return throwError(() => refreshError);
           })

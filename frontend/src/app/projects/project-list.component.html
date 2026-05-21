@@ -16,7 +16,7 @@
   <div class="form-overlay" *ngIf="showForm">
     <div class="form-card">
       <h2>{{ editingId ? 'Edit Project' : 'New Project' }}</h2>
-      <form [formGroup]="projectForm" (ngSubmit)="save()">
+      <form [formGroup]="projectForm" (ngSubmit)="save()" autocomplete="off">
         <div class="form-grid">
           <div class="form-group">
             <label for="title">Title</label>
@@ -99,16 +99,24 @@
 
           <div class="form-group full-width">
             <label>Banner Image</label>
-            <input type="file" (change)="onBannerSelected($event)" accept=".png,.jpg,.jpeg,.webp" />
+            <label class="upload-zone" [class.upload-zone--has-image]="!!bannerPreview">
+              <input type="file" (change)="onBannerSelected($event)" accept=".png,.jpg,.jpeg,.webp" />
+              <img *ngIf="bannerPreview" [src]="bannerPreview" class="image-preview" />
+              <i class="bi bi-image" *ngIf="!bannerPreview"></i>
+              <span *ngIf="!bannerPreview">Click to upload banner image</span>
+              <span class="upload-name" *ngIf="bannerPreview">Click to change image</span>
+              <span *ngIf="!bannerPreview" style="font-size:0.75rem;color:var(--text-muted)">PNG, JPG, WebP</span>
+            </label>
           </div>
 
           <div class="form-group full-width" *ngIf="editingId">
             <label>Image Gallery</label>
-            <div class="gallery-upload-area">
-              <input #galleryInput type="file" (change)="uploadImages($event)" accept=".png,.jpg,.jpeg,.webp" multiple style="display:none" />
-              <button type="button" class="btn-secondary" (click)="galleryInput.click()">+ Add Images</button>
-              <span class="file-hint">PNG, JPG, WebP (multiple allowed)</span>
-            </div>
+            <label class="upload-zone">
+              <input #galleryInput type="file" (change)="uploadImages($event)" accept=".png,.jpg,.jpeg,.webp" multiple />
+              <i class="bi bi-images"></i>
+              <span>Click to add gallery images</span>
+              <span style="font-size:0.75rem;color:var(--text-muted)">PNG, JPG, WebP (multiple allowed)</span>
+            </label>
             <div class="gallery-grid" *ngIf="projectImages.length > 0">
               <div class="gallery-item" *ngFor="let img of projectImages; let i = index">
                 <img [src]="img.fileUrl" [alt]="'Image ' + (i+1)" />

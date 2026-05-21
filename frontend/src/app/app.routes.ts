@@ -11,6 +11,11 @@ export const routes: Routes = [
       ),
     children: [
       { path: '', loadComponent: () => import('./public-portfolio/portfolio.component').then((m) => m.PortfolioComponent) },
+      { path: 'about', loadComponent: () => import('./pages/about-page.component').then((m) => m.AboutPageComponent) },
+      { path: 'experience', loadComponent: () => import('./pages/experience-page.component').then((m) => m.ExperiencePageComponent) },
+      { path: 'projects', loadComponent: () => import('./pages/projects-page.component').then((m) => m.ProjectsPageComponent) },
+      { path: 'skills', loadComponent: () => import('./pages/skills-page.component').then((m) => m.SkillsPageComponent) },
+      { path: 'contact', loadComponent: () => import('./pages/contact-page.component').then((m) => m.ContactPageComponent) },
     ],
   },
   {

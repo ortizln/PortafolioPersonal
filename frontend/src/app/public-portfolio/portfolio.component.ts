@@ -29,51 +29,61 @@ import { ContactSectionComponent } from './sections/contact-section.component';
   ],
   template: `
     <div class="portfolio-wrapper">
-      <app-hero-section
-        [profile]="profile"
-        [socialLinks]="socialLinks"
-        [stats]="stats"
-      ></app-hero-section>
+      <div *ngIf="loading" class="page-loading"><div class="spinner"></div></div>
 
-      <app-about-section
-        *ngIf="profile"
-        [profile]="profile"
-      ></app-about-section>
+      <div *ngIf="!loading && error" class="page-error">
+        <i class="bi bi-exclamation-triangle"></i>
+        <p>Could not load portfolio. Please try again later.</p>
+        <button class="btn-retry" (click)="loadPortfolio()">Retry</button>
+      </div>
 
-      <app-experience-section
-        *ngIf="experiences.length"
-        [experiences]="experiences"
-      ></app-experience-section>
+      <ng-container *ngIf="!loading && !error">
+        <app-hero-section
+          [profile]="profile"
+          [socialLinks]="socialLinks"
+          [stats]="stats"
+        ></app-hero-section>
 
-      <app-education-section
-        *ngIf="education.length"
-        [education]="education"
-      ></app-education-section>
+        <app-about-section
+          *ngIf="profile"
+          [profile]="profile"
+        ></app-about-section>
 
-      <app-certifications-section
-        *ngIf="certifications.length"
-        [certifications]="certifications"
-      ></app-certifications-section>
+        <app-experience-section
+          *ngIf="experiences.length"
+          [experiences]="experiences"
+        ></app-experience-section>
 
-      <app-projects-section
-        *ngIf="projects.length"
-        [projects]="projects"
-      ></app-projects-section>
+        <app-education-section
+          *ngIf="education.length"
+          [education]="education"
+        ></app-education-section>
 
-      <app-skills-section
-        *ngIf="skills.length"
-        [skills]="skills"
-      ></app-skills-section>
+        <app-certifications-section
+          *ngIf="certifications.length"
+          [certifications]="certifications"
+        ></app-certifications-section>
 
-      <app-languages-section
-        *ngIf="languages.length"
-        [languages]="languages"
-      ></app-languages-section>
+        <app-projects-section
+          *ngIf="projects.length"
+          [projects]="projects"
+        ></app-projects-section>
 
-      <app-contact-section
-        [profile]="profile"
-        [socialLinks]="socialLinks"
-      ></app-contact-section>
+        <app-skills-section
+          *ngIf="skills.length"
+          [skills]="skills"
+        ></app-skills-section>
+
+        <app-languages-section
+          *ngIf="languages.length"
+          [languages]="languages"
+        ></app-languages-section>
+
+        <app-contact-section
+          [profile]="profile"
+          [socialLinks]="socialLinks"
+        ></app-contact-section>
+      </ng-container>
 
       <button
         class="back-to-top"
@@ -101,12 +111,15 @@ export class PortfolioComponent implements OnInit {
   stats = { projects: 0, experience: 0, certifications: 0 };
   showBackToTop = false;
   loading = true;
+  error = false;
 
   ngOnInit(): void {
     this.loadPortfolio();
   }
 
   private loadPortfolio(): void {
+    this.loading = true;
+    this.error = false;
     this.api.getPortfolio().subscribe({
       next: (data) => {
         this.profile = data.profile;
@@ -131,17 +144,23 @@ export class PortfolioComponent implements OnInit {
         this.projects = projects || [];
         this.stats.projects = this.projects.length;
       },
+      error: () => {},
     });
   }
 
   private loadFallbackData(): void {
-    this.api.getPublicExperiences().subscribe((e) => (this.experiences = e || []));
-    this.api.getPublicEducation().subscribe((e) => (this.education = e || []));
-    this.api.getPublicCertifications().subscribe((c) => (this.certifications = c || []));
-    this.api.getPublicSkills().subscribe((s) => (this.skills = s || []));
-    this.api.getProfile().subscribe((p) => {
-      this.profile = p;
-      this.calcStats();
+    this.api.getPublicExperiences().subscribe({ next: (e) => (this.experiences = e || []), error: () => {} });
+    this.api.getPublicEducation().subscribe({ next: (e) => (this.education = e || []), error: () => {} });
+    this.api.getPublicCertifications().subscribe({ next: (c) => (this.certifications = c || []), error: () => {} });
+    this.api.getPublicSkills().subscribe({ next: (s) => (this.skills = s || []), error: () => {} });
+    this.api.getProfile().subscribe({
+      next: (p) => {
+        this.profile = p;
+        this.calcStats();
+      },
+      error: () => {
+        this.error = true;
+      },
     });
     this.loading = false;
     setTimeout(() => this.initAOS(), 100);

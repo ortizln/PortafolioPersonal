@@ -1,5 +1,5 @@
 import { Component, Input, inject } from '@angular/core';
-import { NgFor, NgIf } from '@angular/common';
+import { NgFor, NgIf, NgClass } from '@angular/common';
 import { FormsModule, NgForm } from '@angular/forms';
 import { Profile, SocialLink } from '../../core/models';
 import { ApiService } from '../../core/services/api.service';
@@ -7,7 +7,7 @@ import { ApiService } from '../../core/services/api.service';
 @Component({
   selector: 'app-contact-section',
   standalone: true,
-  imports: [NgFor, NgIf, FormsModule],
+  imports: [NgFor, NgIf, NgClass, FormsModule],
   template: `
     <section id="contact" class="contact-section">
       <div class="container">

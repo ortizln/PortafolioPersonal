@@ -1,6 +1,7 @@
 import { Component, OnInit } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { FormsModule } from '@angular/forms';
+import { ConfirmService } from '../core/services/confirm.service';
 
 interface Language {
   id: string;
@@ -23,6 +24,8 @@ export class LanguageListComponent implements OnInit {
   editingLanguage: Language | null = null;
   form = { name: '', level: 'Beginner' as Language['level'], percentage: 0, certification: '' };
   isSubmitting = false;
+
+  constructor(private confirmService: ConfirmService) {}
 
   ngOnInit(): void {
     this.loadLanguages();
@@ -92,11 +95,11 @@ export class LanguageListComponent implements OnInit {
     this.isSubmitting = false;
   }
 
-  deleteLanguage(id: string): void {
-    if (confirm('Delete this language?')) {
-      this.languages = this.languages.filter(l => l.id !== id);
-      this.saveLanguages();
-    }
+  async deleteLanguage(id: string): Promise<void> {
+    const ok = await this.confirmService.confirm({ message: 'Delete this language?' });
+    if (!ok) return;
+    this.languages = this.languages.filter(l => l.id !== id);
+    this.saveLanguages();
   }
 
   getLevelLabel(level: string): string {

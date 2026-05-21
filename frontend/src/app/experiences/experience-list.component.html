@@ -17,7 +17,7 @@
   <div class="form-overlay" *ngIf="showForm">
     <div class="form-card">
       <h2>{{ editingId ? 'Edit Experience' : 'New Experience' }}</h2>
-      <form [formGroup]="experienceForm" (ngSubmit)="save()">
+      <form [formGroup]="experienceForm" (ngSubmit)="save()" autocomplete="off">
         <div class="form-grid">
           <div class="form-group">
             <label for="company">Company</label>
@@ -41,11 +41,12 @@
           </div>
           <div class="form-group">
             <label for="endDate">End Date</label>
-            <input id="endDate" class="form-control" formControlName="endDate" type="date" [disabled]="experienceForm.get('isCurrent')?.value" />
-          </div>
-          <div class="form-group full-width checkbox-group">
-            <input id="isCurrent" class="checkbox-control" formControlName="isCurrent" type="checkbox" />
-            <label for="isCurrent">I currently work here</label>
+            <input id="endDate" class="form-control" formControlName="endDate" type="date" />
+
+            <div class="checkbox-group">
+              <input id="current" class="checkbox-control" formControlName="current" type="checkbox" />
+              <label for="current">I currently work here</label>
+            </div>
           </div>
           <div class="form-group full-width">
             <label for="description">Description</label>
@@ -79,8 +80,8 @@
             <div class="timeline-dates">
               <span>{{ exp.startDate | date:'MMM yyyy' }}</span>
               <span>&mdash;</span>
-              <span>{{ exp.isCurrent ? 'Present' : (exp.endDate | date:'MMM yyyy') }}</span>
-              <span class="current-badge" *ngIf="exp.isCurrent">Current</span>
+              <span>{{ exp.current ? 'Present' : (exp.endDate | date:'MMM yyyy') }}</span>
+              <span class="current-badge" *ngIf="exp.current">Current</span>
             </div>
           </div>
         </div>

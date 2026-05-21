@@ -2,6 +2,7 @@ import { Component, OnInit, inject } from '@angular/core';
 import { ReactiveFormsModule, FormBuilder, FormGroup } from '@angular/forms';
 import { NgFor, NgIf, DatePipe } from '@angular/common';
 import { ApiService } from '../core/services/api.service';
+import { ConfirmService } from '../core/services/confirm.service';
 import { Education } from '../core/models';
 
 @Component({
@@ -14,6 +15,7 @@ import { Education } from '../core/models';
 export class EducationListComponent implements OnInit {
   private fb = inject(FormBuilder);
   private apiService = inject(ApiService);
+  private confirmService = inject(ConfirmService);
 
   educationList: Education[] = [];
   showForm = false;
@@ -41,6 +43,12 @@ export class EducationListComponent implements OnInit {
       endDate: [''],
       current: [false],
       grade: [''],
+    });
+
+    this.educationForm.get('current')?.valueChanges.subscribe((current) => {
+      const endDate = this.educationForm.get('endDate');
+      if (current) { endDate?.disable(); endDate?.reset(); }
+      else { endDate?.enable(); }
     });
   }
 
@@ -110,8 +118,9 @@ export class EducationListComponent implements OnInit {
     });
   }
 
-  deleteEducation(id: number): void {
-    if (!confirm('Delete this education entry?')) return;
+  async deleteEducation(id: number): Promise<void> {
+    const ok = await this.confirmService.confirm({ message: 'Delete this education entry?' });
+    if (!ok) return;
     this.apiService.deleteEducation(id).subscribe({
       next: () => {
         this.showToast('Education deleted', 'success');

@@ -96,6 +96,11 @@
       color: var(--accent);
       background: rgba(108, 99, 255, 0.08);
     }
+
+    &.active-link {
+      color: var(--accent);
+      background: rgba(100, 255, 218, 0.08);
+    }
   }
 }
 

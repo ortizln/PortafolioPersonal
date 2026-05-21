@@ -16,7 +16,7 @@
   <div class="form-overlay" *ngIf="showForm">
     <div class="form-card">
       <h2>{{ editingId ? 'Edit Certificate' : 'New Certificate' }}</h2>
-      <form [formGroup]="certForm" (ngSubmit)="save()">
+      <form [formGroup]="certForm" (ngSubmit)="save()" autocomplete="off">
         <div class="form-grid">
           <div class="form-group">
             <label for="name">Name</label>
@@ -32,7 +32,7 @@
           </div>
           <div class="form-group">
             <label for="expiryDate">Expiration Date</label>
-            <input id="expiryDate" class="form-control" formControlName="expiryDate" type="date" [disabled]="certForm.get('doesNotExpire')?.value" />
+            <input id="expiryDate" class="form-control" formControlName="expiryDate" type="date" />
           </div>
           <div class="form-group checkbox-group">
             <input id="doesNotExpire" formControlName="doesNotExpire" type="checkbox" class="checkbox-control" />
@@ -63,12 +63,25 @@
           </div>
 
           <div class="form-group full-width" *ngIf="editingId">
+            <label>Certificate Image</label>
+            <label class="upload-zone" [class.upload-zone--has-image]="!!certImagePreview">
+              <input type="file" (change)="uploadCertImage($event)" accept=".png,.jpg,.jpeg,.webp" />
+              <img *ngIf="certImagePreview" [src]="certImagePreview" class="image-preview" />
+              <i class="bi bi-image" *ngIf="!certImagePreview"></i>
+              <span *ngIf="!certImagePreview">Click to upload certificate image</span>
+              <span class="upload-name" *ngIf="certImagePreview">Click to change image</span>
+              <span *ngIf="!certImagePreview" style="font-size:0.75rem;color:var(--text-muted)">PNG, JPG, WebP</span>
+            </label>
+          </div>
+
+          <div class="form-group full-width" *ngIf="editingId">
             <label>Certificate Files</label>
-            <div class="file-upload-area">
-              <input #fileInput type="file" (change)="uploadFile($event)" accept=".pdf,.png,.jpg,.jpeg" style="display:none" />
-              <button type="button" class="btn-secondary" (click)="fileInput.click()">+ Upload File</button>
-              <span class="file-hint">PDF, PNG, JPG accepted</span>
-            </div>
+            <label class="upload-zone">
+              <input type="file" (change)="uploadFile($event)" accept=".pdf,.png,.jpg,.jpeg" />
+              <i class="bi bi-file-earmark-plus"></i>
+              <span>Click to upload certificate file</span>
+              <span style="font-size:0.75rem;color:var(--text-muted)">PDF, PNG, JPG</span>
+            </label>
             <div class="file-list" *ngIf="certFiles.length > 0">
               <div class="file-item" *ngFor="let f of certFiles">
                 <span class="file-icon">{{ f.fileType?.includes('pdf') ? '📄' : '🖼' }}</span>
@@ -94,7 +107,8 @@
   <div class="card-grid" *ngIf="certificates.length > 0">
     <div class="cert-card" *ngFor="let cert of certificates">
       <div class="cert-card-top">
-        <div class="cert-icon">
+        <img *ngIf="$any(cert).imageUrl" [src]="getUploadUrl($any(cert).imageUrl)" class="cert-thumb" />
+        <div class="cert-icon" *ngIf="!$any(cert).imageUrl">
           <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
             <circle cx="12" cy="8" r="4"/>
             <path d="M20 21a8 8 0 1 0-16 0"/>
@@ -103,7 +117,7 @@
         </div>
         <div class="cert-info">
           <div class="cert-name">{{ cert.name }}</div>
-          <div class="cert-org">{{ cert.issuer }}</div>
+          <div class="cert-org">{{ $any(cert).issuer }}</div>
         </div>
       </div>
       <div class="cert-meta">

@@ -4,8 +4,19 @@ const { AppError } = require('../middlewares/errorHandler');
 const publicController = {
   async getPortfolio(req, res, next) {
     try {
+      // Find the most recently updated profile to determine the active user
+      const profile = await prisma.profile.findFirst({
+        where: { deletedAt: null },
+        orderBy: { updatedAt: 'desc' }
+      });
+
+      if (!profile) {
+        return res.json({ profile: null, experiences: [], education: [], certifications: [], skills: {}, languages: [], socialLinks: [], featuredProjects: [], repositories: [] });
+      }
+
+      const userId = profile.userId;
+
       const [
-        profile,
         experiences,
         education,
         certifications,
@@ -15,37 +26,34 @@ const publicController = {
         featuredProjects,
         repositories
       ] = await Promise.all([
-        prisma.profile.findFirst({
-          where: { deletedAt: null }
-        }),
         prisma.experience.findMany({
-          where: { deletedAt: null },
+          where: { deletedAt: null, userId },
           orderBy: [{ current: 'desc' }, { startDate: 'desc' }]
         }),
         prisma.education.findMany({
-          where: { deletedAt: null },
+          where: { deletedAt: null, userId },
           include: { certificates: { where: { deletedAt: null }, include: { files: true } } },
           orderBy: { startDate: 'desc' }
         }),
         prisma.certification.findMany({
-          where: { deletedAt: null },
+          where: { deletedAt: null, userId },
           include: { files: true },
           orderBy: { issueDate: 'desc' }
         }),
         prisma.skill.findMany({
-          where: { deletedAt: null },
+          where: { deletedAt: null, userId },
           orderBy: [{ category: 'asc' }, { order: 'asc' }]
         }),
         prisma.language.findMany({
-          where: { deletedAt: null },
+          where: { deletedAt: null, userId },
           orderBy: { percentage: 'desc' }
         }),
         prisma.socialLink.findMany({
-          where: { deletedAt: null, isActive: true },
+          where: { deletedAt: null, userId, isActive: true },
           orderBy: { order: 'asc' }
         }),
         prisma.project.findMany({
-          where: { deletedAt: null, isFeatured: true },
+          where: { deletedAt: null, userId, isFeatured: true },
           include: {
             images: true,
             technologies: { include: { technology: true } },
@@ -54,7 +62,7 @@ const publicController = {
           orderBy: [{ order: 'asc' }, { createdAt: 'desc' }]
         }),
         prisma.repository.findMany({
-          where: { deletedAt: null, isPrivate: false },
+          where: { deletedAt: null, userId, isPrivate: false },
           orderBy: { stars: 'desc' },
           take: 6
         })
@@ -107,15 +115,20 @@ const publicController = {
 
   async getProjects(req, res, next) {
     try {
-      const projects = await prisma.project.findMany({
+      const profile = await prisma.profile.findFirst({
         where: { deletedAt: null },
+        orderBy: { updatedAt: 'desc' }
+      });
+      const userId = profile?.userId;
+      const projects = userId ? await prisma.project.findMany({
+        where: { deletedAt: null, userId },
         include: {
           images: true,
           technologies: { include: { technology: true } },
           categories: { include: { category: true } }
         },
         orderBy: [{ order: 'asc' }, { createdAt: 'desc' }]
-      });
+      }) : [];
 
       res.json({ projects });
     } catch (error) {
@@ -125,10 +138,15 @@ const publicController = {
 
   async getExperiences(req, res, next) {
     try {
-      const experiences = await prisma.experience.findMany({
+      const profile = await prisma.profile.findFirst({
         where: { deletedAt: null },
-        orderBy: [{ current: 'desc' }, { startDate: 'desc' }]
+        orderBy: { updatedAt: 'desc' }
       });
+      const userId = profile?.userId;
+      const experiences = userId ? await prisma.experience.findMany({
+        where: { deletedAt: null, userId },
+        orderBy: [{ current: 'desc' }, { startDate: 'desc' }]
+      }) : [];
 
       res.json({ experiences });
     } catch (error) {
@@ -138,8 +156,13 @@ const publicController = {
 
   async getEducation(req, res, next) {
     try {
-      const education = await prisma.education.findMany({
+      const profile = await prisma.profile.findFirst({
         where: { deletedAt: null },
+        orderBy: { updatedAt: 'desc' }
+      });
+      const userId = profile?.userId;
+      const education = userId ? await prisma.education.findMany({
+        where: { deletedAt: null, userId },
         include: {
           certificates: {
             where: { deletedAt: null },
@@ -147,7 +170,7 @@ const publicController = {
           }
         },
         orderBy: { startDate: 'desc' }
-      });
+      }) : [];
 
       res.json({ education });
     } catch (error) {
@@ -157,11 +180,16 @@ const publicController = {
 
   async getCertifications(req, res, next) {
     try {
-      const certifications = await prisma.certification.findMany({
+      const profile = await prisma.profile.findFirst({
         where: { deletedAt: null },
+        orderBy: { updatedAt: 'desc' }
+      });
+      const userId = profile?.userId;
+      const certifications = userId ? await prisma.certification.findMany({
+        where: { deletedAt: null, userId },
         include: { files: true },
         orderBy: { issueDate: 'desc' }
-      });
+      }) : [];
 
       res.json({ certifications });
     } catch (error) {
@@ -171,10 +199,15 @@ const publicController = {
 
   async getSkills(req, res, next) {
     try {
-      const skills = await prisma.skill.findMany({
+      const profile = await prisma.profile.findFirst({
         where: { deletedAt: null },
-        orderBy: [{ category: 'asc' }, { order: 'asc' }]
+        orderBy: { updatedAt: 'desc' }
       });
+      const userId = profile?.userId;
+      const skills = userId ? await prisma.skill.findMany({
+        where: { deletedAt: null, userId },
+        orderBy: [{ category: 'asc' }, { order: 'asc' }]
+      }) : [];
 
       const skillsByCategory = skills.reduce((acc, skill) => {
         const category = skill.category || 'OTHER';

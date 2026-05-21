@@ -14,5 +14,6 @@ router.post('/', certificationValidation, certificationController.create);
 router.put('/:id', idParam, certificationController.update);
 router.delete('/:id', idParam, certificationController.delete);
 router.post('/:id/files', idParam, upload.single('certificate'), certificationController.uploadFile);
+router.post('/:id/image', idParam, upload.single('certificate-image'), certificationController.uploadImage);
 
 module.exports = router;

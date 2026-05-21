@@ -96,7 +96,7 @@ export interface CertificateFile {
 }
 
 export interface Project {
-  id: number;
+  id: string;
   title: string;
   description?: string;
   summary?: string;
@@ -121,13 +121,13 @@ export interface Project {
 }
 
 export interface ProjectImage {
-  id: number;
+  id: string;
   url: string;
+  projectId: string;
   thumbnailUrl?: string;
   alt?: string;
   isPrimary: boolean;
   order: number;
-  projectId: string;
   createdAt: string;
 }
 
@@ -144,7 +144,7 @@ export interface Technology {
 }
 
 export interface Skill {
-  id: number;
+  id: string;
   name: string;
   percentage: number;
   level?: string;

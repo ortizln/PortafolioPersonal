@@ -2,12 +2,12 @@ import { Component, OnInit, inject } from '@angular/core';
 import { ReactiveFormsModule, FormBuilder, FormGroup } from '@angular/forms';
 import { NgFor, NgIf, NgClass, NgStyle } from '@angular/common';
 import { ApiService } from '../core/services/api.service';
+import { ConfirmService } from '../core/services/confirm.service';
 import { Skill } from '../core/models';
 
 const SKILL_CATEGORIES = [
-  'Frontend', 'Backend', 'Database', 'DevOps',
-  'Mobile', 'Testing', 'Design', 'Tools',
-  'Languages', 'Frameworks', 'Other',
+  'FRONTEND', 'BACKEND', 'DEVOPS', 'DATABASE',
+  'DESIGN', 'CLOUD', 'MOBILE', 'OTHER',
 ];
 
 @Component({
@@ -20,12 +20,13 @@ const SKILL_CATEGORIES = [
 export class SkillListComponent implements OnInit {
   private fb = inject(FormBuilder);
   private apiService = inject(ApiService);
+  private confirmService = inject(ConfirmService);
 
   skills: Skill[] = [];
   activeCategory = 'All';
   categories = SKILL_CATEGORIES;
   showForm = false;
-  editingId: number | null = null;
+  editingId: string | null = null;
   saving = false;
   loading = true;
   skillForm!: FormGroup;
@@ -51,7 +52,7 @@ export class SkillListComponent implements OnInit {
       icon: [''],
       color: ['#64ffda'],
       order: [0],
-      category: ['Frontend'],
+      category: ['FRONTEND'],
     });
   }
 
@@ -65,7 +66,7 @@ export class SkillListComponent implements OnInit {
 
   openAdd(): void {
     this.editingId = null;
-    this.skillForm.reset({ percentage: 50, order: 0, category: 'Frontend', color: '#64ffda' });
+    this.skillForm.reset({ percentage: 50, order: 0, category: 'FRONTEND', color: '#64ffda' });
     this.showForm = true;
   }
 
@@ -86,7 +87,7 @@ export class SkillListComponent implements OnInit {
   cancelForm(): void {
     this.showForm = false;
     this.editingId = null;
-    this.skillForm.reset({ percentage: 50, order: 0, category: 'Frontend', color: '#64ffda' });
+    this.skillForm.reset({ percentage: 50, order: 0, category: 'FRONTEND', color: '#64ffda' });
   }
 
   save(): void {
@@ -119,8 +120,9 @@ export class SkillListComponent implements OnInit {
     });
   }
 
-  deleteSkill(id: number): void {
-    if (!confirm('Delete this skill?')) return;
+  async deleteSkill(id: string): Promise<void> {
+    const ok = await this.confirmService.confirm({ message: 'Delete this skill?' });
+    if (!ok) return;
     this.apiService.deleteSkill(id).subscribe({
       next: () => {
         this.showToast('Skill deleted', 'success');
@@ -138,7 +140,7 @@ export class SkillListComponent implements OnInit {
     return this.skills.filter((s) => s.category === category).length;
   }
 
-  deleteWithEvent(event: Event, id: number): void {
+  deleteWithEvent(event: Event, id: string): void {
     event.stopPropagation();
     this.deleteSkill(id);
   }

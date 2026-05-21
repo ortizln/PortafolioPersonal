@@ -137,35 +137,47 @@ export class ApiService {
     return this.http.post<CertificateFile>(`${this.apiUrl}/certifications/${id}/files`, formData);
   }
 
+  uploadCertificationImage(id: number, file: File): Observable<any> {
+    const formData = new FormData();
+    formData.append('certificate-image', file);
+    return this.http.post<any>(`${this.apiUrl}/certifications/${id}/image`, formData);
+  }
+
   // Projects
   getProjectsAll(): Observable<Project[]> {
     return this.http.get<Project[]>(`${this.apiUrl}/projects`);
   }
 
-  getProjectById(id: number): Observable<Project> {
-    return this.http.get<Project>(`${this.apiUrl}/projects/${id}`);
+  getProjectById(id: string): Observable<Project> {
+    return this.http.get<{ project: Project }>(`${this.apiUrl}/projects/${id}`).pipe(
+      map(r => r.project)
+    );
   }
 
   createProject(data: Partial<Project>): Observable<Project> {
-    return this.http.post<Project>(`${this.apiUrl}/projects`, data);
+    return this.http.post<{ project: Project }>(`${this.apiUrl}/projects`, data).pipe(
+      map(r => r.project)
+    );
   }
 
-  updateProject(id: number, data: Partial<Project>): Observable<Project> {
-    return this.http.put<Project>(`${this.apiUrl}/projects/${id}`, data);
+  updateProject(id: string, data: Partial<Project>): Observable<Project> {
+    return this.http.put<{ project: Project }>(`${this.apiUrl}/projects/${id}`, data).pipe(
+      map(r => r.project)
+    );
   }
 
-  deleteProject(id: number): Observable<void> {
+  deleteProject(id: string): Observable<void> {
     return this.http.delete<void>(`${this.apiUrl}/projects/${id}`);
   }
 
-  addProjectImage(projectId: number, file: File, isPrimary?: boolean): Observable<ProjectImage> {
+  addProjectImage(projectId: string, file: File, isPrimary?: boolean): Observable<ProjectImage> {
     const formData = new FormData();
     formData.append('project', file);
     if (isPrimary != null) formData.append('isPrimary', String(isPrimary));
     return this.http.post<ProjectImage>(`${this.apiUrl}/projects/${projectId}/images`, formData);
   }
 
-  removeProjectImage(projectId: number, imageId: number): Observable<void> {
+  removeProjectImage(projectId: string, imageId: string): Observable<void> {
     return this.http.delete<void>(`${this.apiUrl}/projects/${projectId}/images/${imageId}`);
   }
 
@@ -174,7 +186,7 @@ export class ApiService {
     return this.http.get<Skill[]>(`${this.apiUrl}/skills`);
   }
 
-  getSkillById(id: number): Observable<Skill> {
+  getSkillById(id: string): Observable<Skill> {
     return this.http.get<Skill>(`${this.apiUrl}/skills/${id}`);
   }
 
@@ -182,11 +194,11 @@ export class ApiService {
     return this.http.post<Skill>(`${this.apiUrl}/skills`, data);
   }
 
-  updateSkill(id: number, data: Partial<Skill>): Observable<Skill> {
+  updateSkill(id: string, data: Partial<Skill>): Observable<Skill> {
     return this.http.put<Skill>(`${this.apiUrl}/skills/${id}`, data);
   }
 
-  deleteSkill(id: number): Observable<void> {
+  deleteSkill(id: string): Observable<void> {
     return this.http.delete<void>(`${this.apiUrl}/skills/${id}`);
   }
 
@@ -345,11 +357,15 @@ export class ApiService {
   }
 
   getPublicProjects(): Observable<Project[]> {
-    return this.http.get<Project[]>(`${this.apiUrl}/public/projects`);
+    return this.http.get<{ projects: Project[] }>(`${this.apiUrl}/public/projects`).pipe(
+      map((res) => res.projects)
+    );
   }
 
   getPublicProjectById(id: number): Observable<Project> {
-    return this.http.get<Project>(`${this.apiUrl}/public/projects/${id}`);
+    return this.http.get<{ project: Project }>(`${this.apiUrl}/public/projects/${id}`).pipe(
+      map((res) => res.project)
+    );
   }
 
   getPublicExperiences(): Observable<Experience[]> {

@@ -1,6 +1,7 @@
 import { Component, OnInit } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { FormsModule } from '@angular/forms';
+import { ConfirmService } from '../core/services/confirm.service';
 
 interface SocialLink {
   id: string;
@@ -25,6 +26,8 @@ export class SocialLinksComponent implements OnInit {
   useCustomPlatform = false;
   form = { platform: '', url: '', icon: '', order: 0, isActive: true };
   isSubmitting = false;
+
+  constructor(private confirmService: ConfirmService) {}
 
   predefinedPlatforms = [
     { name: 'GitHub', icon: 'bi-github' },
@@ -127,11 +130,11 @@ export class SocialLinksComponent implements OnInit {
     this.isSubmitting = false;
   }
 
-  deleteLink(id: string): void {
-    if (confirm('Delete this social link?')) {
-      this.links = this.links.filter(l => l.id !== id);
-      this.saveLinks();
-    }
+  async deleteLink(id: string): Promise<void> {
+    const ok = await this.confirmService.confirm({ message: 'Delete this social link?' });
+    if (!ok) return;
+    this.links = this.links.filter(l => l.id !== id);
+    this.saveLinks();
   }
 
   toggleActive(link: SocialLink): void {

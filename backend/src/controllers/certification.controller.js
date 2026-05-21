@@ -148,6 +148,33 @@ const certificationController = {
     } catch (error) {
       next(error);
     }
+  },
+
+  async uploadImage(req, res, next) {
+    try {
+      const certification = await prisma.certification.findUnique({
+        where: { id: req.params.id }
+      });
+
+      if (!certification || certification.deletedAt || certification.userId !== req.user.id) {
+        throw new AppError('Certification not found', 404);
+      }
+
+      if (!req.file) {
+        throw new AppError('No file provided', 400);
+      }
+
+      const urlPath = `certificates/${req.file.filename}`;
+
+      const updated = await prisma.certification.update({
+        where: { id: req.params.id },
+        data: { imageUrl: urlPath }
+      });
+
+      res.json({ certification: updated });
+    } catch (error) {
+      next(error);
+    }
   }
 };
 

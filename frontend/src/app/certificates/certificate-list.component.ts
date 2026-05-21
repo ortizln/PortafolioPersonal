@@ -3,6 +3,7 @@ import { ReactiveFormsModule, FormBuilder, FormGroup } from '@angular/forms';
 import { NgFor, NgIf, NgClass, DatePipe } from '@angular/common';
 import { environment } from '../../environments/environment';
 import { ApiService } from '../core/services/api.service';
+import { ConfirmService } from '../core/services/confirm.service';
 import { Certification, CertificateFile } from '../core/models';
 
 @Component({
@@ -15,10 +16,12 @@ import { Certification, CertificateFile } from '../core/models';
 export class CertificateListComponent implements OnInit {
   private fb = inject(FormBuilder);
   private apiService = inject(ApiService);
+  private confirmService = inject(ConfirmService);
 
   certificates: Certification[] = [];
   educationList: { id: number; institution: string; degree: string }[] = [];
   certFiles: CertificateFile[] = [];
+  certImagePreview: string | null = null;
   showForm = false;
   editingId: number | null = null;
   saving = false;
@@ -47,6 +50,12 @@ export class CertificateListComponent implements OnInit {
       educationId: [null],
       doesNotExpire: [false],
     });
+
+    this.certForm.get('doesNotExpire')?.valueChanges.subscribe((noExpiry) => {
+      const expiry = this.certForm.get('expiryDate');
+      if (noExpiry) { expiry?.disable(); expiry?.reset(); }
+      else { expiry?.enable(); }
+    });
   }
 
   private loadCertificates(): void {
@@ -72,6 +81,7 @@ export class CertificateListComponent implements OnInit {
   openAdd(): void {
     this.editingId = null;
     this.certFiles = [];
+    this.certImagePreview = null;
     this.certForm.reset({ doesNotExpire: false, educationId: null });
     this.showForm = true;
   }
@@ -79,6 +89,7 @@ export class CertificateListComponent implements OnInit {
   openEdit(cert: Certification): void {
     this.editingId = cert.id;
     this.certFiles = [...(cert.files || [])];
+    this.certImagePreview = this.apiService.getUploadUrl((cert as any).imageUrl);
     this.certForm.patchValue({
       name: cert.name,
       issuingOrganization: cert.issuingOrganization,
@@ -97,6 +108,7 @@ export class CertificateListComponent implements OnInit {
     this.showForm = false;
     this.editingId = null;
     this.certFiles = [];
+    this.certImagePreview = null;
     this.certForm.reset({ doesNotExpire: false, educationId: null });
   }
 
@@ -132,8 +144,9 @@ export class CertificateListComponent implements OnInit {
     });
   }
 
-  deleteCertificate(id: number): void {
-    if (!confirm('Delete this certificate?')) return;
+  async deleteCertificate(id: number): Promise<void> {
+    const ok = await this.confirmService.confirm({ message: 'Delete this certificate?' });
+    if (!ok) return;
     this.apiService.deleteCertification(id).subscribe({
       next: () => {
         this.showToast('Certificate deleted', 'success');
@@ -158,8 +171,24 @@ export class CertificateListComponent implements OnInit {
     input.value = '';
   }
 
-  removeCertFile(file: CertificateFile): void {
-    if (!confirm(`Remove "${file.filename}"?`)) return;
+  uploadCertImage(event: Event): void {
+    const input = event.target as HTMLInputElement;
+    if (!input.files?.length || !this.editingId) return;
+    const file = input.files[0];
+    this.certImagePreview = URL.createObjectURL(file);
+    this.apiService.uploadCertificationImage(this.editingId, file).subscribe({
+      next: () => {
+        this.showToast('Certificate image uploaded', 'success');
+        this.loadCertificates();
+      },
+      error: () => this.showToast('Failed to upload image', 'error'),
+    });
+    input.value = '';
+  }
+
+  async removeCertFile(file: CertificateFile): Promise<void> {
+    const ok = await this.confirmService.confirm({ message: `Remove "${file.filename}"?` });
+    if (!ok) return;
     this.apiService.deleteFile(environment.uploadUrl + '/' + file.path).subscribe({
       next: () => {
         this.certFiles = this.certFiles.filter((f) => f.id !== file.id);
@@ -168,6 +197,10 @@ export class CertificateListComponent implements OnInit {
       },
       error: () => this.showToast('Failed to remove file', 'error'),
     });
+  }
+
+  getUploadUrl(path: string | null | undefined): string {
+    return this.apiService.getUploadUrl(path);
   }
 
   private showToast(message: string, type: 'success' | 'error'): void {

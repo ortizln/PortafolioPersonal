@@ -1,11 +1,11 @@
 import { Component, Input } from '@angular/core';
-import { NgFor, NgIf } from '@angular/common';
+import { NgFor, NgIf, DatePipe } from '@angular/common';
 import { Education } from '../../core/models';
 
 @Component({
   selector: 'app-education-section',
   standalone: true,
-  imports: [NgFor, NgIf],
+  imports: [NgFor, NgIf, DatePipe],
   template: `
     <section id="education" class="education-section">
       <div class="container">
@@ -26,12 +26,12 @@ import { Education } from '../../core/models';
               <i class="bi bi-mortarboard-fill"></i>
             </div>
             <div class="edu-content">
-              <h3 class="edu-degree">{{ edu.degree }} in {{ edu.fieldOfStudy }}</h3>
+              <h3 class="edu-degree">{{ edu.degree }} in {{ edu.field }}</h3>
               <h4 class="edu-institution">{{ edu.institution }}</h4>
               <div class="edu-meta">
                 <span class="edu-date">
                   <i class="bi bi-calendar3"></i>
-                  {{ edu.startDate | date:'yyyy' }} - {{ edu.isCurrent ? 'Present' : (edu.endDate | date:'yyyy') }}
+                  {{ edu.startDate | date:'yyyy' }} - {{ edu.current ? 'Present' : (edu.endDate | date:'yyyy') }}
                 </span>
                 <span class="edu-grade" *ngIf="edu.grade">
                   <i class="bi bi-trophy"></i> {{ edu.grade }}

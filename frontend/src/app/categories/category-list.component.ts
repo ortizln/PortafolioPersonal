@@ -1,6 +1,7 @@
 import { Component, OnInit } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { FormsModule } from '@angular/forms';
+import { ConfirmService } from '../core/services/confirm.service';
 
 interface Category {
   id: string;
@@ -23,6 +24,8 @@ export class CategoryListComponent implements OnInit {
   editingCategory: Category | null = null;
   form = { name: '', description: '' };
   isSubmitting = false;
+
+  constructor(private confirmService: ConfirmService) {}
 
   ngOnInit(): void {
     this.loadCategories();
@@ -97,10 +100,10 @@ export class CategoryListComponent implements OnInit {
     this.isSubmitting = false;
   }
 
-  deleteCategory(id: string): void {
-    if (confirm('Delete this category?')) {
-      this.categories = this.categories.filter(c => c.id !== id);
-      this.saveCategories();
-    }
+  async deleteCategory(id: string): Promise<void> {
+    const ok = await this.confirmService.confirm({ message: 'Delete this category?' });
+    if (!ok) return;
+    this.categories = this.categories.filter(c => c.id !== id);
+    this.saveCategories();
   }
 }

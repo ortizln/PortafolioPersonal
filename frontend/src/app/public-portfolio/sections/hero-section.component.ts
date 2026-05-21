@@ -1,12 +1,12 @@
 import { Component, Input } from '@angular/core';
-import { NgFor, NgIf } from '@angular/common';
+import { NgFor, NgIf, NgClass } from '@angular/common';
 import { UploadUrlPipe } from '../../shared/upload-url.pipe';
 import { Profile, SocialLink } from '../../core/models';
 
 @Component({
   selector: 'app-hero-section',
   standalone: true,
-  imports: [NgFor, NgIf, UploadUrlPipe],
+  imports: [NgFor, NgIf, NgClass, UploadUrlPipe],
   template: `
     <section id="home" class="hero-section">
       <div class="particles">

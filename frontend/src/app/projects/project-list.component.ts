@@ -2,7 +2,9 @@ import { Component, OnInit, inject } from '@angular/core';
 import { ReactiveFormsModule, FormBuilder, FormGroup, FormArray } from '@angular/forms';
 import { NgFor, NgIf, NgClass, NgStyle, DatePipe } from '@angular/common';
 import { ApiService } from '../core/services/api.service';
+import { ConfirmService } from '../core/services/confirm.service';
 import { Project, ProjectImage, Technology, Category } from '../core/models';
+import { environment } from '../../environments/environment';
 
 @Component({
   selector: 'app-project-list',
@@ -14,13 +16,15 @@ import { Project, ProjectImage, Technology, Category } from '../core/models';
 export class ProjectListComponent implements OnInit {
   private fb = inject(FormBuilder);
   private apiService = inject(ApiService);
+  private confirmService = inject(ConfirmService);
 
   projects: Project[] = [];
   categories: Category[] = [];
   technologies: Technology[] = [];
   projectImages: ProjectImage[] = [];
+  bannerPreview: string | null = null;
   showForm = false;
-  editingId: number | null = null;
+  editingId: string | null = null;
   saving = false;
   loading = true;
   projectForm!: FormGroup;
@@ -93,6 +97,7 @@ export class ProjectListComponent implements OnInit {
   openAdd(): void {
     this.editingId = null;
     this.projectImages = [];
+    this.bannerPreview = null;
     this.selectedTechIds = [];
     this.selectedCategoryIds = [];
     this.projectForm.reset({ isFeatured: false, order: 0, status: 'draft' });
@@ -102,6 +107,7 @@ export class ProjectListComponent implements OnInit {
   openEdit(project: Project): void {
     this.editingId = project.id;
     this.projectImages = [...(project.images || [])];
+    this.bannerPreview = this.getPrimaryImage(project);
     this.selectedTechIds = (project.technologies || []).map((t) => t.id);
     this.selectedCategoryIds = project.categories?.[0]?.id ? [project.categories[0].id] : [];
 
@@ -129,6 +135,7 @@ export class ProjectListComponent implements OnInit {
     this.showForm = false;
     this.editingId = null;
     this.projectImages = [];
+    this.bannerPreview = null;
     this.projectForm.reset({ isFeatured: false, order: 0, status: 'draft' });
   }
 
@@ -185,8 +192,9 @@ export class ProjectListComponent implements OnInit {
     });
   }
 
-  deleteProject(id: number): void {
-    if (!confirm('Delete this project?')) return;
+  async deleteProject(id: string): Promise<void> {
+    const ok = await this.confirmService.confirm({ message: 'Delete this project?' });
+    if (!ok) return;
     this.apiService.deleteProject(id).subscribe({
       next: () => {
         this.showToast('Project deleted', 'success');
@@ -233,9 +241,10 @@ export class ProjectListComponent implements OnInit {
     input.value = '';
   }
 
-  removeImage(img: ProjectImage): void {
-    if (!confirm('Remove this image?')) return;
-    this.apiService.removeProjectImage(Number(img.projectId), img.id).subscribe({
+  async removeImage(img: ProjectImage): Promise<void> {
+    const ok = await this.confirmService.confirm({ message: 'Remove this image?' });
+    if (!ok) return;
+    this.apiService.removeProjectImage(img.projectId, img.id).subscribe({
       next: () => {
         this.projectImages = this.projectImages.filter((i) => i.id !== img.id);
         this.showToast('Image removed', 'success');
@@ -246,7 +255,7 @@ export class ProjectListComponent implements OnInit {
   }
 
   setPrimary(img: ProjectImage): void {
-    this.apiService.updateProject(Number(img.projectId), { bannerImage: img.url } as any).subscribe({
+    this.apiService.updateProject(img.projectId, { bannerImage: img.url } as any).subscribe({
       next: () => {
         this.projectImages.forEach((i) => (i.isPrimary = false));
         img.isPrimary = true;
@@ -261,6 +270,9 @@ export class ProjectListComponent implements OnInit {
     const input = event.target as HTMLInputElement;
     if (input.files?.length) {
       this.projectForm.patchValue({ bannerImage: input.files[0] });
+      const reader = new FileReader();
+      reader.onload = (e) => (this.bannerPreview = e.target?.result as string);
+      reader.readAsDataURL(input.files[0]);
     }
   }
 
@@ -276,7 +288,8 @@ export class ProjectListComponent implements OnInit {
 
   getPrimaryImage(project: Project): string | null {
     const primary = project.images?.find((i) => i.isPrimary);
-    return primary?.url || project.images?.[0]?.url || null;
+    const url = primary?.url || project.images?.[0]?.url || null;
+    return url ? `${environment.uploadUrl}/${url}` : null;
   }
 
   private showToast(message: string, type: 'success' | 'error'): void {

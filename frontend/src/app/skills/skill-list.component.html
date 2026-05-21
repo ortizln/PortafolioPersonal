@@ -16,7 +16,7 @@
   <div class="form-overlay" *ngIf="showForm">
     <div class="form-card">
       <h2>{{ editingId ? 'Edit Skill' : 'New Skill' }}</h2>
-      <form [formGroup]="skillForm" (ngSubmit)="save()">
+      <form [formGroup]="skillForm" (ngSubmit)="save()" autocomplete="off">
         <div class="form-grid">
           <div class="form-group">
             <label for="name">Skill Name</label>

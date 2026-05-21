@@ -14,7 +14,7 @@
 
   <div class="loading-state" *ngIf="loading">Loading profile...</div>
 
-  <form [formGroup]="profileForm" (ngSubmit)="save()" *ngIf="!loading" class="two-column">
+  <form [formGroup]="profileForm" (ngSubmit)="save()" *ngIf="!loading" class="two-column" autocomplete="off">
     <!-- Left Column -->
     <div class="card-glass">
       <h2>Media</h2>
@@ -22,9 +22,10 @@
       <div class="upload-area">
         <img *ngIf="photoPreview" [src]="photoPreview" alt="Profile" class="photo-preview" />
         <label class="upload-label">
-          <input type="file" accept="image/*" (change)="onPhotoSelected($event)" />
+          <input #fileInputPhoto type="file" accept="image/*" (change)="onPhotoSelected($event)" />
           Upload Photo
         </label>
+        <span class="upload-hint">Click crop to adjust the visible area</span>
       </div>
 
       <div class="upload-area">
@@ -32,15 +33,16 @@
           <img [src]="bannerPreview" alt="Banner" class="banner-preview" />
         </div>
         <label class="upload-label">
-          <input type="file" accept="image/*" (change)="onBannerSelected($event)" />
+          <input #fileInputBanner type="file" accept="image/*" (change)="onBannerSelected($event)" />
           Upload Banner
         </label>
+        <span class="upload-hint">Click crop to reposition what is visible</span>
       </div>
 
       <div class="upload-area">
         <div class="cv-info" *ngIf="cvName">CV: {{ cvName }}</div>
         <label class="upload-label">
-          <input type="file" accept=".pdf,.doc,.docx" (change)="onCVSelected($event)" />
+          <input #fileInputCV type="file" accept=".pdf,.doc,.docx" (change)="onCVSelected($event)" />
           Upload CV
         </label>
       </div>
@@ -137,6 +139,27 @@
   <div class="toast-container">
     <div *ngFor="let toast of toasts" class="toast" [class]="toast.type">
       {{ toast.message }}
+    </div>
+  </div>
+</div>
+
+<div class="cropper-modal" *ngIf="showCropper" (click)="cancelCrop()">
+  <div class="cropper-modal-content" (click)="$event.stopPropagation()">
+    <h3>{{ cropperType === 'photo' ? 'Crop Photo' : 'Crop Banner' }}</h3>
+    <div class="cropper-wrapper">
+      <image-cropper
+        [imageChangedEvent]="cropperImageEvent"
+        [maintainAspectRatio]="true"
+        [aspectRatio]="cropperAspectRatio"
+        [roundCropper]="cropperRound"
+        [resizeToWidth]="1024"
+        format="png"
+        (imageCropped)="onCropped($event)"
+      ></image-cropper>
+    </div>
+    <div class="cropper-actions">
+      <button class="btn-cancel" (click)="cancelCrop()">Cancel</button>
+      <button class="btn-apply" (click)="applyCrop()">Apply & Upload</button>
     </div>
   </div>
 </div>

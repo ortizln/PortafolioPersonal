@@ -6,10 +6,11 @@ const { AppError } = require('../middlewares/errorHandler');
 const authController = {
   async register(req, res, next) {
     try {
-      const { email, password, name, ...profileData } = req.body;
+      const email = req.body.email?.toLowerCase().trim();
+      const { password, name, ...profileData } = req.body;
 
       const exists = await prisma.user.findUnique({ where: { email } });
-      if (exists) throw new AppError('Email already registered', 409);
+      if (exists) throw new AppError('Registration could not be completed.', 400);
 
       const hashedPassword = await bcrypt.hash(password, 12);
 
@@ -38,12 +39,10 @@ const authController = {
     try {
       const { email, password } = req.body;
 
-      const user = await prisma.user.findUnique({ where: { email } });
-      if (!user) throw new AppError('Invalid credentials', 401);
-      if (!user.isActive) throw new AppError('Account is disabled', 401);
-
-      const valid = await bcrypt.compare(password, user.password);
-      if (!valid) throw new AppError('Invalid credentials', 401);
+      const user = await prisma.user.findUnique({ where: { email: email?.toLowerCase().trim() } });
+      if (!user || !user.isActive || !(await bcrypt.compare(password, user.password))) {
+        throw new AppError('Invalid credentials', 401);
+      }
 
       const accessToken = generateAccessToken(user);
       const refreshToken = generateRefreshToken(user);
@@ -65,7 +64,12 @@ const authController = {
       const { refreshToken } = req.body;
       if (!refreshToken) throw new AppError('Refresh token required', 400);
 
-      const decoded = verifyRefreshToken(refreshToken);
+      let decoded;
+      try {
+        decoded = verifyRefreshToken(refreshToken);
+      } catch {
+        throw new AppError('Invalid or expired refresh token', 401);
+      }
 
       const user = await prisma.user.findUnique({ where: { id: decoded.id } });
       if (!user || !user.isActive || user.refreshToken !== refreshToken) {
@@ -88,7 +92,12 @@ const authController = {
       const { refreshToken } = req.body;
       if (!refreshToken) throw new AppError('Refresh token required', 400);
 
-      const decoded = verifyRefreshToken(refreshToken);
+      let decoded;
+      try {
+        decoded = verifyRefreshToken(refreshToken);
+      } catch {
+        return res.json({ message: 'Logged out successfully' });
+      }
 
       const user = await prisma.user.findUnique({ where: { id: decoded.id } });
       if (user && user.refreshToken === refreshToken) {

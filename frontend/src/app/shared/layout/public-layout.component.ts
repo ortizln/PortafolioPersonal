@@ -1,15 +1,15 @@
 import { Component, HostListener } from '@angular/core';
-import { RouterOutlet, RouterLink } from '@angular/router';
+import { RouterOutlet, RouterLink, RouterLinkActive } from '@angular/router';
 import { NgIf, NgFor } from '@angular/common';
 
 @Component({
   selector: 'app-public-layout',
   standalone: true,
-  imports: [RouterOutlet, NgIf, NgFor, RouterLink],
+  imports: [RouterOutlet, NgIf, NgFor, RouterLink, RouterLinkActive],
   template: `
     <nav class="navbar" [class.scrolled]="isScrolled">
       <div class="container">
-        <a class="navbar-brand" routerLink="/" (click)="scrollTo('#home')">
+        <a class="navbar-brand" routerLink="/portfolio">
           <span class="logo-text">&lt;Dev /&gt;</span>
         </a>
 
@@ -20,7 +20,7 @@ import { NgIf, NgFor } from '@angular/common';
         <div class="nav-collapse" [class.open]="isMobileMenuOpen">
           <ul class="nav-links">
             <li *ngFor="let link of navLinks">
-              <a [href]="link.href" (click)="scrollTo(link.href)">{{ link.label }}</a>
+              <a [routerLink]="link.href" routerLinkActive="active-link" [routerLinkActiveOptions]="{exact: link.href === '/portfolio'}" (click)="isMobileMenuOpen = false">{{ link.label }}</a>
             </li>
           </ul>
           <div class="nav-actions">
@@ -70,12 +70,12 @@ export class PublicLayoutComponent {
   currentYear = new Date().getFullYear();
 
   navLinks = [
-    { label: 'Home', href: '#home' },
-    { label: 'About', href: '#about' },
-    { label: 'Experience', href: '#experience' },
-    { label: 'Projects', href: '#projects' },
-    { label: 'Skills', href: '#skills' },
-    { label: 'Contact', href: '#contact' },
+    { label: 'Home', href: '/portfolio' },
+    { label: 'About', href: '/portfolio/about' },
+    { label: 'Experience', href: '/portfolio/experience' },
+    { label: 'Projects', href: '/portfolio/projects' },
+    { label: 'Skills', href: '/portfolio/skills' },
+    { label: 'Contact', href: '/portfolio/contact' },
   ];
 
   @HostListener('window:scroll')

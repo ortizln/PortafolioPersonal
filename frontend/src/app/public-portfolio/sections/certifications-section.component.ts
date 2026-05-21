@@ -1,11 +1,12 @@
 import { Component, Input } from '@angular/core';
-import { NgFor, NgIf, NgClass } from '@angular/common';
+import { NgFor, NgIf, NgClass, DatePipe } from '@angular/common';
 import { Certification } from '../../core/models';
+import { UploadUrlPipe } from '../../shared/upload-url.pipe';
 
 @Component({
   selector: 'app-certifications-section',
   standalone: true,
-  imports: [NgFor, NgIf, NgClass],
+  imports: [NgFor, NgIf, NgClass, DatePipe, UploadUrlPipe],
   template: `
     <section id="certifications" class="certifications-section">
       <div class="container">
@@ -22,13 +23,19 @@ import { Certification } from '../../core/models';
             data-aos="fade-up"
             [attr.data-aos-delay]="i * 80"
           >
+            <img
+              *ngIf="cert.imageUrl"
+              [src]="cert.imageUrl | uploadUrl"
+              [alt]="cert.name"
+              class="cert-image"
+            />
             <div class="cert-card-header">
               <div class="cert-icon">
                 <i class="bi bi-patch-check-fill"></i>
               </div>
               <div class="cert-info">
                 <h3 class="cert-name">{{ cert.name }}</h3>
-                <span class="cert-issuer">{{ cert.issuer }}</span>
+                <span class="cert-issuer">{{ cert.issuingOrganization }}</span>
               </div>
             </div>
 
@@ -37,11 +44,11 @@ import { Certification } from '../../core/models';
                 <i class="bi bi-calendar-check"></i>
                 Issued {{ cert.issueDate | date:'MMM yyyy' }}
               </span>
-              <span *ngIf="!cert.doesNotExpire && cert.expirationDate" class="cert-expiry">
+              <span *ngIf="cert.expiryDate" class="cert-expiry">
                 <i class="bi bi-clock"></i>
-                Expires {{ cert.expirationDate | date:'MMM yyyy' }}
+                Expires {{ cert.expiryDate | date:'MMM yyyy' }}
               </span>
-              <span *ngIf="cert.doesNotExpire" class="cert-no-expiry">
+              <span *ngIf="!cert.expiryDate" class="cert-no-expiry">
                 <i class="bi bi-infinity"></i> No Expiry
               </span>
             </div>
@@ -60,11 +67,11 @@ import { Certification } from '../../core/models';
               </a>
               <a
                 *ngFor="let file of cert.files"
-                [href]="file.fileUrl"
+                [href]="file.path | uploadUrl"
                 target="_blank"
                 class="cert-download"
               >
-                <i class="bi bi-file-pdf"></i> {{ file.fileName }}
+                <i class="bi bi-file-pdf"></i> {{ file.filename }}
               </a>
             </div>
           </div>

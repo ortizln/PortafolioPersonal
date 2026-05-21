@@ -18,10 +18,12 @@ const profileController = {
 
   async updateProfile(req, res, next) {
     try {
+      const { profileImage, bannerImage, cvFile, ...safeBody } = req.body;
+
       const profile = await prisma.profile.upsert({
         where: { userId: req.user.id },
-        update: req.body,
-        create: { userId: req.user.id, ...req.body }
+        update: safeBody,
+        create: { userId: req.user.id, ...safeBody }
       });
 
       res.json(profile);

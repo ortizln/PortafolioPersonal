@@ -1,6 +1,7 @@
 import { Component, OnInit } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { FormsModule } from '@angular/forms';
+import { ConfirmService } from '../core/services/confirm.service';
 
 interface Repository {
   id: string;
@@ -36,6 +37,8 @@ export class RepositoryListComponent implements OnInit {
   };
   isSubmitting = false;
   syncing = { github: false, gitlab: false };
+
+  constructor(private confirmService: ConfirmService) {}
 
   ngOnInit(): void {
     this.loadRepos();
@@ -133,11 +136,11 @@ export class RepositoryListComponent implements OnInit {
     this.isSubmitting = false;
   }
 
-  deleteRepo(id: string): void {
-    if (confirm('Delete this repository?')) {
-      this.repos = this.repos.filter(r => r.id !== id);
-      this.saveRepos();
-    }
+  async deleteRepo(id: string): Promise<void> {
+    const ok = await this.confirmService.confirm({ message: 'Delete this repository?' });
+    if (!ok) return;
+    this.repos = this.repos.filter(r => r.id !== id);
+    this.saveRepos();
   }
 
   openRepo(url: string): void {

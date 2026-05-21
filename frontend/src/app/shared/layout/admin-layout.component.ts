@@ -18,7 +18,7 @@ interface NavItem {
         <div class="sidebar-header">
           <a class="sidebar-brand" routerLink="/admin">
             <span class="brand-icon">&lt;/&gt;</span>
-            <span class="brand-text" *ngIf="!isSidebarCollapsed">DevPanel</span>
+            <span class="brand-text" *ngIf="!isSidebarCollapsed">DevBlackSheep</span>
           </a>
           <button class="sidebar-close" (click)="toggleMobileSidebar()" *ngIf="isMobileSidebarOpen">
             <i class="bi bi-x-lg"></i>
@@ -107,7 +107,7 @@ export class AdminLayoutComponent {
     { label: 'Repositories', route: '/admin/repositories', icon: 'bi-github' },
     { label: 'Social Links', route: '/admin/social-links', icon: 'bi-link-45deg' },
     { label: 'Categories', route: '/admin/categories', icon: 'bi-tags' },
-    { label: 'Contact Messages', route: '/admin/contact-messages', icon: 'bi-envelope' },
+    { label: 'Contact Messages', route: '/admin/messages', icon: 'bi-envelope' },
     { label: 'Settings', route: '/admin/settings', icon: 'bi-sliders' },
   ];
 

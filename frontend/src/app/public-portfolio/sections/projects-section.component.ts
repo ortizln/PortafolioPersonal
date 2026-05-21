@@ -1,12 +1,14 @@
-import { Component, Input } from '@angular/core';
+import { Component, Input, inject } from '@angular/core';
 import { NgFor, NgIf, NgClass } from '@angular/common';
+import { DomSanitizer, SafeResourceUrl } from '@angular/platform-browser';
 import { environment } from '../../../environments/environment';
 import { Project } from '../../core/models';
+import { UploadUrlPipe } from '../../shared/upload-url.pipe';
 
 @Component({
   selector: 'app-projects-section',
   standalone: true,
-  imports: [NgFor, NgIf, NgClass],
+  imports: [NgFor, NgIf, NgClass, UploadUrlPipe],
   template: `
     <section id="projects" class="projects-section">
       <div class="container">
@@ -85,11 +87,27 @@ import { Project } from '../../core/models';
             <i class="bi bi-x-lg"></i>
           </button>
           <div class="modal-body">
-            <img
-              class="modal-image"
-              [src]="getPrimaryImage(selectedProject) || 'assets/project-placeholder.svg'"
-              [alt]="selectedProject.title"
-            />
+            <div class="modal-media">
+              <iframe
+                *ngIf="getVideoUrl(selectedProject.videoUrl)"
+                class="modal-video"
+                [src]="getVideoUrl(selectedProject.videoUrl)"
+                frameborder="0"
+                allowfullscreen
+              ></iframe>
+              <img
+                *ngIf="!getVideoUrl(selectedProject.videoUrl) && !selectedImage"
+                class="modal-image"
+                [src]="getPrimaryImage(selectedProject) || 'assets/project-placeholder.svg'"
+                [alt]="selectedProject.title"
+              />
+              <img
+                *ngIf="selectedImage"
+                class="modal-image"
+                [src]="selectedImage"
+                alt="Project image"
+              />
+            </div>
             <div class="modal-details">
               <h2 class="modal-title">{{ selectedProject.title }}</h2>
               <div class="modal-techs">
@@ -98,6 +116,18 @@ import { Project } from '../../core/models';
                 </span>
               </div>
               <p class="modal-description">{{ selectedProject.description }}</p>
+              <div class="modal-gallery" *ngIf="selectedProject.images?.length">
+                <span class="gallery-label">Gallery</span>
+                <div class="gallery-thumbs">
+                  <img
+                    *ngFor="let img of selectedProject.images"
+                    [src]="getImageUrl(img)"
+                    [class.active]="getImageUrl(img) === selectedImage"
+                    (click)="viewImage(img)"
+                    class="gallery-thumb"
+                  />
+                </div>
+              </div>
               <div class="modal-actions">
                 <a *ngIf="selectedProject.demoUrl" [href]="selectedProject.demoUrl" target="_blank" class="modal-btn primary">
                   <i class="bi bi-box-arrow-up-right"></i> Live Demo
@@ -117,6 +147,9 @@ import { Project } from '../../core/models';
 export class ProjectsSectionComponent {
   @Input() projects: Project[] = [];
   selectedProject: Project | null = null;
+  selectedImage: string | null = null;
+
+  private sanitizer = inject(DomSanitizer);
 
   getPrimaryImage(project: Project): string | null {
     const primary = project.images?.find((img) => img.isPrimary);
@@ -126,15 +159,46 @@ export class ProjectsSectionComponent {
     return `${environment.uploadUrl}/${url}`;
   }
 
+  getImageUrl(image: any): string {
+    if (!image?.url) return '';
+    if (image.url.startsWith('http://') || image.url.startsWith('https://') || image.url.startsWith('data:')) return image.url;
+    return `${environment.uploadUrl}/${image.url}`;
+  }
+
+  getVideoUrl(url: string | null | undefined): SafeResourceUrl | null {
+    if (!url) return null;
+    const match = url.match(
+      /(?:youtube\.com\/watch\?v=|youtu\.be\/|youtube\.com\/embed\/)([a-zA-Z0-9_-]+)/
+    );
+    if (match) {
+      return this.sanitizer.bypassSecurityTrustResourceUrl(
+        `https://www.youtube.com/embed/${match[1]}`
+      );
+    }
+    const vimeoMatch = url.match(/vimeo\.com\/(\d+)/);
+    if (vimeoMatch) {
+      return this.sanitizer.bypassSecurityTrustResourceUrl(
+        `https://player.vimeo.com/video/${vimeoMatch[1]}`
+      );
+    }
+    return null;
+  }
+
   openProject(project: Project): void {
     this.selectedProject = project;
+    this.selectedImage = null;
   }
 
   closeProject(): void {
     this.selectedProject = null;
+    this.selectedImage = null;
   }
 
   stopEvent(event: Event): void {
     event.stopPropagation();
+  }
+
+  viewImage(img: any): void {
+    this.selectedImage = this.getImageUrl(img);
   }
 }

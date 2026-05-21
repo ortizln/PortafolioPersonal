@@ -13,7 +13,12 @@ export class AuthService {
     const stored = localStorage.getItem('currentUser');
     if (stored) {
       try {
-        this.currentUserSubject.next(JSON.parse(stored));
+        const parsed = JSON.parse(stored);
+        if (parsed && parsed.id && parsed.email) {
+          this.currentUserSubject.next(parsed);
+        } else {
+          localStorage.removeItem('currentUser');
+        }
       } catch {
         localStorage.removeItem('currentUser');
       }
@@ -36,7 +41,14 @@ export class AuthService {
   }
 
   register(data: { email: string; password: string; name: string }): Observable<{ user: User; accessToken: string; refreshToken: string }> {
-    return this.apiService.register(data);
+    return this.apiService.register(data).pipe(
+      tap((res) => {
+        localStorage.setItem('accessToken', res.accessToken);
+        localStorage.setItem('refreshToken', res.refreshToken);
+        localStorage.setItem('currentUser', JSON.stringify(res.user));
+        this.currentUserSubject.next(res.user);
+      })
+    );
   }
 
   logout(): void {
@@ -70,7 +82,7 @@ export class AuthService {
     return localStorage.getItem('refreshToken');
   }
 
-  private clearStorage(): void {
+  clearStorage(): void {
     localStorage.removeItem('accessToken');
     localStorage.removeItem('refreshToken');
     localStorage.removeItem('currentUser');

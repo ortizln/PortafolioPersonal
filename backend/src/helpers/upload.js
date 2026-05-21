@@ -26,6 +26,8 @@ const storage = multer.diskStorage({
       uploadPath = path.join(uploadPath, 'projects');
     } else if (file.fieldname === 'profile') {
       uploadPath = path.join(uploadPath, 'images');
+    } else if (file.fieldname === 'certificate-image') {
+      uploadPath = path.join(uploadPath, 'certificates');
     } else if (file.fieldname === 'thumbnail') {
       uploadPath = path.join(uploadPath, 'thumbnails');
     }
