@@ -13,6 +13,13 @@ FRONTEND_DIR="$SCRIPT_DIR/frontend"
 NGINX_CONF="$SCRIPT_DIR/nginx/portfolio.conf"
 SERVER_IP="192.168.1.71"
 
+# Detectar si se necesita sudo
+if [ "$(id -u)" -eq 0 ]; then
+    SUDO=""
+else
+    SUDO="sudo"
+fi
+
 echo "========================================="
 echo "  Deploy Portafolio Personal"
 echo "========================================="
@@ -58,27 +65,27 @@ npm run build -- --configuration production
 
 echo ""
 echo "[3/7] Creando directorio de deploy y copiando archivos..."
-sudo mkdir -p "$DEPLOY_DIR"
-sudo rm -rf "$DEPLOY_DIR"/*
-sudo cp -r "$FRONTEND_DIR"/dist/frontend/browser/* "$DEPLOY_DIR"/
-sudo chown -R www-data:www-data "$DEPLOY_DIR"
-sudo chmod -R 755 "$DEPLOY_DIR"
+$SUDO mkdir -p "$DEPLOY_DIR"
+$SUDO rm -rf "$DEPLOY_DIR"/*
+$SUDO cp -r "$FRONTEND_DIR"/dist/frontend/browser/* "$DEPLOY_DIR"/
+$SUDO chown -R www-data:www-data "$DEPLOY_DIR"
+$SUDO chmod -R 755 "$DEPLOY_DIR"
 
 echo ""
 echo "[4/7] Configurando nginx..."
-sudo cp "$NGINX_CONF" /etc/nginx/sites-available/portfolio
-sudo ln -sf /etc/nginx/sites-available/portfolio /etc/nginx/sites-enabled/portfolio
-sudo rm -f /etc/nginx/sites-enabled/default
+$SUDO cp "$NGINX_CONF" /etc/nginx/sites-available/portfolio
+$SUDO ln -sf /etc/nginx/sites-available/portfolio /etc/nginx/sites-enabled/portfolio
+$SUDO rm -f /etc/nginx/sites-enabled/default
 
 # Probar configuracion de nginx
-if sudo nginx -t 2>&1; then
+if $SUDO nginx -t 2>&1; then
     echo "Configuracion de nginx valida."
-    sudo systemctl reload nginx
+    $SUDO systemctl reload nginx
     echo "Nginx recargado."
 else
     echo "Error en la configuracion de nginx. Revirtiendo..."
-    sudo rm -f /etc/nginx/sites-enabled/portfolio
-    sudo systemctl reload nginx
+    $SUDO rm -f /etc/nginx/sites-enabled/portfolio
+    $SUDO systemctl reload nginx
     exit 1
 fi
 
