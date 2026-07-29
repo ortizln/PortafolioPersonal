@@ -65,9 +65,29 @@ npm run build -- --configuration production
 
 echo ""
 echo "[3/7] Creando directorio de deploy y copiando archivos..."
+
+# Encontrar donde Angular coloco los archivos build (varia segun version)
+DIST_DIR="$FRONTEND_DIR/dist"
+BUILD_OUTPUT=""
+
+if [ -d "$DIST_DIR/frontend/browser" ]; then
+    BUILD_OUTPUT="$DIST_DIR/frontend/browser"
+elif [ -d "$DIST_DIR/browser" ]; then
+    BUILD_OUTPUT="$DIST_DIR/browser"
+elif [ -d "$DIST_DIR/portfolio-frontend/browser" ]; then
+    BUILD_OUTPUT="$DIST_DIR/portfolio-frontend/browser"
+elif [ -f "$DIST_DIR/index.html" ]; then
+    BUILD_OUTPUT="$DIST_DIR"
+else
+    echo "Error: No se encontro el build de Angular en $DIST_DIR"
+    exit 1
+fi
+
+echo "Build encontrado en: $BUILD_OUTPUT"
+
 $SUDO mkdir -p "$DEPLOY_DIR"
 $SUDO rm -rf "$DEPLOY_DIR"/*
-$SUDO cp -r "$FRONTEND_DIR"/dist/frontend/browser/* "$DEPLOY_DIR"/
+$SUDO cp -r "$BUILD_OUTPUT"/* "$DEPLOY_DIR"/
 $SUDO chown -R www-data:www-data "$DEPLOY_DIR"
 $SUDO chmod -R 755 "$DEPLOY_DIR"
 
