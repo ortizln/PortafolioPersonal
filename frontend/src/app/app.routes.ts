@@ -2,9 +2,8 @@ import { Routes } from '@angular/router';
 import { authGuard } from './core/guards/auth.guard';
 
 export const routes: Routes = [
-  { path: '', redirectTo: 'portfolio', pathMatch: 'full' },
   {
-    path: 'portfolio',
+    path: '',
     loadComponent: () =>
       import('./shared/layout/public-layout.component').then(
         (m) => m.PublicLayoutComponent
@@ -18,6 +17,7 @@ export const routes: Routes = [
       { path: 'contact', loadComponent: () => import('./pages/contact-page.component').then((m) => m.ContactPageComponent) },
     ],
   },
+  { path: 'portfolio', redirectTo: '', pathMatch: 'full' },
   {
     path: 'admin',
     loadComponent: () =>
@@ -59,5 +59,5 @@ export const routes: Routes = [
       },
     ],
   },
-  { path: '**', redirectTo: 'portfolio' },
+  { path: '**', redirectTo: '' },
 ];

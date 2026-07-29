@@ -41,6 +41,12 @@
           "configurations": {
             "production": {
               "baseHref": "/portfolio/",
+              "fileReplacements": [
+                {
+                  "replace": "src/environments/environment.ts",
+                  "with": "src/environments/environment.prod.ts"
+                }
+              ],
               "budgets": [
                 { "type": "initial", "maximumWarning": "2mb", "maximumError": "5mb" },
                 { "type": "anyComponentStyle", "maximumWarning": "8kb", "maximumError": "12kb" }
