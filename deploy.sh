@@ -121,23 +121,24 @@ docker compose -f docker-compose.prod.yml up -d
 
 echo ""
 echo "[7/7] Esperando a que el backend este listo..."
-sleep 5
 
-# Verificar que el backend esta corriendo
-if docker compose -f docker-compose.prod.yml ps | grep -q "running"; then
-    echo "Backend esta corriendo."
-else
-    echo "Error: El backend no pudo iniciarse. Revisar logs:"
-    echo "  docker compose -f docker-compose.prod.yml logs"
+# Esperar hasta 30 segundos para que el health check responda
+MAX_WAIT=30
+WAITED=0
+while [ $WAITED -lt $MAX_WAIT ]; do
+    if curl -s "http://127.0.0.1:3000/api/health" 2>/dev/null | grep -q "ok"; then
+        echo "Backend esta corriendo y respondiendo."
+        break
+    fi
+    sleep 2
+    WAITED=$((WAITED + 2))
+    echo "  Esperando... ($WAITED/${MAX_WAIT}s)"
+done
+
+if [ $WAITED -ge $MAX_WAIT ]; then
+    echo "Error: Backend no respondio en ${MAX_WAIT}s. Revisar logs:"
+    docker compose -f docker-compose.prod.yml logs --tail=20
     exit 1
-fi
-
-# Verificar health check
-echo "Verificando health check..."
-if curl -s "http://$SERVER_IP/api/health" | grep -q "ok"; then
-    echo "Health check: OK"
-else
-    echo "Warning: Health check fallo. El backend puede estar iniciando..."
 fi
 
 echo ""
