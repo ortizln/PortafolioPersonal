@@ -1,5 +1,5 @@
 export const environment = {
   production: true,
-  apiUrl: '/api',
-  uploadUrl: '/uploads'
+  apiUrl: '/portfolio/api',
+  uploadUrl: '/portfolio/uploads'
 };
