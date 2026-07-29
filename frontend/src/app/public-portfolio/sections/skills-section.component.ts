@@ -7,32 +7,35 @@ import { Skill } from '../../core/models';
   standalone: true,
   imports: [NgFor, NgIf, NgClass],
   template: `
-    <section id="skills" class="skills-section">
+    <section id="skills" class="skills-section" aria-label="Habilidades técnicas">
       <div class="container">
         <div class="section-header" data-aos="fade-up">
-          <span class="section-subtitle">Skills</span>
-          <h2 class="section-title">Technical Expertise</h2>
-          <div class="section-divider"></div>
+          <span class="section-subtitle">Habilidades</span>
+          <h2 class="section-title">Competencias Técnicas</h2>
+          <div class="section-divider" aria-hidden="true"></div>
         </div>
 
-        <div class="skills-tabs" data-aos="fade-up">
+        <div class="skills-tabs" data-aos="fade-up" role="tablist" [attr.aria-label]="'Categorías de habilidades'">
           <button
             class="tab-btn"
             *ngFor="let cat of categories"
             [class.active]="activeCategory === cat"
             (click)="activeCategory = cat"
+            role="tab"
+            [attr.aria-selected]="activeCategory === cat"
           >
-            <i class="bi" [ngClass]="getCategoryIcon(cat)"></i>
+            <i class="bi" [ngClass]="getCategoryIcon(cat)" aria-hidden="true"></i>
             {{ cat }}
           </button>
         </div>
 
-        <div class="skills-grid">
+        <div class="skills-grid" role="list" aria-label="Lista de habilidades">
           <div
             class="skill-card"
             *ngFor="let skill of filteredSkills; let i = index"
             data-aos="fade-up"
             [attr.data-aos-delay]="i * 60"
+            role="listitem"
           >
             <div class="skill-header">
               <span class="skill-name">{{ skill.name }}</span>
@@ -40,7 +43,7 @@ import { Skill } from '../../core/models';
                 {{ getLevelLabel(skill.percentage) }}
               </span>
             </div>
-            <div class="skill-bar-track">
+            <div class="skill-bar-track" role="progressbar" [attr.aria-valuenow]="skill.percentage" aria-valuemin="0" aria-valuemax="100" [attr.aria-label]="skill.name + ': ' + skill.percentage + '%'">
               <div
                 class="skill-bar-fill"
                 [style.width.%]="skill.percentage"

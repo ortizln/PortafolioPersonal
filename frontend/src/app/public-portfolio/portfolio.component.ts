@@ -29,12 +29,23 @@ import { ContactSectionComponent } from './sections/contact-section.component';
   ],
   template: `
     <div class="portfolio-wrapper">
-      <div *ngIf="loading" class="page-loading"><div class="spinner"></div></div>
+      <div *ngIf="loading" class="skeleton-wrapper" aria-label="Cargando portafolio" aria-busy="true">
+        <div class="skeleton-hero">
+          <div class="sk-avatar"></div>
+          <div class="sk-line w-60"></div>
+          <div class="sk-line w-40"></div>
+          <div class="sk-line w-80"></div>
+          <div class="sk-buttons"><div class="sk-btn"></div><div class="sk-btn"></div></div>
+        </div>
+        <div class="skeleton-section"><div class="sk-line w-30"></div><div class="sk-line w-90"></div><div class="sk-line w-70"></div></div>
+        <div class="skeleton-section"><div class="sk-line w-30"></div><div class="sk-line w-90"></div><div class="sk-line w-70"></div></div>
+        <div class="skeleton-section"><div class="sk-line w-30"></div><div class="sk-line w-90"></div><div class="sk-line w-70"></div></div>
+      </div>
 
-      <div *ngIf="!loading && error" class="page-error">
-        <i class="bi bi-exclamation-triangle"></i>
-        <p>Could not load portfolio. Please try again later.</p>
-        <button class="btn-retry" (click)="loadPortfolio()">Retry</button>
+      <div *ngIf="!loading && error" class="page-error" role="alert">
+        <i class="bi bi-exclamation-triangle" aria-hidden="true"></i>
+        <p>No pudimos cargar el portafolio. Intenta de nuevo.</p>
+        <button class="btn-retry" (click)="loadPortfolio()" aria-label="Reintentar cargar portafolio">Reintentar</button>
       </div>
 
       <ng-container *ngIf="!loading && !error">
@@ -89,9 +100,9 @@ import { ContactSectionComponent } from './sections/contact-section.component';
         class="back-to-top"
         [class.visible]="showBackToTop"
         (click)="scrollToTop()"
-        aria-label="Back to top"
+        aria-label="Volver arriba"
       >
-        <i class="bi bi-arrow-up"></i>
+        <i class="bi bi-arrow-up" aria-hidden="true"></i>
       </button>
     </div>
   `,

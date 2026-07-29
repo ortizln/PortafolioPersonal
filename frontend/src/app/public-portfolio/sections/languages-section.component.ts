@@ -7,12 +7,12 @@ import { Language } from '../../core/models';
   standalone: true,
   imports: [NgFor, NgIf, NgClass],
   template: `
-    <section id="languages" class="languages-section">
+    <section id="languages" class="languages-section" aria-label="Idiomas">
       <div class="container">
         <div class="section-header" data-aos="fade-up">
-          <span class="section-subtitle">Languages</span>
-          <h2 class="section-title">Language Proficiency</h2>
-          <div class="section-divider"></div>
+          <span class="section-subtitle">Idiomas</span>
+          <h2 class="section-title">Nivel de Idiomas</h2>
+          <div class="section-divider" aria-hidden="true"></div>
         </div>
 
         <div class="languages-grid">
@@ -22,7 +22,7 @@ import { Language } from '../../core/models';
             data-aos="fade-up"
             [attr.data-aos-delay]="i * 100"
           >
-            <div class="language-icon">
+            <div class="language-icon" aria-hidden="true">
               {{ lang.name.charAt(0) }}
             </div>
             <div class="language-info">
@@ -32,7 +32,7 @@ import { Language } from '../../core/models';
                   {{ lang.level }}
                 </span>
               </div>
-              <div class="language-bar-track">
+              <div class="language-bar-track" role="progressbar" [attr.aria-valuenow]="lang.percentage" aria-valuemin="0" aria-valuemax="100" [attr.aria-label]="lang.name + ': ' + lang.percentage + '%'">
                 <div
                   class="language-bar-fill"
                   [style.width.%]="lang.percentage"

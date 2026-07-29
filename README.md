@@ -1,247 +1,178 @@
-# Portafolio Profesional Interactivo
+# Portafolio Personal — DevBlackSheep
 
-Plataforma web profesional de portafolio interactivo y administrable, construida con **Angular 18+**, **Node.js + Express**, **PostgreSQL** y **Prisma**.
-
-![Version](https://img.shields.io/badge/version-1.0.0-blue)
-![Angular](https://img.shields.io/badge/Angular-18+-red)
-![Node](https://img.shields.io/badge/Node-20+-green)
-![PostgreSQL](https://img.shields.io/badge/PostgreSQL-16-blue)
-![License](https://img.shields.io/badge/license-MIT-green)
-
-## ✨ Características
-
-### 🔥 Frontend
-- **Angular 18+** con componentes standalone
-- Diseño moderno con **glassmorphism** y animaciones profesionales
-- **Tema oscuro/claro** con variables CSS
-- Componentes **responsivos** (Desktop, Tablet, Mobile)
-- **Lazy Loading** en todos los módulos
-- Formularios reactivos con validaciones completas
-- Interceptores HTTP para autenticación y manejo de errores
-- Guards de protección de rutas
-- **AOS** (Animate On Scroll) para animaciones fluidas
-- Diseño inspirado en Apple, Stripe, Linear y Vercel
-
-### ⚙️ Backend
-- **Node.js + Express** con arquitectura limpia
-- **Prisma ORM** para gestión de base de datos
-- **JWT + Refresh Tokens** para autenticación segura
-- Middleware de **rate limiting**, **helmet** y **CORS**
-- Sistema de **roles** (ADMIN/USER)
-- **Validaciones** robustas con express-validator
-- **Swagger/OpenAPI** documentación automática
-- Sistema de **upload** con multer y sharp
-- **Logs** de auditoría
-- Soft delete en todas las entidades
-
-### 🗄️ Base de Datos
-- **PostgreSQL** 16 con modelo normalizado
-- 18 tablas con relaciones FK, índices y timestamps
-- Soft delete y auditoría integrada
-
-## 📋 Módulos
-
-### Público
-- **Hero**: Presentación profesional con estadísticas
-- **Sobre Mí**: Historia, objetivos y filosofía
-- **Experiencia**: Timeline interactivo
-- **Educación**: Formación académica
-- **Certificados**: Visor PDF y descargas
-- **Proyectos**: Galería con filtros
-- **Habilidades**: Barras animadas por categoría
-- **Idiomas**: Niveles y porcentajes
-- **Contacto**: Formulario con validación
-
-### Administrativo
-- **Dashboard**: Estadísticas y métricas
-- **CRUD completo**: Perfil, Experiencias, Educación, Certificados, Proyectos, Skills, Idiomas, Redes Sociales, Repositorios, Categorías
-- **Gestión de archivos**: Upload drag & drop, previews
-- **Configuración**: Settings dinámicos
-- **Mensajes**: Bandeja de entrada de contactos
-
-## 🚀 Instalación
-
-### Requisitos
-- Node.js 20+
-- PostgreSQL 16+
-- Angular CLI 18+ (`npm install -g @angular/cli`)
-
-### Pasos
-
-```bash
-# 1. Clonar repositorio
-git clone https://github.com/tu-usuario/portafolio-personal.git
-cd portafolio-personal
-
-# 2. Backend
-cd backend
-npm install
-cp .env.example .env  # Configurar variables de entorno
-npx prisma migrate dev --name init
-npx prisma db seed
-npm run dev
-
-# 3. Frontend
-cd ../frontend
-npm install
-ng serve -o
-```
-
-### Variables de Entorno (.env)
-
-```env
-NODE_ENV=development
-PORT=3000
-DATABASE_URL="postgresql://postgres:postgres@localhost:5432/portfolio_db"
-JWT_SECRET=tu-secreto-jwt
-JWT_REFRESH_SECRET=tu-secreto-refresh
-CORS_ORIGIN=http://localhost:4200
-```
-
-### Docker
-
-```bash
-docker-compose up -d
-```
-
-## 🏗️ Estructura del Proyecto
+Sistema de portafolio profesional administrable. Frontend Angular 18 + Backend Node/Express/Prisma + PostgreSQL.
 
 ```
-portafolio-personal/
-├── backend/
-│   ├── prisma/
-│   │   └── schema.prisma    # Modelo de datos
-│   ├── src/
-│   │   ├── auth/            # JWT services
-│   │   ├── config/          # Configuración
-│   │   ├── controllers/     # Controladores API
-│   │   ├── helpers/         # Utilidades
-│   │   ├── middlewares/     # Middleware (auth, error)
-│   │   ├── routes/          # Rutas API
-│   │   ├── swagger/         # Documentación
-│   │   ├── validations/     # Validaciones
-│   │   └── app.js           # Entry point
-│   └── uploads/             # Archivos subidos
-├── frontend/
-│   └── src/
-│       ├── app/
-│       │   ├── auth/        # Login/Register
-│       │   ├── core/        # Guards, interceptors, services
-│       │   ├── dashboard/   # Admin dashboard
-│       │   ├── experiences/ # Admin experiencias
-│       │   ├── education/   # Admin educación
-│       │   ├── certificates/# Admin certificados
-│       │   ├── projects/    # Admin proyectos
-│       │   ├── skills/      # Admin habilidades
-│       │   ├── languages/   # Admin idiomas
-│       │   ├── social-links/# Admin redes sociales
-│       │   ├── repositories/# Admin repositorios
-│       │   ├── categories/  # Admin categorías
-│       │   ├── settings/    # Admin configuración
-│       │   ├── public-portfolio/ # Vista pública
-│       │   └── shared/      # Componentes compartidos
-│       └── environments/    # Configuración
-├── docker-compose.yml
-└── README.md
+Usuario → Nginx (192.168.100.215) → /portfolio/     → Angular SPA (standalone)
+                                   → /portfolio/api/* → Docker: Backend (Express :3000)
+                                   → /portfolio/uploads → Archivos estáticos
 ```
-
-## 🔌 API Endpoints
-
-### Autenticación
-| Método | Ruta | Descripción |
-|--------|------|-------------|
-| POST | `/api/auth/register` | Registrar usuario |
-| POST | `/api/auth/login` | Iniciar sesión |
-| POST | `/api/auth/refresh-token` | Refrescar token |
-| POST | `/api/auth/logout` | Cerrar sesión |
-| GET | `/api/auth/me` | Perfil actual |
-
-### Público
-| Método | Ruta | Descripción |
-|--------|------|-------------|
-| GET | `/api/public/portfolio` | Portafolio completo |
-| GET | `/api/public/projects` | Proyectos públicos |
-| GET | `/api/public/experiences` | Experiencias |
-| GET | `/api/public/education` | Educación |
-| GET | `/api/public/certifications` | Certificados |
-| GET | `/api/public/skills` | Habilidades |
-
-### Admin (requiere autenticación)
-CRUD completo para: `/profile`, `/experiences`, `/education`, `/certifications`, `/projects`, `/skills`, `/languages`, `/social-links`, `/repositories`, `/categories`, `/contact`, `/settings`, `/uploads`
-
-Documentación completa en: `http://localhost:3000/api-docs`
-
-## 🛠️ Tecnologías
-
-### Frontend
-- Angular 18+
-- Bootstrap 5 + Bootstrap Icons
-- Angular Material
-- SCSS + CSS Variables
-- AOS (Animate on Scroll)
-- Chart.js / ngx-charts
-- RxJS
-
-### Backend
-- Node.js + Express
-- Prisma ORM
-- JWT + Refresh Tokens
-- Multer + Sharp
-- Helmet + CORS + Rate Limiting
-- Swagger/OpenAPI
-- Morgan + Winston
-
-### Base de Datos
-- PostgreSQL 16
-- Relaciones normalizadas
-- Índices + Soft Delete + Timestamps
-
-### DevOps
-- Docker + Docker Compose
-- Nginx
-- PM2 (opcional)
-- Git + GitHub/GitLab
-
-## 🔒 Seguridad
-- JWT con refresh tokens
-- Passwords hasheadas con bcryptjs
-- Rate limiting por IP
-- Helmet headers de seguridad
-- Sanitización de inputs
-- Validación de tipos MIME en uploads
-- Protección CSRF
-- Roles y permisos
-
-## 📱 Responsive Design
-- **Desktop**: Diseño completo con sidebar y layouts complejos
-- **Tablet**: Layout adaptativo con navegación colapsable
-- **Mobile**: Navegación tipo drawer, cards verticales, tipografía adaptativa
-
-## 🚢 Despliegue
-
-### Producción
-
-```bash
-# Backend
-cd backend
-NODE_ENV=production npm start
-
-# Frontend
-cd frontend
-ng build --configuration production
-# Servir con nginx (ver nginx.conf)
-```
-
-### Docker
-```bash
-docker-compose up -d --build
-```
-
-## 📄 Licencia
-MIT © [Tu Nombre]
 
 ---
 
-<p align="center">
-  Hecho con ❤️ y ☕ por <a href="https://github.com/tu-usuario">tu-usuario</a>
-</p>
+## Stack
+
+| Capa | Tecnologías |
+|------|-------------|
+| **Frontend** | Angular 18.2 standalone, Bootstrap 5.3, Angular Material, Chart.js, AOS, RxJS |
+| **Backend** | Node 20 + Express 4.21, Prisma 5.22, JWT (HS256), bcryptjs, Multer + Sharp, Helmet |
+| **BD** | PostgreSQL 16 |
+| **Deploy** | Docker Compose, Nginx, servidor Ubuntu |
+
+---
+
+## Frontend — 43 Componentes
+
+### Layouts
+- **PublicLayout** — navbar + footer, tema oscuro/claro, menú responsive
+- **AdminLayout** — sidebar colapsable con 13 secciones, topbar, tema
+- **AuthLayout** — mínimo, solo brand + formulario
+
+### Rutas
+```
+/                    → PortfolioComponent (vista pública principal)
+/about               → AboutPageComponent
+/experience          → ExperiencePageComponent
+/projects            → ProjectsPageComponent
+/skills              → SkillsPageComponent
+/contact             → ContactPageComponent
+/portfolio           → redirige a /
+
+/admin               → AdminLayout (protegido por authGuard)
+/admin/dashboard     → DashboardComponent
+/admin/profile       → ProfileEditComponent
+/admin/experiences   → ExperienceListComponent
+/admin/education     → EducationListComponent
+/admin/certificates  → CertificateListComponent
+/admin/projects      → ProjectListComponent
+/admin/skills        → SkillListComponent
+/admin/languages     → LanguageListComponent
+/admin/social-links  → SocialLinksComponent
+/admin/repositories  → RepositoryListComponent
+/admin/categories    → CategoryListComponent
+/admin/messages      → ContactMessagesComponent
+/admin/settings      → SettingsComponent
+
+/auth/login          → LoginComponent
+/auth/register       → RegisterComponent
+```
+
+### Secciones públicas (PortfolioComponent)
+Hero, Sobre Mí, Experiencia (timeline), Educación, Certificados (visor PDF), Proyectos (galería con filtros), Habilidades (barras por categoría), Idiomas, Contacto (formulario).
+
+### Core
+- **ApiService** — 20+ endpoints (CRUD + públicos + upload + stats)
+- **AuthService** — JWT en localStorage, `currentUser$` BehaviorSubject
+- **AuthInterceptor** — adjunta Bearer token
+- **ErrorInterceptor** — refresh automático en 401, redirect a login si falla
+- **AuthGuard** — verifica token expiry, refresh si expiró
+- **ConfirmModal** — diálogo de confirmación dinámico
+
+---
+
+## Backend — 18 Controladores
+
+### Estructura
+```
+src/
+├── app.js                     # Entry point (middleware stack + routes)
+├── auth/jwt.js                # HS256, access 1h, refresh 7d
+├── config/database.js         # PrismaClient singleton
+├── controllers/               # 18 controladores
+├── middlewares/auth.js         # authenticate + authorize
+├── middlewares/errorHandler.js # AppError + err.code mapping
+├── routes/                    # 18 route files
+├── helpers/upload.js          # Multer disk storage + UUID
+├── validations/index.js       # express-validator rules
+└── swagger/swagger.js         # OpenAPI 3.0
+```
+
+### Middleware stack (orden)
+Helmet → Compression → CORS → JSON (1mb) → Morgan → Rate limiting → Static `/uploads` → Swagger `/api-docs` → Routes → Health `/api/health` → Error handler.
+
+### Modelos BD (18 tablas)
+User, Profile, Experience, Education, Certification, CertificateFile, Project, ProjectImage, Technology, ProjectTechnology, Skill, Language, SocialLink, Repository, ContactMessage, Category, ProjectCategory, Setting, AuditLog.
+
+### Auth flow
+Register → hash bcrypt (12 rounds) → create user+profile → tokens (HS256). Login → verify → tokens. Refresh → verify refresh token → rotate ambos. Logout → null refresh token en DB. Soft delete en entidades principales.
+
+### Seed
+Admin: `admin@portfolio.com` / `Admin123!` + 15 technologies + 10 skills + 3 languages + 3 social links.
+
+---
+
+## Estado por Módulo
+
+| Módulo | Frontend | Backend | Estado |
+|--------|----------|---------|--------|
+| Auth | Login/Register/Logout/Refresh | JWT HS256 + refresh rotation | **Completo** |
+| Profile | Edit, photo/banner/CV upload | CRUD + Multer/Sharp | **Completo** |
+| Experiences | CRUD lista con drag | CRUD + soft delete | **Completo** |
+| Education | CRUD lista | CRUD + soft delete | **Completo** |
+| Certificates | CRUD + upload file/image | CRUD + file/image upload | **Completo** |
+| Projects | CRUD + galería imágenes | CRUD + image management | **Completo** |
+| Skills | CRUD con orden | CRUD + soft delete | **Completo** |
+| Languages | CRUD (localStorage) | CRUD | **No conecta al API** |
+| Social Links | CRUD (localStorage) | CRUD | **No conecta al API** |
+| Repositories | CRUD + sync (stubs) | CRUD + sync (stubs) | **No conecta al API** |
+| Categories | CRUD (localStorage) | CRUD + slugify | **No conecta al API** |
+| Contact Messages | Bandeja (localStorage) | CRUD + markAsRead | **No conecta al API** |
+| Settings | Editor (localStorage) | CRUD key/value | **No conecta al API** |
+| Dashboard | Charts + stats | Stats controller | **Completo** |
+| Público | 9 secciones | Portfolio combined endpoint | **Completo** |
+
+---
+
+## Problemas Conocidos
+
+| # | Problema | Impacto |
+|---|----------|---------|
+| 1 | Languages, SocialLinks, Repositories, Categories, ContactMessages, Settings usan localStorage en vez del API | Datos no persisten en backend |
+| 2 | `prisma.uploadedFile` referenciado en UploadController pero no existe en schema | Crash si se invoca |
+| 3 | GitHub/GitLab sync son stubs sin implementación real | No sincroniza repos |
+| 4 | `docker-compose.prod.yml` tiene DB password hardcodeada | Riesgo de seguridad |
+| 5 | CORS hardcodeado a `http://192.168.100.215` | No portable |
+| 6 | Sin envío de emails (SMTP configurado pero no implementado) | No hay notificaciones ni recovery |
+| 7 | Sin reintento automático de requests tras refresh token | Pérdida de datos si token expira |
+
+---
+
+## Deploy
+
+```bash
+# En el servidor Linux (192.168.100.215)
+cd ~/PortafolioPersonal
+./deploy.sh
+```
+
+El script: `npm ci` → `ng build --configuration production` → copia a `/var/www/portfolio` → `docker compose -f docker-compose.prod.yml up -d` → health check.
+
+### Nginx (control-servidor)
+```
+location /portfolio/ {
+    root /var/www;
+    try_files $uri $uri/ /portfolio/index.html;
+}
+
+location /portfolio/api/ {
+    proxy_pass http://127.0.0.1:3000/api/;
+}
+
+location /portfolio/uploads/ {
+    proxy_pass http://127.0.0.1:3000/uploads/;
+}
+```
+
+No usar `alias`, no usar regex location blocks para assets (interceptan JS). Sin symlink en `/etc/nginx/sites-enabled/portfolio`.
+
+---
+
+## Cambios Recientes
+
+- `fileReplacements` en angular.json → build production usa `environment.prod.ts`
+- Rutas: `''` carga portfolio directamente, `/portfolio` redirige a `''` (evita `/portfolio/portfolio`)
+- Project API: unwrap `{ project }` response, UUID strings, image URL prefix
+- Refresh token 500: try-catch en JWT verify
+- Disabled attribute warnings: `valueChanges` en vez de `[disabled]` en template
+- Settings: try-catch para localStorage corrupto
+- baseHref `/portfolio/` + environment URLs `/portfolio/api` y `/portfolio/uploads`

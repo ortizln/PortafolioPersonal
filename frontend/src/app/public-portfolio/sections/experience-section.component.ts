@@ -7,49 +7,61 @@ import { Experience } from '../../core/models';
   standalone: true,
   imports: [NgFor, NgIf, NgClass, DatePipe],
   template: `
-    <section id="experience" class="experience-section">
+    <section id="experience" class="experience-section" aria-label="Experiencia laboral">
       <div class="container">
         <div class="section-header" data-aos="fade-up">
-          <span class="section-subtitle">Career</span>
-          <h2 class="section-title">Work Experience</h2>
-          <div class="section-divider"></div>
+          <span class="section-subtitle">Trayectoria</span>
+          <h2 class="section-title">Experiencia Laboral</h2>
+          <div class="section-divider" aria-hidden="true"></div>
         </div>
 
-        <div class="timeline">
+        <div class="exp-list" role="list">
           <div
-            class="timeline-item"
+            class="exp-item"
             *ngFor="let exp of experiences; let i = index"
-            [class.current]="exp.current"
             data-aos="fade-up"
             [attr.data-aos-delay]="i * 100"
+            role="listitem"
           >
-            <div class="timeline-marker">
-              <div class="timeline-dot" [class.active]="exp.current"></div>
+            <div class="exp-line" aria-hidden="true">
+              <div class="exp-dot" [class.current]="exp.current"></div>
             </div>
 
-            <div class="timeline-card" [class.current-card]="exp.current">
-              <div class="timeline-card-header">
-                <div class="timeline-company-icon">
-                  <i class="bi bi-building"></i>
+            <div class="exp-card" [class.current]="exp.current">
+              <div class="exp-card-top">
+                <div class="exp-avatar" aria-hidden="true">
+                  {{ exp.company.charAt(0) }}
                 </div>
-                <div class="timeline-company-info">
-                  <h3 class="timeline-position">{{ exp.position }}</h3>
-                  <span class="timeline-company">{{ exp.company }}</span>
+                <div class="exp-info">
+                  <h3 class="exp-position">{{ exp.position }}</h3>
+                  <div class="exp-company-row">
+                    <span class="exp-company">{{ exp.company }}</span>
+                    <span class="exp-badge" *ngIf="exp.current">Actual</span>
+                  </div>
+                  <div class="exp-meta">
+                    <span>
+                      <i class="bi bi-calendar3" aria-hidden="true"></i>
+                      {{ exp.startDate | date:'MMM yyyy' }} — {{ exp.current ? 'Actualidad' : (exp.endDate | date:'MMM yyyy') }}
+                    </span>
+                    <span *ngIf="exp.location">
+                      <i class="bi bi-geo-alt" aria-hidden="true"></i> {{ exp.location }}
+                    </span>
+                  </div>
                 </div>
-                <span class="timeline-badge" *ngIf="exp.current">Current</span>
               </div>
 
-              <div class="timeline-meta">
-                <span class="timeline-date">
-                  <i class="bi bi-calendar3"></i>
-                  {{ exp.startDate | date:'MMM yyyy' }} - {{ exp.current ? 'Present' : (exp.endDate | date:'MMM yyyy') }}
-                </span>
-                <span class="timeline-location" *ngIf="exp.location">
-                  <i class="bi bi-geo-alt"></i> {{ exp.location }}
-                </span>
+              <p class="exp-description">{{ exp.description }}</p>
+
+              <div class="exp-achievements" *ngIf="exp.achievements?.length">
+                <h4 class="exp-achievements-title">Logros</h4>
+                <ul>
+                  <li *ngFor="let ach of exp.achievements">{{ ach }}</li>
+                </ul>
               </div>
 
-              <p class="timeline-description">{{ exp.description }}</p>
+              <div class="exp-techs" *ngIf="exp.technologies?.length" aria-label="Tecnologías utilizadas">
+                <span class="exp-tech" *ngFor="let tech of exp.technologies">{{ tech }}</span>
+              </div>
             </div>
           </div>
         </div>

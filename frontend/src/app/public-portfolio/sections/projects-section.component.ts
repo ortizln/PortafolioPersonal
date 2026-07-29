@@ -10,30 +10,52 @@ import { UploadUrlPipe } from '../../shared/upload-url.pipe';
   standalone: true,
   imports: [NgFor, NgIf, NgClass, UploadUrlPipe],
   template: `
-    <section id="projects" class="projects-section">
+    <section id="projects" class="projects-section" aria-label="Proyectos destacados">
       <div class="container">
         <div class="section-header" data-aos="fade-up">
-          <span class="section-subtitle">Portfolio</span>
-          <h2 class="section-title">Featured Projects</h2>
-          <div class="section-divider"></div>
+          <span class="section-subtitle">Portafolio</span>
+          <h2 class="section-title">Proyectos Destacados</h2>
+          <div class="section-divider" aria-hidden="true"></div>
+        </div>
+
+        <div class="projects-filters" data-aos="fade-up" role="tablist" aria-label="Filtros de proyectos">
+          <button
+            class="filter-btn"
+            [class.active]="activeFilter === 'all'"
+            (click)="setFilter('all')"
+            role="tab"
+            [attr.aria-selected]="activeFilter === 'all'"
+          >Todos</button>
+          <button
+            class="filter-btn"
+            *ngFor="let tech of availableTechs"
+            [class.active]="activeFilter === tech"
+            (click)="setFilter(tech)"
+            role="tab"
+            [attr.aria-selected]="activeFilter === tech"
+          >{{ tech }}</button>
         </div>
 
         <div class="projects-grid">
           <div
             class="project-card"
-            *ngFor="let project of projects; let i = index"
+            *ngFor="let project of filteredProjects; let i = index"
             data-aos="fade-up"
             [attr.data-aos-delay]="i * 100"
             [class.featured]="project.isFeatured"
             (click)="openProject(project)"
+            role="button"
+            [attr.aria-label]="'Ver detalle de ' + project.title"
+            tabindex="0"
+            (keydown)="onCardKeydown($event, project)"
           >
             <div class="project-banner">
               <img
                 class="project-image"
                 [src]="getPrimaryImage(project) || 'assets/project-placeholder.svg'"
-                [alt]="project.title"
+                [alt]="'Captura del proyecto ' + project.title"
               />
-              <div class="project-overlay">
+              <div class="project-overlay" aria-hidden="true">
                 <div class="overlay-links">
                   <a
                     *ngIf="project.demoUrl"
@@ -43,8 +65,8 @@ import { UploadUrlPipe } from '../../shared/upload-url.pipe';
                     class="overlay-link"
                     (click)="stopEvent($event)"
                   >
-                    <i class="bi bi-box-arrow-up-right"></i>
-                    <span>Live Demo</span>
+                    <i class="bi bi-box-arrow-up-right" aria-hidden="true"></i>
+                    <span>Demo</span>
                   </a>
                   <a
                     *ngIf="project.githubUrl"
@@ -54,13 +76,13 @@ import { UploadUrlPipe } from '../../shared/upload-url.pipe';
                     class="overlay-link"
                     (click)="stopEvent($event)"
                   >
-                    <i class="bi bi-github"></i>
-                    <span>Source Code</span>
+                    <i class="bi bi-github" aria-hidden="true"></i>
+                    <span>Código</span>
                   </a>
                 </div>
               </div>
               <span class="project-featured-badge" *ngIf="project.isFeatured">
-                <i class="bi bi-star-fill"></i> Featured
+                <i class="bi bi-star-fill" aria-hidden="true"></i> Destacado
               </span>
             </div>
 
@@ -81,10 +103,10 @@ import { UploadUrlPipe } from '../../shared/upload-url.pipe';
         </div>
       </div>
 
-      <div class="modal-overlay" *ngIf="selectedProject" (click)="closeProject()">
-        <div class="modal-content" (click)="stopEvent($event)">
-          <button class="modal-close" (click)="closeProject()">
-            <i class="bi bi-x-lg"></i>
+      <div class="modal-overlay" *ngIf="selectedProject" (click)="closeProject()" (keydown.escape)="closeProject()" role="dialog" aria-modal="true" [attr.aria-label]="'Detalle del proyecto: ' + selectedProject.title">
+        <div class="modal-content" (click)="stopEvent($event)" role="document" tabindex="-1">
+          <button class="modal-close" (click)="closeProject()" aria-label="Cerrar">
+            <i class="bi bi-x-lg" aria-hidden="true"></i>
           </button>
           <div class="modal-body">
             <div class="modal-media">
@@ -94,18 +116,19 @@ import { UploadUrlPipe } from '../../shared/upload-url.pipe';
                 [src]="getVideoUrl(selectedProject.videoUrl)"
                 frameborder="0"
                 allowfullscreen
+                title="Video del proyecto"
               ></iframe>
               <img
                 *ngIf="!getVideoUrl(selectedProject.videoUrl) && !selectedImage"
                 class="modal-image"
                 [src]="getPrimaryImage(selectedProject) || 'assets/project-placeholder.svg'"
-                [alt]="selectedProject.title"
+                [alt]="'Imagen principal de ' + selectedProject.title"
               />
               <img
                 *ngIf="selectedImage"
                 class="modal-image"
                 [src]="selectedImage"
-                alt="Project image"
+                [alt]="'Imagen del proyecto ' + selectedProject.title"
               />
             </div>
             <div class="modal-details">
@@ -117,7 +140,7 @@ import { UploadUrlPipe } from '../../shared/upload-url.pipe';
               </div>
               <p class="modal-description">{{ selectedProject.description }}</p>
               <div class="modal-gallery" *ngIf="selectedProject.images?.length">
-                <span class="gallery-label">Gallery</span>
+                <span class="gallery-label">Galería</span>
                 <div class="gallery-thumbs">
                   <img
                     *ngFor="let img of selectedProject.images"
@@ -125,15 +148,19 @@ import { UploadUrlPipe } from '../../shared/upload-url.pipe';
                     [class.active]="getImageUrl(img) === selectedImage"
                     (click)="viewImage(img)"
                     class="gallery-thumb"
+                    [attr.aria-label]="'Ver imagen'"
+                    role="button"
+                    tabindex="0"
+                    (keydown.enter)="viewImage(img)"
                   />
                 </div>
               </div>
               <div class="modal-actions">
-                <a *ngIf="selectedProject.demoUrl" [href]="selectedProject.demoUrl" target="_blank" class="modal-btn primary">
-                  <i class="bi bi-box-arrow-up-right"></i> Live Demo
+                <a *ngIf="selectedProject.demoUrl" [href]="selectedProject.demoUrl" target="_blank" class="modal-btn primary" [attr.aria-label]="'Ver demo de ' + selectedProject.title">
+                  <i class="bi bi-box-arrow-up-right" aria-hidden="true"></i> Demo
                 </a>
-                <a *ngIf="selectedProject.githubUrl" [href]="selectedProject.githubUrl" target="_blank" class="modal-btn secondary">
-                  <i class="bi bi-github"></i> Source Code
+                <a *ngIf="selectedProject.githubUrl" [href]="selectedProject.githubUrl" target="_blank" class="modal-btn secondary" [attr.aria-label]="'Ver código de ' + selectedProject.title">
+                  <i class="bi bi-github" aria-hidden="true"></i> Código
                 </a>
               </div>
             </div>
@@ -148,6 +175,22 @@ export class ProjectsSectionComponent {
   @Input() projects: Project[] = [];
   selectedProject: Project | null = null;
   selectedImage: string | null = null;
+  activeFilter = 'all';
+
+  get availableTechs(): string[] {
+    const set = new Set<string>();
+    this.projects.forEach(p => p.technologies?.forEach(t => set.add(t.name)));
+    return [...set];
+  }
+
+  get filteredProjects(): Project[] {
+    if (this.activeFilter === 'all') return this.projects;
+    return this.projects.filter(p => p.technologies?.some(t => t.name === this.activeFilter));
+  }
+
+  setFilter(tech: string): void {
+    this.activeFilter = tech;
+  }
 
   private sanitizer = inject(DomSanitizer);
 
@@ -200,5 +243,12 @@ export class ProjectsSectionComponent {
 
   viewImage(img: any): void {
     this.selectedImage = this.getImageUrl(img);
+  }
+
+  onCardKeydown(event: KeyboardEvent, project: Project): void {
+    if (event.key === 'Enter' || event.key === ' ') {
+      event.preventDefault();
+      this.openProject(project);
+    }
   }
 }

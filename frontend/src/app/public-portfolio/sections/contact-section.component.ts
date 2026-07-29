@@ -9,74 +9,74 @@ import { ApiService } from '../../core/services/api.service';
   standalone: true,
   imports: [NgFor, NgIf, NgClass, FormsModule],
   template: `
-    <section id="contact" class="contact-section">
+    <section id="contact" class="contact-section" aria-label="Contacto">
       <div class="container">
         <div class="section-header" data-aos="fade-up">
-          <span class="section-subtitle">Contact</span>
-          <h2 class="section-title">Get In Touch</h2>
-          <div class="section-divider"></div>
+          <span class="section-subtitle">Contacto</span>
+          <h2 class="section-title">Hablemos</h2>
+          <div class="section-divider" aria-hidden="true"></div>
         </div>
 
         <div class="contact-grid">
           <div class="contact-info" data-aos="fade-right">
-            <h3 class="contact-heading">Let's work together</h3>
+            <h3 class="contact-heading">Trabajemos juntos</h3>
             <p class="contact-text">
-              I'm always open to new opportunities, collaborations, and interesting projects.
-              Feel free to reach out!
+              Siempre estoy abierto a nuevas oportunidades, colaboraciones y proyectos interesantes.
+              ¡No dudes en contactarme!
             </p>
 
             <div class="contact-details">
               <div class="contact-item" *ngIf="profile?.email">
-                <div class="contact-item-icon">
-                  <i class="bi bi-envelope-fill"></i>
+                <div class="contact-item-icon" aria-hidden="true">
+                  <i class="bi bi-envelope-fill" aria-hidden="true"></i>
                 </div>
                 <div class="contact-item-text">
-                  <span class="contact-item-label">Email</span>
+                  <span class="contact-item-label">Correo</span>
                   <a [href]="'mailto:' + profile!.email" class="contact-item-value">{{ profile!.email }}</a>
                 </div>
               </div>
 
               <div class="contact-item" *ngIf="profile?.phone">
-                <div class="contact-item-icon">
-                  <i class="bi bi-telephone-fill"></i>
+                <div class="contact-item-icon" aria-hidden="true">
+                  <i class="bi bi-telephone-fill" aria-hidden="true"></i>
                 </div>
                 <div class="contact-item-text">
-                  <span class="contact-item-label">Phone</span>
+                  <span class="contact-item-label">Teléfono</span>
                   <span class="contact-item-value">{{ profile!.phone }}</span>
                 </div>
               </div>
 
               <div class="contact-item" *ngIf="profile?.location">
-                <div class="contact-item-icon">
-                  <i class="bi bi-geo-alt-fill"></i>
+                <div class="contact-item-icon" aria-hidden="true">
+                  <i class="bi bi-geo-alt-fill" aria-hidden="true"></i>
                 </div>
                 <div class="contact-item-text">
-                  <span class="contact-item-label">Location</span>
+                  <span class="contact-item-label">Ubicación</span>
                   <span class="contact-item-value">{{ profile!.location }}</span>
                 </div>
               </div>
             </div>
 
-            <div class="contact-socials">
+            <div class="contact-socials" aria-label="Redes sociales">
               <a
                 *ngFor="let link of socialLinks"
                 [href]="link.url"
                 target="_blank"
                 rel="noopener noreferrer"
                 class="contact-social-link"
-                [attr.aria-label]="link.platform"
+                [attr.aria-label]="'Visitar perfil de ' + link.platform"
               >
-                <i class="bi" [ngClass]="getSocialIcon(link.platform)"></i>
+                <i class="bi" [ngClass]="getSocialIcon(link.platform)" aria-hidden="true"></i>
               </a>
             </div>
           </div>
 
           <div class="contact-form-wrapper" data-aos="fade-left">
-            <div class="success-message" *ngIf="submitted">
-              <i class="bi bi-check-circle-fill"></i>
-              <h3>Message Sent!</h3>
-              <p>Thank you for reaching out. I'll get back to you soon.</p>
-              <button class="btn-secondary" (click)="submitted = false">Send Another</button>
+            <div class="success-message" *ngIf="submitted" role="alert" aria-live="polite">
+              <i class="bi bi-check-circle-fill" aria-hidden="true"></i>
+              <h3>¡Mensaje Enviado!</h3>
+              <p>Gracias por contactarme. Te responderé pronto.</p>
+              <button class="btn-secondary" (click)="submitted = false">Enviar Otro</button>
             </div>
 
             <form
@@ -84,9 +84,10 @@ import { ApiService } from '../../core/services/api.service';
               #contactForm="ngForm"
               (ngSubmit)="onSubmit(contactForm)"
               class="contact-form"
+              novalidate
             >
               <div class="form-group">
-                <label class="form-label" for="name">Name</label>
+                <label class="form-label" for="name">Nombre</label>
                 <input
                   id="name"
                   name="name"
@@ -96,15 +97,17 @@ import { ApiService } from '../../core/services/api.service';
                   required
                   minlength="2"
                   #name="ngModel"
-                  placeholder="Your name"
+                  placeholder="Tu nombre"
+                  [attr.aria-invalid]="name.invalid && name.touched"
+                  [attr.aria-describedby]="(name.invalid && name.touched) ? 'name-error' : null"
                 />
-                <span class="form-error" *ngIf="name.invalid && name.touched">
-                  Please enter your name
+                <span class="form-error" *ngIf="name.invalid && name.touched" id="name-error" role="alert">
+                  Ingresa tu nombre
                 </span>
               </div>
 
               <div class="form-group">
-                <label class="form-label" for="email">Email</label>
+                <label class="form-label" for="email">Correo</label>
                 <input
                   id="email"
                   name="email"
@@ -114,15 +117,17 @@ import { ApiService } from '../../core/services/api.service';
                   required
                   email
                   #email="ngModel"
-                  placeholder="your@email.com"
+                  placeholder="tu@correo.com"
+                  [attr.aria-invalid]="email.invalid && email.touched"
+                  [attr.aria-describedby]="(email.invalid && email.touched) ? 'email-error' : null"
                 />
-                <span class="form-error" *ngIf="email.invalid && email.touched">
-                  Please enter a valid email
+                <span class="form-error" *ngIf="email.invalid && email.touched" id="email-error" role="alert">
+                  Ingresa un correo válido
                 </span>
               </div>
 
               <div class="form-group">
-                <label class="form-label" for="subject">Subject</label>
+                <label class="form-label" for="subject">Asunto</label>
                 <input
                   id="subject"
                   name="subject"
@@ -132,15 +137,17 @@ import { ApiService } from '../../core/services/api.service';
                   required
                   minlength="3"
                   #subject="ngModel"
-                  placeholder="What's this about?"
+                  placeholder="¿De qué trata?"
+                  [attr.aria-invalid]="subject.invalid && subject.touched"
+                  [attr.aria-describedby]="(subject.invalid && subject.touched) ? 'subject-error' : null"
                 />
-                <span class="form-error" *ngIf="subject.invalid && subject.touched">
-                  Please enter a subject
+                <span class="form-error" *ngIf="subject.invalid && subject.touched" id="subject-error" role="alert">
+                  Ingresa un asunto
                 </span>
               </div>
 
               <div class="form-group">
-                <label class="form-label" for="message">Message</label>
+                <label class="form-label" for="message">Mensaje</label>
                 <textarea
                   id="message"
                   name="message"
@@ -150,10 +157,12 @@ import { ApiService } from '../../core/services/api.service';
                   required
                   minlength="10"
                   #message="ngModel"
-                  placeholder="Your message..."
+                  placeholder="Tu mensaje..."
+                  [attr.aria-invalid]="message.invalid && message.touched"
+                  [attr.aria-describedby]="(message.invalid && message.touched) ? 'message-error' : null"
                 ></textarea>
-                <span class="form-error" *ngIf="message.invalid && message.touched">
-                  Message must be at least 10 characters
+                <span class="form-error" *ngIf="message.invalid && message.touched" id="message-error" role="alert">
+                  El mensaje debe tener al menos 10 caracteres
                 </span>
               </div>
 
@@ -161,12 +170,13 @@ import { ApiService } from '../../core/services/api.service';
                 type="submit"
                 class="btn-primary"
                 [disabled]="contactForm.invalid || sending"
+                [attr.aria-busy]="sending"
               >
                 <span *ngIf="!sending">
-                  <i class="bi bi-send-fill"></i> Send Message
+                  <i class="bi bi-send-fill" aria-hidden="true"></i> Enviar Mensaje
                 </span>
                 <span *ngIf="sending">
-                  <i class="bi bi-hourglass-split"></i> Sending...
+                  <i class="bi bi-hourglass-split" aria-hidden="true"></i> Enviando...
                 </span>
               </button>
             </form>

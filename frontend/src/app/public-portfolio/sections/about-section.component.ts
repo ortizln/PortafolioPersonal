@@ -8,12 +8,12 @@ import { Profile } from '../../core/models';
   standalone: true,
   imports: [NgFor, NgIf, UploadUrlPipe],
   template: `
-    <section id="about" class="about-section">
+    <section id="about" class="about-section" aria-label="Sobre mí">
       <div class="container">
         <div class="section-header" data-aos="fade-up">
-          <span class="section-subtitle">About Me</span>
-          <h2 class="section-title">Get to Know Me</h2>
-          <div class="section-divider"></div>
+          <span class="section-subtitle">Sobre Mí</span>
+          <h2 class="section-title">Conóceme</h2>
+          <div class="section-divider" aria-hidden="true"></div>
         </div>
 
         <div class="about-grid">
@@ -22,43 +22,43 @@ import { Profile } from '../../core/models';
               <img
                 class="about-image"
                 [src]="(profile?.profileImage | uploadUrl) || 'assets/default-avatar.svg'"
-                [alt]="profile?.fullName"
+                [alt]="'Foto de ' + (profile?.fullName || '')"
               />
-              <div class="glow-ring"></div>
+              <div class="glow-ring" aria-hidden="true"></div>
             </div>
             <div class="exp-badge">
-              <span class="exp-number">{{ yearsActive }}+</span>
-              <span class="exp-label">Years Active</span>
+              <span class="exp-number" [attr.aria-label]="yearsActive + ' años activo'">{{ yearsActive }}+</span>
+              <span class="exp-label">Años Activo</span>
             </div>
           </div>
 
           <div class="about-content" data-aos="fade-left">
             <h3 class="about-greeting">
-              <span class="greeting-wave">👋</span>
-              Hi, I'm <span class="greeting-name">{{ profile?.fullName }}</span>
+              <span class="greeting-wave" aria-hidden="true">👋</span>
+              Hola, soy <span class="greeting-name">{{ profile?.fullName }}</span>
             </h3>
             <p class="about-text">{{ profile?.aboutMe || profile?.biography || profile?.description || 'No description available.' }}</p>
 
             <div class="about-contact-row" *ngIf="profile?.email || profile?.phone || profile?.location">
               <div class="contact-chip" *ngIf="profile?.email">
-                <i class="bi bi-envelope-fill"></i>
+                <i class="bi bi-envelope-fill" aria-hidden="true"></i>
                 {{ profile!.email }}
               </div>
               <div class="contact-chip" *ngIf="profile?.phone">
-                <i class="bi bi-telephone-fill"></i>
+                <i class="bi bi-telephone-fill" aria-hidden="true"></i>
                 {{ profile!.phone }}
               </div>
               <div class="contact-chip" *ngIf="profile?.location">
-                <i class="bi bi-geo-alt-fill"></i>
+                <i class="bi bi-geo-alt-fill" aria-hidden="true"></i>
                 {{ profile!.location }}
               </div>
             </div>
 
             <div class="about-specialties" *ngIf="specialtyList.length">
-              <h4 class="specialties-title">Specialties</h4>
+              <h4 class="specialties-title">Especialidades</h4>
               <div class="specialties-tags">
                 <span class="specialty-tag" *ngFor="let s of specialtyList">
-                  <i class="bi bi-check-circle-fill"></i>
+                  <i class="bi bi-check-circle-fill" aria-hidden="true"></i>
                   {{ s }}
                 </span>
               </div>
