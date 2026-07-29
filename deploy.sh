@@ -92,22 +92,9 @@ $SUDO chown -R www-data:www-data "$DEPLOY_DIR"
 $SUDO chmod -R 755 "$DEPLOY_DIR"
 
 echo ""
-echo "[4/7] Configurando nginx..."
-$SUDO cp "$NGINX_CONF" /etc/nginx/sites-available/portfolio
-$SUDO ln -sf /etc/nginx/sites-available/portfolio /etc/nginx/sites-enabled/portfolio
-$SUDO rm -f /etc/nginx/sites-enabled/default
-
-# Probar configuracion de nginx
-if $SUDO nginx -t 2>&1; then
-    echo "Configuracion de nginx valida."
-    $SUDO systemctl reload nginx
-    echo "Nginx recargado."
-else
-    echo "Error en la configuracion de nginx. Revirtiendo..."
-    $SUDO rm -f /etc/nginx/sites-enabled/portfolio
-    $SUDO systemctl reload nginx
-    exit 1
-fi
+echo "[4/7] Omitiendo configuracion de nginx (manual)..."
+echo "  Agrega manualmente el bloque server al archivo control-servidor"
+echo "  La configuracion de ejemplo esta en: $NGINX_CONF"
 
 echo ""
 echo "[5/7] Deteniendo contenedor anterior (si existe)..."
