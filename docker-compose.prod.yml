@@ -21,8 +21,6 @@ services:
       - backend_uploads:/app/uploads
     extra_hosts:
       - "host.docker.internal:host-gateway"
-    command: >
-      sh -c "npx prisma migrate deploy && node src/app.js"
 
 volumes:
   backend_uploads:
