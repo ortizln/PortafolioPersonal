@@ -1,6 +1,32 @@
 .contact-section {
   padding: 6rem 2rem;
-  background: var(--bg-secondary);
+  background: linear-gradient(140deg, var(--bg-secondary) 0%, color-mix(in srgb, var(--bg-secondary) 96%, var(--accent)) 60%, var(--bg-secondary) 100%);
+  position: relative;
+  overflow: hidden;
+}
+
+.contact-section::before {
+  content: '';
+  position: absolute;
+  bottom: -15%;
+  right: -8%;
+  width: 500px;
+  height: 500px;
+  border-radius: 50%;
+  background: radial-gradient(circle, rgba(129, 140, 248, 0.08), transparent 70%);
+  pointer-events: none;
+}
+
+.contact-section::after {
+  content: '';
+  position: absolute;
+  top: -10%;
+  left: -5%;
+  width: 300px;
+  height: 300px;
+  border-radius: 50%;
+  background: radial-gradient(circle, rgba(168, 85, 247, 0.05), transparent 70%);
+  pointer-events: none;
 }
 
 .container {

@@ -1,6 +1,6 @@
 .about-section {
   padding: 6rem 2rem;
-  background: var(--bg-secondary);
+  background: linear-gradient(160deg, var(--bg-secondary) 0%, color-mix(in srgb, var(--bg-secondary) 97%, var(--accent)) 50%, var(--bg-secondary) 100%);
   position: relative;
   overflow: hidden;
 }
@@ -8,12 +8,24 @@
 .about-section::before {
   content: '';
   position: absolute;
-  top: -30%;
-  right: -15%;
-  width: 500px;
-  height: 500px;
+  top: -25%;
+  right: -10%;
+  width: 550px;
+  height: 550px;
   border-radius: 50%;
-  background: radial-gradient(circle, rgba(100, 255, 218, 0.06), transparent 70%);
+  background: radial-gradient(circle, rgba(129, 140, 248, 0.08), transparent 70%);
+  pointer-events: none;
+}
+
+.about-section::after {
+  content: '';
+  position: absolute;
+  bottom: -20%;
+  left: -10%;
+  width: 400px;
+  height: 400px;
+  border-radius: 50%;
+  background: radial-gradient(circle, rgba(168, 85, 247, 0.06), transparent 70%);
   pointer-events: none;
 }
 

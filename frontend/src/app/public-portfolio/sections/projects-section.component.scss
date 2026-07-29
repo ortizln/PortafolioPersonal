@@ -1,7 +1,32 @@
 .projects-section {
   padding: 6rem 2rem;
-  background: var(--bg-primary);
+  background: linear-gradient(160deg, var(--bg-primary) 0%, color-mix(in srgb, var(--bg-primary) 96%, var(--accent)) 50%, var(--bg-primary) 100%);
   position: relative;
+  overflow: hidden;
+}
+
+.projects-section::before {
+  content: '';
+  position: absolute;
+  top: -15%;
+  left: -5%;
+  width: 500px;
+  height: 500px;
+  border-radius: 50%;
+  background: radial-gradient(circle, rgba(129, 140, 248, 0.07), transparent 70%);
+  pointer-events: none;
+}
+
+.projects-section::after {
+  content: '';
+  position: absolute;
+  bottom: -20%;
+  right: -8%;
+  width: 400px;
+  height: 400px;
+  border-radius: 50%;
+  background: radial-gradient(circle, rgba(168, 85, 247, 0.05), transparent 70%);
+  pointer-events: none;
 }
 
 .container {
