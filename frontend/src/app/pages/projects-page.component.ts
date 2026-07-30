@@ -1,4 +1,4 @@
-import { Component, OnInit, inject } from '@angular/core';
+import { Component, OnInit, inject, HostListener } from '@angular/core';
 import { NgFor, NgIf, NgClass } from '@angular/common';
 import { DomSanitizer, SafeResourceUrl } from '@angular/platform-browser';
 import { RouterLink } from '@angular/router';
@@ -80,26 +80,51 @@ import { environment } from '../../environments/environment';
           </button>
           <div class="modal-body">
             <div class="modal-media">
-              <iframe
-                *ngIf="getVideoUrl(selectedProject.videoUrl)"
-                class="modal-video"
-                [src]="getVideoUrl(selectedProject.videoUrl)"
-                frameborder="0"
-                allowfullscreen
-                title="Video del proyecto"
-              ></iframe>
-              <img
-                *ngIf="!getVideoUrl(selectedProject.videoUrl) && !selectedImage"
-                class="modal-image"
-                [src]="getPrimaryImage(selectedProject) || 'assets/project-placeholder.svg'"
-                [alt]="'Imagen principal de ' + selectedProject.title"
-              />
-              <img
-                *ngIf="selectedImage"
-                class="modal-image"
-                [src]="selectedImage"
-                [alt]="'Imagen del proyecto ' + selectedProject.title"
-              />
+              <div class="carousel-container" *ngIf="carouselSlides.length > 0">
+                <div class="carousel-slide">
+                  <iframe
+                    *ngIf="carouselSlides[currentSlide]?.type === 'video'"
+                    class="modal-video"
+                    [src]="carouselSlides[currentSlide].url"
+                    frameborder="0"
+                    allowfullscreen
+                    title="Video del proyecto"
+                  ></iframe>
+                  <img
+                    *ngIf="carouselSlides[currentSlide]?.type === 'image'"
+                    class="modal-image"
+                    [src]="carouselSlides[currentSlide].url"
+                    [alt]="'Imagen del proyecto ' + selectedProject.title"
+                  />
+                </div>
+                <button class="carousel-btn carousel-prev" (click)="prevSlide()" *ngIf="carouselSlides.length > 1" aria-label="Anterior">
+                  <i class="bi bi-chevron-left" aria-hidden="true"></i>
+                </button>
+                <button class="carousel-btn carousel-next" (click)="nextSlide()" *ngIf="carouselSlides.length > 1" aria-label="Siguiente">
+                  <i class="bi bi-chevron-right" aria-hidden="true"></i>
+                </button>
+                <div class="carousel-counter" *ngIf="carouselSlides.length > 1">
+                  {{ currentSlide + 1 }} / {{ carouselSlides.length }}
+                </div>
+                <div class="carousel-dots" *ngIf="carouselSlides.length > 1">
+                  <span
+                    class="carousel-dot"
+                    *ngFor="let _ of carouselSlides; let i = index"
+                    [class.active]="i === currentSlide"
+                    (click)="currentSlide = i"
+                    role="button"
+                    tabindex="0"
+                    [attr.aria-label]="'Ir a slide ' + (i+1)"
+                    (keydown.enter)="currentSlide = i"
+                  ></span>
+                </div>
+              </div>
+              <div class="modal-video-link" *ngIf="selectedProject.videoUrl">
+                <i class="bi bi-play-circle" aria-hidden="true"></i>
+                <a [href]="selectedProject.videoUrl" target="_blank" rel="noopener noreferrer">
+                  {{ selectedProject.videoUrl }}
+                </a>
+              </div>
             </div>
             <div class="modal-details">
               <h2 class="modal-title">{{ selectedProject.title }}</h2>
@@ -109,22 +134,6 @@ import { environment } from '../../environments/environment';
                 </span>
               </div>
               <p class="modal-description">{{ selectedProject.description }}</p>
-              <div class="modal-gallery" *ngIf="selectedProject.images?.length">
-                <span class="gallery-label">Galería</span>
-                <div class="gallery-thumbs">
-                  <img
-                    *ngFor="let img of selectedProject.images"
-                    [src]="getImageUrl(img)"
-                    [class.active]="getImageUrl(img) === selectedImage"
-                    (click)="viewImage(img)"
-                    class="gallery-thumb"
-                    [attr.aria-label]="'Ver imagen'"
-                    role="button"
-                    tabindex="0"
-                    (keydown.enter)="viewImage(img)"
-                  />
-                </div>
-              </div>
               <div class="modal-actions">
                 <a *ngIf="selectedProject.demoUrl" [href]="selectedProject.demoUrl" target="_blank" class="modal-btn primary" [attr.aria-label]="'Ver demo de ' + selectedProject.title">
                   <i class="bi bi-box-arrow-up-right" aria-hidden="true"></i> Demo
@@ -177,20 +186,28 @@ import { environment } from '../../environments/environment';
     .modal-close:hover { border-color: var(--accent); color: var(--accent); }
     .modal-body { display: grid; grid-template-columns: 1fr 1fr; gap: 0; }
     @media (max-width: 768px) { .modal-body { grid-template-columns: 1fr; } }
-    .modal-media { position: relative; background: #000; border-radius: 20px 0 0 20px; overflow: hidden; min-height: 300px; }
+    .modal-media { position: relative; background: #000; border-radius: 20px 0 0 20px; overflow: hidden; min-height: 300px; display: flex; flex-direction: column; }
     @media (max-width: 768px) { .modal-media { border-radius: 20px 20px 0 0; min-height: 240px; } }
+    .carousel-container { position: relative; flex: 1; display: flex; align-items: center; justify-content: center; min-height: 300px; }
+    .carousel-slide { width: 100%; height: 100%; position: absolute; inset: 0; display: flex; align-items: center; justify-content: center; }
     .modal-video { width: 100%; height: 100%; min-height: 350px; border: none; }
-    .modal-image { width: 100%; height: 100%; object-fit: cover; position: absolute; inset: 0; }
+    .modal-image { width: 100%; height: 100%; object-fit: cover; }
+    .carousel-btn { position: absolute; top: 50%; transform: translateY(-50%); width: 36px; height: 36px; border-radius: 50%; border: 1px solid rgba(255,255,255,0.3); background: rgba(0,0,0,0.5); color: #fff; font-size: 1.1rem; cursor: pointer; z-index: 5; display: flex; align-items: center; justify-content: center; transition: var(--transition); }
+    .carousel-btn:hover { background: rgba(0,0,0,0.8); border-color: var(--accent); color: var(--accent); }
+    .carousel-prev { left: 10px; }
+    .carousel-next { right: 10px; }
+    .carousel-counter { position: absolute; top: 10px; right: 10px; background: rgba(0,0,0,0.6); color: #fff; padding: 4px 10px; border-radius: 12px; font-size: 0.75rem; z-index: 5; }
+    .carousel-dots { position: absolute; bottom: 10px; left: 50%; transform: translateX(-50%); display: flex; gap: 6px; z-index: 5; }
+    .carousel-dot { width: 8px; height: 8px; border-radius: 50%; background: rgba(255,255,255,0.4); cursor: pointer; transition: var(--transition); }
+    .carousel-dot.active { background: var(--accent); width: 20px; border-radius: 4px; }
+    .modal-video-link { padding: 8px 12px; background: rgba(0,0,0,0.6); display: flex; align-items: center; gap: 8px; font-size: 0.78rem; color: var(--text-muted); flex-shrink: 0; }
+    .modal-video-link a { color: var(--accent); text-decoration: none; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
+    .modal-video-link a:hover { text-decoration: underline; }
     .modal-details { padding: 32px; display: flex; flex-direction: column; gap: 16px; }
     .modal-title { font-size: 1.4rem; font-weight: 700; color: var(--white); margin: 0; }
     .modal-techs { display: flex; flex-wrap: wrap; gap: 6px; }
     .modal-tech { background: rgba(var(--accent-rgb, 100, 255, 218), 0.1); color: var(--accent); padding: 4px 12px; border-radius: 6px; font-size: 0.78rem; }
     .modal-description { font-size: 0.9rem; color: var(--text-secondary); line-height: 1.6; margin: 0; }
-    .gallery-label { font-size: 0.82rem; color: var(--text-muted); font-weight: 500; display: block; margin-bottom: 8px; }
-    .gallery-thumbs { display: flex; gap: 8px; flex-wrap: wrap; }
-    .gallery-thumb { width: 60px; height: 60px; border-radius: 8px; object-fit: cover; cursor: pointer; border: 2px solid transparent; transition: var(--transition); }
-    .gallery-thumb:hover { border-color: var(--accent); }
-    .gallery-thumb.active { border-color: var(--accent); }
     .modal-actions { display: flex; gap: 12px; flex-wrap: wrap; margin-top: auto; }
     .modal-btn { padding: 10px 20px; border-radius: 10px; font-size: 0.85rem; font-weight: 600; text-decoration: none; display: inline-flex; align-items: center; gap: 6px; transition: var(--transition); }
     .modal-btn.primary { background: linear-gradient(135deg, var(--accent), var(--accent-secondary)); color: var(--bg-primary); }
@@ -204,12 +221,20 @@ export class ProjectsPageComponent implements OnInit {
   private sanitizer = inject(DomSanitizer);
   projects: Project[] = [];
   selectedProject: Project | null = null;
-  selectedImage: string | null = null;
+  currentSlide = 0;
+  carouselSlides: { type: 'video' | 'image'; url: any }[] = [];
   loading = true;
   error = false;
 
   ngOnInit(): void {
     this.loadData();
+  }
+
+  @HostListener('document:keydown', ['$event'])
+  handleKeydown(event: KeyboardEvent): void {
+    if (!this.selectedProject) return;
+    if (event.key === 'ArrowLeft') this.prevSlide();
+    if (event.key === 'ArrowRight') this.nextSlide();
   }
 
   private loadData(): void {
@@ -264,19 +289,41 @@ export class ProjectsPageComponent implements OnInit {
 
   openProject(project: Project): void {
     this.selectedProject = project;
-    this.selectedImage = null;
+    this.buildCarousel(project);
   }
 
   closeProject(): void {
     this.selectedProject = null;
-    this.selectedImage = null;
+    this.carouselSlides = [];
+    this.currentSlide = 0;
+  }
+
+  private buildCarousel(project: Project): void {
+    this.carouselSlides = [];
+    this.currentSlide = 0;
+    const videoUrl = this.getVideoUrl(project.videoUrl);
+    if (videoUrl) {
+      this.carouselSlides.push({ type: 'video', url: videoUrl });
+    }
+    (project.images || []).forEach((img: any) => {
+      const url = this.getImageUrl(img);
+      if (url) this.carouselSlides.push({ type: 'image', url });
+    });
+  }
+
+  nextSlide(): void {
+    if (this.carouselSlides.length > 1) {
+      this.currentSlide = (this.currentSlide + 1) % this.carouselSlides.length;
+    }
+  }
+
+  prevSlide(): void {
+    if (this.carouselSlides.length > 1) {
+      this.currentSlide = (this.currentSlide - 1 + this.carouselSlides.length) % this.carouselSlides.length;
+    }
   }
 
   stopEvent(event: Event): void {
     event.stopPropagation();
-  }
-
-  viewImage(img: any): void {
-    this.selectedImage = this.getImageUrl(img);
   }
 }

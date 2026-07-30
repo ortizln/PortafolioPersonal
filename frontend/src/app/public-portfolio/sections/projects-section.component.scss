@@ -260,7 +260,7 @@
   background: var(--bg-primary);
   border: 1px solid var(--border-color);
   border-radius: 20px;
-  max-width: 800px;
+  max-width: 900px;
   width: 100%;
   max-height: 90vh;
   overflow-y: auto;
@@ -292,84 +292,177 @@
 }
 
 .modal-body {
-  display: flex;
-  flex-direction: column;
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 0;
+}
+
+@media (max-width: 768px) {
+  .modal-body {
+    grid-template-columns: 1fr;
+  }
 }
 
 .modal-media {
   position: relative;
+  background: #000;
+  border-radius: 20px 0 0 20px;
+  overflow: hidden;
+  min-height: 300px;
+  display: flex;
+  flex-direction: column;
+}
+
+@media (max-width: 768px) {
+  .modal-media {
+    border-radius: 20px 20px 0 0;
+    min-height: 240px;
+  }
+}
+
+.carousel-container {
+  position: relative;
+  flex: 1;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  min-height: 300px;
+}
+
+.carousel-slide {
   width: 100%;
+  height: 100%;
+  position: absolute;
+  inset: 0;
+  display: flex;
+  align-items: center;
+  justify-content: center;
 }
 
 .modal-video {
   width: 100%;
-  height: 400px;
-  border-radius: 20px 20px 0 0;
+  height: 100%;
+  min-height: 350px;
+  border: none;
 }
 
 .modal-image {
   width: 100%;
-  height: 300px;
+  height: 100%;
   object-fit: cover;
-  border-radius: 20px 20px 0 0;
 }
 
-.modal-gallery {
-  margin-bottom: 1rem;
-}
-
-.gallery-label {
-  display: block;
-  font-size: 0.8rem;
-  color: var(--text-tertiary);
-  text-transform: uppercase;
-  letter-spacing: 0.08em;
-  margin-bottom: 0.5rem;
-  font-weight: 600;
-}
-
-.gallery-thumbs {
-  display: flex;
-  gap: 0.5rem;
-  flex-wrap: wrap;
-}
-
-.gallery-thumb {
-  width: 64px;
-  height: 48px;
-  object-fit: cover;
-  border-radius: 6px;
+.carousel-btn {
+  position: absolute;
+  top: 50%;
+  transform: translateY(-50%);
+  width: 36px;
+  height: 36px;
+  border-radius: 50%;
+  border: 1px solid rgba(255, 255, 255, 0.3);
+  background: rgba(0, 0, 0, 0.5);
+  color: #fff;
+  font-size: 1.1rem;
   cursor: pointer;
-  border: 2px solid transparent;
+  z-index: 5;
+  display: flex;
+  align-items: center;
+  justify-content: center;
   transition: all 0.2s ease;
-  opacity: 0.7;
 
   &:hover {
-    opacity: 1;
+    background: rgba(0, 0, 0, 0.8);
+    border-color: var(--accent);
+    color: var(--accent);
   }
+}
+
+.carousel-prev {
+  left: 10px;
+}
+
+.carousel-next {
+  right: 10px;
+}
+
+.carousel-counter {
+  position: absolute;
+  top: 10px;
+  right: 10px;
+  background: rgba(0, 0, 0, 0.6);
+  color: #fff;
+  padding: 4px 10px;
+  border-radius: 12px;
+  font-size: 0.75rem;
+  z-index: 5;
+}
+
+.carousel-dots {
+  position: absolute;
+  bottom: 10px;
+  left: 50%;
+  transform: translateX(-50%);
+  display: flex;
+  gap: 6px;
+  z-index: 5;
+}
+
+.carousel-dot {
+  width: 8px;
+  height: 8px;
+  border-radius: 50%;
+  background: rgba(255, 255, 255, 0.4);
+  cursor: pointer;
+  transition: all 0.2s ease;
 
   &.active {
-    border-color: var(--accent);
-    opacity: 1;
+    background: var(--accent);
+    width: 20px;
+    border-radius: 4px;
+  }
+}
+
+.modal-video-link {
+  padding: 8px 12px;
+  background: rgba(0, 0, 0, 0.6);
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  font-size: 0.78rem;
+  color: var(--text-muted);
+  flex-shrink: 0;
+
+  a {
+    color: var(--accent);
+    text-decoration: none;
+    overflow: hidden;
+    text-overflow: ellipsis;
+    white-space: nowrap;
+
+    &:hover {
+      text-decoration: underline;
+    }
   }
 }
 
 .modal-details {
   padding: 2rem;
+  display: flex;
+  flex-direction: column;
+  gap: 16px;
 }
 
 .modal-title {
   font-size: 1.5rem;
   font-weight: 800;
   color: var(--text-primary);
-  margin: 0 0 0.75rem;
+  margin: 0;
 }
 
 .modal-techs {
   display: flex;
   flex-wrap: wrap;
   gap: 0.5rem;
-  margin-bottom: 1rem;
 }
 
 .modal-tech {
@@ -385,29 +478,14 @@
   font-size: 0.95rem;
   line-height: 1.7;
   color: var(--text-secondary);
-  margin: 0 0 1rem;
-}
-
-.modal-content-body {
-  font-size: 0.9rem;
-  line-height: 1.7;
-  color: var(--text-secondary);
-  margin-bottom: 1.5rem;
-
-  ::ng-deep img {
-    max-width: 100%;
-    border-radius: 8px;
-    margin: 1rem 0;
-  }
-
-  ::ng-deep a {
-    color: var(--accent);
-  }
+  margin: 0;
 }
 
 .modal-actions {
   display: flex;
   gap: 0.75rem;
+  margin-top: auto;
+  flex-wrap: wrap;
 }
 
 .modal-btn {
@@ -451,9 +529,6 @@
   }
   .modal-overlay {
     padding: 1rem;
-  }
-  .modal-image {
-    height: 200px;
   }
   .modal-details {
     padding: 1.25rem;

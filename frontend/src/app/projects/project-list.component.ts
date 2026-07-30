@@ -1,5 +1,5 @@
 import { Component, OnInit, inject } from '@angular/core';
-import { ReactiveFormsModule, FormBuilder, FormGroup, FormArray } from '@angular/forms';
+import { ReactiveFormsModule, FormBuilder, FormGroup } from '@angular/forms';
 import { NgFor, NgIf, NgClass, NgStyle, DatePipe } from '@angular/common';
 import { ApiService } from '../core/services/api.service';
 import { ConfirmService } from '../core/services/confirm.service';
@@ -23,6 +23,8 @@ export class ProjectListComponent implements OnInit {
   technologies: Technology[] = [];
   projectImages: ProjectImage[] = [];
   bannerPreview: string | null = null;
+  bannerFile: File | null = null;
+  additionalFiles: { file: File; preview: string }[] = [];
   showForm = false;
   editingId: string | null = null;
   saving = false;
@@ -59,7 +61,6 @@ export class ProjectListComponent implements OnInit {
       features: [''],
       isFeatured: [false],
       order: [0],
-      bannerImage: [null],
     });
   }
 
@@ -74,7 +75,7 @@ export class ProjectListComponent implements OnInit {
           c.category ? { ...c.category, id: c.category.id } : c
         ),
       })).sort((a: any, b: any) => b.order - a.order)),
-      error: () => this.showToast('Failed to load projects', 'error'),
+      error: () => this.showToast('Error al cargar proyectos', 'error'),
       complete: () => (this.loading = false),
     });
   }
@@ -95,6 +96,8 @@ export class ProjectListComponent implements OnInit {
     this.editingId = null;
     this.projectImages = [];
     this.bannerPreview = null;
+    this.bannerFile = null;
+    this.additionalFiles = [];
     this.selectedTechIds = [];
     this.selectedCategoryIds = [];
     this.projectForm.reset({ isFeatured: false, order: 0, status: 'draft' });
@@ -105,6 +108,8 @@ export class ProjectListComponent implements OnInit {
     this.editingId = project.id;
     this.projectImages = [...(project.images || [])];
     this.bannerPreview = this.getPrimaryImage(project);
+    this.bannerFile = null;
+    this.additionalFiles = [];
     this.selectedTechIds = (project.technologies as any[] || []).map((t) => t.technology?.id ?? t.id).filter(Boolean);
     this.selectedCategoryIds = ((project.categories as any[]) || [])
       .map((c) => c.category?.id ?? c.id)
@@ -136,6 +141,8 @@ export class ProjectListComponent implements OnInit {
     this.editingId = null;
     this.projectImages = [];
     this.bannerPreview = null;
+    this.bannerFile = null;
+    this.additionalFiles = [];
     this.projectForm.reset({ isFeatured: false, order: 0, status: 'draft' });
   }
 
@@ -148,7 +155,7 @@ export class ProjectListComponent implements OnInit {
     try {
       if (form.features) features = JSON.parse(form.features);
     } catch {
-      this.showToast('Features must be valid JSON', 'error');
+      this.showToast('Features debe ser JSON válido', 'error');
       this.saving = false;
       return;
     }
@@ -179,31 +186,79 @@ export class ProjectListComponent implements OnInit {
 
     request.subscribe({
       next: (saved) => {
-        this.showToast(this.editingId ? 'Project updated' : 'Project created', 'success');
-        if (!this.editingId && form.bannerImage) {
-          const file: File = form.bannerImage;
-          this.apiService.addProjectImage(saved.id, file, true).subscribe({
-            next: () => this.showToast('Image uploaded', 'success'),
-            error: () => this.showToast('Failed to upload image', 'error'),
-          });
+        this.showToast(this.editingId ? 'Proyecto actualizado' : 'Proyecto creado', 'success');
+        const projectId = saved.id || this.editingId;
+        const uploads: Promise<void>[] = [];
+
+        if (this.bannerFile) {
+          uploads.push(new Promise((resolve) => {
+            this.apiService.addProjectImage(projectId, this.bannerFile!, true).subscribe({
+              next: () => { this.showToast('Imagen subida', 'success'); resolve(); },
+              error: () => { this.showToast('Error al subir imagen', 'error'); resolve(); },
+            });
+          }));
         }
-        this.cancelForm();
-        this.loadProjects();
+
+        this.additionalFiles.forEach((item) => {
+          uploads.push(new Promise((resolve) => {
+            this.apiService.addProjectImage(projectId, item.file, false).subscribe({
+              next: () => resolve(),
+              error: () => resolve(),
+            });
+          }));
+        });
+
+        Promise.all(uploads).then(() => {
+          this.cancelForm();
+          this.loadProjects();
+        });
+
+        if (uploads.length === 0) {
+          this.cancelForm();
+          this.loadProjects();
+        }
       },
-      error: () => this.showToast('Failed to save project', 'error'),
+      error: () => this.showToast('Error al guardar proyecto', 'error'),
       complete: () => (this.saving = false),
     });
   }
 
+  onBannerSelected(event: Event): void {
+    const input = event.target as HTMLInputElement;
+    if (input.files?.length) {
+      this.bannerFile = input.files[0];
+      const reader = new FileReader();
+      reader.onload = (e) => (this.bannerPreview = e.target?.result as string);
+      reader.readAsDataURL(input.files[0]);
+    }
+  }
+
+  onImagesSelected(event: Event): void {
+    const input = event.target as HTMLInputElement;
+    if (!input.files?.length) return;
+    Array.from(input.files).forEach((file) => {
+      const reader = new FileReader();
+      reader.onload = (e) => {
+        this.additionalFiles.push({ file, preview: e.target?.result as string });
+      };
+      reader.readAsDataURL(file);
+    });
+    input.value = '';
+  }
+
+  removePendingImage(index: number): void {
+    this.additionalFiles.splice(index, 1);
+  }
+
   async deleteProject(id: string): Promise<void> {
-    const ok = await this.confirmService.confirm({ message: 'Delete this project?' });
+    const ok = await this.confirmService.confirm({ message: '¿Eliminar este proyecto?' });
     if (!ok) return;
     this.apiService.deleteProject(id).subscribe({
       next: () => {
-        this.showToast('Project deleted', 'success');
+        this.showToast('Proyecto eliminado', 'success');
         this.loadProjects();
       },
-      error: () => this.showToast('Failed to delete project', 'error'),
+      error: () => this.showToast('Error al eliminar proyecto', 'error'),
     });
   }
 
@@ -235,25 +290,25 @@ export class ProjectListComponent implements OnInit {
       this.apiService.addProjectImage(this.editingId, file, isPrimary).subscribe({
         next: (img) => {
           this.projectImages.push(img);
-          this.showToast('Image uploaded', 'success');
+          this.showToast('Imagen subida', 'success');
           this.loadProjects();
         },
-        error: () => this.showToast('Failed to upload image', 'error'),
+        error: () => this.showToast('Error al subir imagen', 'error'),
       });
     });
     input.value = '';
   }
 
   async removeImage(img: ProjectImage): Promise<void> {
-    const ok = await this.confirmService.confirm({ message: 'Remove this image?' });
+    const ok = await this.confirmService.confirm({ message: '¿Eliminar esta imagen?' });
     if (!ok) return;
     this.apiService.removeProjectImage(img.projectId, img.id).subscribe({
       next: () => {
         this.projectImages = this.projectImages.filter((i) => i.id !== img.id);
-        this.showToast('Image removed', 'success');
+        this.showToast('Imagen eliminada', 'success');
         this.loadProjects();
       },
-      error: () => this.showToast('Failed to remove image', 'error'),
+      error: () => this.showToast('Error al eliminar imagen', 'error'),
     });
   }
 
@@ -262,21 +317,11 @@ export class ProjectListComponent implements OnInit {
       next: () => {
         this.projectImages.forEach((i) => (i.isPrimary = false));
         img.isPrimary = true;
-        this.showToast('Primary image set', 'success');
+        this.showToast('Imagen principal establecida', 'success');
         this.loadProjects();
       },
-      error: () => this.showToast('Failed to set primary image', 'error'),
+      error: () => this.showToast('Error al establecer imagen principal', 'error'),
     });
-  }
-
-  onBannerSelected(event: Event): void {
-    const input = event.target as HTMLInputElement;
-    if (input.files?.length) {
-      this.projectForm.patchValue({ bannerImage: input.files[0] });
-      const reader = new FileReader();
-      reader.onload = (e) => (this.bannerPreview = e.target?.result as string);
-      reader.readAsDataURL(input.files[0]);
-    }
   }
 
   getStatusClass(status: string): string {
@@ -287,6 +332,22 @@ export class ProjectListComponent implements OnInit {
       archived: 'badge-archived',
     };
     return map[status] || 'badge-draft';
+  }
+
+  getStatusLabel(status: string): string {
+    const map: Record<string, string> = {
+      draft: 'Borrador',
+      in_progress: 'En Progreso',
+      completed: 'Completado',
+      archived: 'Archivado',
+    };
+    return map[status] || 'Borrador';
+  }
+
+  getImageUrl(image: any): string {
+    if (!image?.url) return '';
+    if (image.url.startsWith('http://') || image.url.startsWith('https://') || image.url.startsWith('data:')) return image.url;
+    return `${environment.uploadUrl}/${image.url}`;
   }
 
   getPrimaryImage(project: Project): string | null {

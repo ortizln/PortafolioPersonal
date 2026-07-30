@@ -1,141 +1,160 @@
 <div class="project-list">
   <header class="page-header">
     <div>
-      <h1>Projects</h1>
-      <p>Manage your portfolio projects</p>
+      <h1>Proyectos</h1>
+      <p>Gestiona los proyectos de tu portafolio</p>
     </div>
-    <button type="button" class="btn-gradient" (click)="openAdd()">+ Add Project</button>
+    <button type="button" class="btn-gradient" (click)="openAdd()">+ Nuevo Proyecto</button>
   </header>
 
-  <div class="loading-state" *ngIf="loading">Loading projects...</div>
+  <div class="loading-state" *ngIf="loading">Cargando proyectos...</div>
 
   <div class="empty-state" *ngIf="!loading && projects.length === 0 && !showForm">
-    No projects yet. Create your first one!
+    No hay proyectos aún. ¡Crea el primero!
   </div>
 
   <div class="form-overlay" *ngIf="showForm">
     <div class="form-card">
-      <h2>{{ editingId ? 'Edit Project' : 'New Project' }}</h2>
+      <h2>{{ editingId ? 'Editar Proyecto' : 'Nuevo Proyecto' }}</h2>
       <form [formGroup]="projectForm" (ngSubmit)="save()" autocomplete="off">
         <div class="form-grid">
           <div class="form-group">
-            <label for="title">Title</label>
-            <input id="title" class="form-control" formControlName="title" placeholder="Project title" />
+            <label for="title">Título</label>
+            <input id="title" class="form-control" formControlName="title" placeholder="Título del proyecto" />
           </div>
           <div class="form-group">
-            <label for="client">Client</label>
-            <input id="client" class="form-control" formControlName="client" placeholder="Client name (optional)" />
+            <label for="client">Cliente</label>
+            <input id="client" class="form-control" formControlName="client" placeholder="Nombre del cliente (opcional)" />
           </div>
           <div class="form-group">
-            <label for="status">Status</label>
+            <label for="status">Estado</label>
             <select id="status" class="form-control" formControlName="status">
-              <option value="draft">Draft</option>
-              <option value="in_progress">In Progress</option>
-              <option value="completed">Completed</option>
-              <option value="archived">Archived</option>
+              <option value="draft">Borrador</option>
+              <option value="in_progress">En Progreso</option>
+              <option value="completed">Completado</option>
+              <option value="archived">Archivado</option>
             </select>
           </div>
           <div class="form-group">
-            <label for="order">Order</label>
+            <label for="order">Orden</label>
             <input id="order" class="form-control" formControlName="order" type="number" />
           </div>
           <div class="form-group">
-            <label for="startDate">Start Date</label>
+            <label for="startDate">Fecha Inicio</label>
             <input id="startDate" class="form-control" formControlName="startDate" type="date" />
           </div>
           <div class="form-group">
-            <label for="endDate">End Date</label>
+            <label for="endDate">Fecha Fin</label>
             <input id="endDate" class="form-control" formControlName="endDate" type="date" />
           </div>
           <div class="form-group">
-            <label for="demoUrl">Demo URL</label>
+            <label for="demoUrl">URL Demo</label>
             <input id="demoUrl" class="form-control" formControlName="demoUrl" placeholder="https://demo.example.com" />
           </div>
           <div class="form-group">
-            <label for="githubUrl">GitHub URL</label>
+            <label for="githubUrl">URL GitHub</label>
             <input id="githubUrl" class="form-control" formControlName="githubUrl" placeholder="https://github.com/user/repo" />
           </div>
           <div class="form-group">
-            <label for="gitlabUrl">GitLab URL</label>
+            <label for="gitlabUrl">URL GitLab</label>
             <input id="gitlabUrl" class="form-control" formControlName="gitlabUrl" placeholder="https://gitlab.com/user/repo" />
           </div>
           <div class="form-group">
-            <label for="videoUrl">Video URL</label>
+            <label for="videoUrl">URL Video</label>
             <input id="videoUrl" class="form-control" formControlName="videoUrl" placeholder="https://youtube.com/watch?v=..." />
           </div>
           <div class="form-group checkbox-group">
             <input id="isFeatured" formControlName="isFeatured" type="checkbox" class="checkbox-control" />
-            <label for="isFeatured">Featured project</label>
+            <label for="isFeatured">Proyecto destacado</label>
           </div>
           <div class="form-group">
-            <label for="architecture">Architecture</label>
-            <input id="architecture" class="form-control" formControlName="architecture" placeholder="e.g. Microservices, Monolith" />
+            <label for="architecture">Arquitectura</label>
+            <input id="architecture" class="form-control" formControlName="architecture" placeholder="Ej. Microservicios, Monolito" />
           </div>
           <div class="form-group full-width">
-            <label>Category</label>
+            <label>Categoría</label>
             <div class="chip-group">
               <button type="button" *ngFor="let cat of categories" class="chip" [class.active]="isCatSelected(cat.id)" (click)="toggleCategory(cat.id)">{{ cat.name }}</button>
-              <span *ngIf="categories.length === 0" class="chip-empty">No categories available</span>
+              <span *ngIf="categories.length === 0" class="chip-empty">Sin categorías</span>
             </div>
           </div>
           <div class="form-group full-width">
-            <label>Technologies</label>
+            <label>Tecnologías</label>
             <div class="chip-group">
               <button type="button" *ngFor="let tech of technologies" class="chip" [class.active]="isTechSelected(tech.id)" (click)="toggleTech(tech.id)" [ngStyle]="{'--chip-color': tech.color || 'var(--accent)'}">{{ tech.name }}</button>
             </div>
           </div>
           <div class="form-group full-width">
-            <label for="description">Description</label>
-            <textarea id="description" class="form-control" formControlName="description" rows="4" placeholder="Full project description"></textarea>
+            <label for="description">Descripción</label>
+            <textarea id="description" class="form-control" formControlName="description" rows="4" placeholder="Descripción completa del proyecto"></textarea>
           </div>
           <div class="form-group full-width">
-            <label for="summary">Summary</label>
-            <textarea id="summary" class="form-control" formControlName="summary" rows="2" placeholder="Short summary for cards"></textarea>
+            <label for="summary">Resumen</label>
+            <textarea id="summary" class="form-control" formControlName="summary" rows="2" placeholder="Resumen corto para las tarjetas"></textarea>
           </div>
           <div class="form-group full-width">
-            <label for="features">Features (JSON)</label>
-            <textarea id="features" class="form-control form-control--mono" formControlName="features" rows="4" placeholder='["Feature 1", "Feature 2"]'></textarea>
+            <label for="features">Características (JSON)</label>
+            <textarea id="features" class="form-control form-control--mono" formControlName="features" rows="4" placeholder='["Característica 1", "Característica 2"]'></textarea>
           </div>
 
           <div class="form-group full-width">
-            <label>Banner Image</label>
+            <label>Imagen Principal (Banner)</label>
             <label class="upload-zone" [class.upload-zone--has-image]="!!bannerPreview">
               <input type="file" (change)="onBannerSelected($event)" accept=".png,.jpg,.jpeg,.webp" />
               <img *ngIf="bannerPreview" [src]="bannerPreview" class="image-preview" />
               <i class="bi bi-image" *ngIf="!bannerPreview"></i>
-              <span *ngIf="!bannerPreview">Click to upload banner image</span>
-              <span class="upload-name" *ngIf="bannerPreview">Click to change image</span>
+              <span *ngIf="!bannerPreview">Haz clic para subir la imagen principal</span>
+              <span class="upload-name" *ngIf="bannerPreview">Cambiar imagen</span>
               <span *ngIf="!bannerPreview" style="font-size:0.75rem;color:var(--text-muted)">PNG, JPG, WebP</span>
             </label>
           </div>
 
-          <div class="form-group full-width" *ngIf="editingId">
-            <label>Image Gallery</label>
+          <div class="form-group full-width">
+            <label>Imágenes Adicionales</label>
             <label class="upload-zone">
-              <input #galleryInput type="file" (change)="uploadImages($event)" accept=".png,.jpg,.jpeg,.webp" multiple />
+              <input type="file" (change)="onImagesSelected($event)" accept=".png,.jpg,.jpeg,.webp" multiple />
               <i class="bi bi-images"></i>
-              <span>Click to add gallery images</span>
-              <span style="font-size:0.75rem;color:var(--text-muted)">PNG, JPG, WebP (multiple allowed)</span>
+              <span>Haz clic para agregar imágenes</span>
+              <span style="font-size:0.75rem;color:var(--text-muted)">PNG, JPG, WebP (múltiples permitidos)</span>
             </label>
-            <div class="gallery-grid" *ngIf="projectImages.length > 0">
-              <div class="gallery-item" *ngFor="let img of projectImages; let i = index">
-                <img [src]="img.fileUrl" [alt]="'Image ' + (i+1)" />
+            <div class="gallery-grid" *ngIf="additionalFiles.length > 0">
+              <div class="gallery-item" *ngFor="let item of additionalFiles; let i = index">
+                <img [src]="item.preview" [alt]="'Imagen ' + (i+1)" />
                 <div class="gallery-overlay">
-                  <span class="primary-badge" *ngIf="img.isPrimary">Primary</span>
                   <div class="gallery-actions">
-                    <button type="button" class="gallery-btn" *ngIf="!img.isPrimary" (click)="setPrimary(img)" title="Set as primary">⭐</button>
-                    <button type="button" class="gallery-btn gallery-btn--danger" (click)="removeImage(img)" title="Remove">&times;</button>
+                    <button type="button" class="gallery-btn gallery-btn--danger" (click)="removePendingImage(i)" title="Quitar">&times;</button>
                   </div>
                 </div>
               </div>
             </div>
           </div>
 
+          <div class="form-group full-width" *ngIf="editingId && projectImages.length > 0">
+            <label>Galería de Imágenes (guardadas)</label>
+            <div class="gallery-grid">
+              <div class="gallery-item" *ngFor="let img of projectImages; let i = index">
+                <img [src]="getImageUrl(img)" [alt]="'Imagen ' + (i+1)" />
+                <div class="gallery-overlay">
+                  <span class="primary-badge" *ngIf="img.isPrimary">Principal</span>
+                  <div class="gallery-actions">
+                    <button type="button" class="gallery-btn" *ngIf="!img.isPrimary" (click)="setPrimary(img)" title="Establecer como principal">⭐</button>
+                    <button type="button" class="gallery-btn gallery-btn--danger" (click)="removeImage(img)" title="Eliminar">&times;</button>
+                  </div>
+                </div>
+              </div>
+            </div>
+            <label class="upload-zone" style="margin-top:12px">
+              <input #galleryInput type="file" (change)="uploadImages($event)" accept=".png,.jpg,.jpeg,.webp" multiple />
+              <i class="bi bi-plus-circle"></i>
+              <span>Agregar más imágenes</span>
+            </label>
+          </div>
+
           <div class="form-actions">
-            <button type="button" class="btn-secondary" (click)="cancelForm()">Cancel</button>
+            <button type="button" class="btn-secondary" (click)="cancelForm()">Cancelar</button>
             <button type="submit" class="btn-primary" [disabled]="saving">
               <span class="spinner" *ngIf="saving"></span>
-              {{ saving ? 'Saving...' : (editingId ? 'Update' : 'Create') }}
+              {{ saving ? 'Guardando...' : (editingId ? 'Actualizar' : 'Crear') }}
             </button>
           </div>
         </div>
@@ -147,13 +166,13 @@
     <div class="project-card" *ngFor="let project of projects">
       <div class="project-banner" *ngIf="getPrimaryImage(project)">
         <img [src]="getPrimaryImage(project)" [alt]="project.title" />
-        <span class="project-status" [ngClass]="getStatusClass(project.status || 'draft')">{{ project.status || 'Draft' }}</span>
+        <span class="project-status" [ngClass]="getStatusClass(project.status || 'draft')">{{ getStatusLabel(project.status || 'draft') }}</span>
       </div>
       <div class="project-banner project-banner--empty" *ngIf="!getPrimaryImage(project)">
         <div class="banner-placeholder">
           <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" width="40" height="40"><rect x="3" y="3" width="18" height="18" rx="2"/><circle cx="8.5" cy="8.5" r="1.5"/><path d="m3 16 4-4 3 3 5-5 6 6"/></svg>
         </div>
-        <span class="project-status badge-draft">Draft</span>
+        <span class="project-status badge-draft">Borrador</span>
       </div>
       <div class="project-body">
         <div class="project-category" *ngIf="project.category">
@@ -172,16 +191,16 @@
           <span *ngIf="project.demoUrl" class="meta-link">
             <a [href]="project.demoUrl" target="_blank" title="Demo">🔗</a>
           </span>
-          <span class="featured-star" *ngIf="project.isFeatured">★ Featured</span>
+          <span class="featured-star" *ngIf="project.isFeatured">★ Destacado</span>
         </div>
       </div>
       <div class="project-gallery-thumbs" *ngIf="project.images?.length > 1">
-        <img *ngFor="let img of project.images.slice(0, 4)" [src]="img.fileUrl" alt="" />
+        <img *ngFor="let img of project.images.slice(0, 4)" [src]="getImageUrl(img)" alt="" />
         <span *ngIf="project.images.length > 4" class="more-count">+{{ project.images.length - 4 }}</span>
       </div>
       <div class="project-actions">
-        <button type="button" class="btn-accent" (click)="openEdit(project)">Edit</button>
-        <button type="button" class="btn-danger" (click)="deleteProject(project.id)">Delete</button>
+        <button type="button" class="btn-accent" (click)="openEdit(project)">Editar</button>
+        <button type="button" class="btn-danger" (click)="deleteProject(project.id)">Eliminar</button>
       </div>
     </div>
   </div>

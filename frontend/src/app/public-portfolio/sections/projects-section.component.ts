@@ -104,32 +104,57 @@ import { UploadUrlPipe } from '../../shared/upload-url.pipe';
       </div>
 
       <div class="modal-overlay" *ngIf="selectedProject" (click)="closeProject()" (keydown.escape)="closeProject()" role="dialog" aria-modal="true" [attr.aria-label]="'Detalle del proyecto: ' + selectedProject.title">
-        <div class="modal-content" (click)="stopEvent($event)" role="document" tabindex="-1">
+        <div class="modal-content" (click)="stopEvent($event)" role="document" tabindex="-1" (keydown.arrowleft)="prevSlide()" (keydown.arrowright)="nextSlide()">
           <button class="modal-close" (click)="closeProject()" aria-label="Cerrar">
             <i class="bi bi-x-lg" aria-hidden="true"></i>
           </button>
           <div class="modal-body">
             <div class="modal-media">
-              <iframe
-                *ngIf="getVideoUrl(selectedProject.videoUrl)"
-                class="modal-video"
-                [src]="getVideoUrl(selectedProject.videoUrl)"
-                frameborder="0"
-                allowfullscreen
-                title="Video del proyecto"
-              ></iframe>
-              <img
-                *ngIf="!getVideoUrl(selectedProject.videoUrl) && !selectedImage"
-                class="modal-image"
-                [src]="getPrimaryImage(selectedProject) || 'assets/project-placeholder.svg'"
-                [alt]="'Imagen principal de ' + selectedProject.title"
-              />
-              <img
-                *ngIf="selectedImage"
-                class="modal-image"
-                [src]="selectedImage"
-                [alt]="'Imagen del proyecto ' + selectedProject.title"
-              />
+              <div class="carousel-container" *ngIf="carouselSlides.length > 0">
+                <div class="carousel-slide">
+                  <iframe
+                    *ngIf="carouselSlides[currentSlide]?.type === 'video'"
+                    class="modal-video"
+                    [src]="carouselSlides[currentSlide].url"
+                    frameborder="0"
+                    allowfullscreen
+                    title="Video del proyecto"
+                  ></iframe>
+                  <img
+                    *ngIf="carouselSlides[currentSlide]?.type === 'image'"
+                    class="modal-image"
+                    [src]="carouselSlides[currentSlide].url"
+                    [alt]="'Imagen del proyecto ' + selectedProject.title"
+                  />
+                </div>
+                <button class="carousel-btn carousel-prev" (click)="prevSlide()" *ngIf="carouselSlides.length > 1" aria-label="Anterior">
+                  <i class="bi bi-chevron-left" aria-hidden="true"></i>
+                </button>
+                <button class="carousel-btn carousel-next" (click)="nextSlide()" *ngIf="carouselSlides.length > 1" aria-label="Siguiente">
+                  <i class="bi bi-chevron-right" aria-hidden="true"></i>
+                </button>
+                <div class="carousel-counter" *ngIf="carouselSlides.length > 1">
+                  {{ currentSlide + 1 }} / {{ carouselSlides.length }}
+                </div>
+                <div class="carousel-dots" *ngIf="carouselSlides.length > 1">
+                  <span
+                    class="carousel-dot"
+                    *ngFor="let _ of carouselSlides; let i = index"
+                    [class.active]="i === currentSlide"
+                    (click)="currentSlide = i"
+                    role="button"
+                    tabindex="0"
+                    [attr.aria-label]="'Ir a slide ' + (i+1)"
+                    (keydown.enter)="currentSlide = i"
+                  ></span>
+                </div>
+              </div>
+              <div class="modal-video-link" *ngIf="selectedProject.videoUrl">
+                <i class="bi bi-play-circle" aria-hidden="true"></i>
+                <a [href]="selectedProject.videoUrl" target="_blank" rel="noopener noreferrer">
+                  {{ selectedProject.videoUrl }}
+                </a>
+              </div>
             </div>
             <div class="modal-details">
               <h2 class="modal-title">{{ selectedProject.title }}</h2>
@@ -139,22 +164,6 @@ import { UploadUrlPipe } from '../../shared/upload-url.pipe';
                 </span>
               </div>
               <p class="modal-description">{{ selectedProject.description }}</p>
-              <div class="modal-gallery" *ngIf="selectedProject.images?.length">
-                <span class="gallery-label">Galería</span>
-                <div class="gallery-thumbs">
-                  <img
-                    *ngFor="let img of selectedProject.images"
-                    [src]="getImageUrl(img)"
-                    [class.active]="getImageUrl(img) === selectedImage"
-                    (click)="viewImage(img)"
-                    class="gallery-thumb"
-                    [attr.aria-label]="'Ver imagen'"
-                    role="button"
-                    tabindex="0"
-                    (keydown.enter)="viewImage(img)"
-                  />
-                </div>
-              </div>
               <div class="modal-actions">
                 <a *ngIf="selectedProject.demoUrl" [href]="selectedProject.demoUrl" target="_blank" class="modal-btn primary" [attr.aria-label]="'Ver demo de ' + selectedProject.title">
                   <i class="bi bi-box-arrow-up-right" aria-hidden="true"></i> Demo
@@ -174,7 +183,8 @@ import { UploadUrlPipe } from '../../shared/upload-url.pipe';
 export class ProjectsSectionComponent {
   @Input() projects: Project[] = [];
   selectedProject: Project | null = null;
-  selectedImage: string | null = null;
+  currentSlide = 0;
+  carouselSlides: { type: 'video' | 'image'; url: any }[] = [];
   activeFilter = 'all';
 
   get availableTechs(): string[] {
@@ -210,39 +220,55 @@ export class ProjectsSectionComponent {
 
   getVideoUrl(url: string | null | undefined): SafeResourceUrl | null {
     if (!url) return null;
-    const match = url.match(
-      /(?:youtube\.com\/watch\?v=|youtu\.be\/|youtube\.com\/embed\/)([a-zA-Z0-9_-]+)/
-    );
+    const match = url.match(/(?:youtube\.com\/watch\?v=|youtu\.be\/|youtube\.com\/embed\/)([a-zA-Z0-9_-]+)/);
     if (match) {
-      return this.sanitizer.bypassSecurityTrustResourceUrl(
-        `https://www.youtube.com/embed/${match[1]}`
-      );
+      return this.sanitizer.bypassSecurityTrustResourceUrl(`https://www.youtube.com/embed/${match[1]}`);
     }
     const vimeoMatch = url.match(/vimeo\.com\/(\d+)/);
     if (vimeoMatch) {
-      return this.sanitizer.bypassSecurityTrustResourceUrl(
-        `https://player.vimeo.com/video/${vimeoMatch[1]}`
-      );
+      return this.sanitizer.bypassSecurityTrustResourceUrl(`https://player.vimeo.com/video/${vimeoMatch[1]}`);
     }
     return null;
   }
 
   openProject(project: Project): void {
     this.selectedProject = project;
-    this.selectedImage = null;
+    this.buildCarousel(project);
   }
 
   closeProject(): void {
     this.selectedProject = null;
-    this.selectedImage = null;
+    this.carouselSlides = [];
+    this.currentSlide = 0;
+  }
+
+  private buildCarousel(project: Project): void {
+    this.carouselSlides = [];
+    this.currentSlide = 0;
+    const videoUrl = this.getVideoUrl(project.videoUrl);
+    if (videoUrl) {
+      this.carouselSlides.push({ type: 'video', url: videoUrl });
+    }
+    (project.images || []).forEach((img: any) => {
+      const url = this.getImageUrl(img);
+      if (url) this.carouselSlides.push({ type: 'image', url });
+    });
+  }
+
+  nextSlide(): void {
+    if (this.carouselSlides.length > 1) {
+      this.currentSlide = (this.currentSlide + 1) % this.carouselSlides.length;
+    }
+  }
+
+  prevSlide(): void {
+    if (this.carouselSlides.length > 1) {
+      this.currentSlide = (this.currentSlide - 1 + this.carouselSlides.length) % this.carouselSlides.length;
+    }
   }
 
   stopEvent(event: Event): void {
     event.stopPropagation();
-  }
-
-  viewImage(img: any): void {
-    this.selectedImage = this.getImageUrl(img);
   }
 
   onCardKeydown(event: KeyboardEvent, project: Project): void {
