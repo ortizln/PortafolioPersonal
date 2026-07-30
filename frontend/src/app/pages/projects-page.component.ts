@@ -1,5 +1,6 @@
 import { Component, OnInit, inject } from '@angular/core';
 import { NgFor, NgIf, NgClass } from '@angular/common';
+import { DomSanitizer, SafeResourceUrl } from '@angular/platform-browser';
 import { RouterLink } from '@angular/router';
 import { ApiService } from '../core/services/api.service';
 import { Project } from '../core/models';
@@ -13,8 +14,8 @@ import { environment } from '../../environments/environment';
     <div class="page-wrapper">
       <div class="page-header">
         <div class="container">
-          <a routerLink="/portfolio" class="back-link">&larr; Back to Portfolio</a>
-          <h1>Projects</h1>
+          <a routerLink="/portfolio" class="back-link">&larr; Volver al Portafolio</a>
+          <h1>Proyectos</h1>
         </div>
       </div>
 
@@ -22,13 +23,13 @@ import { environment } from '../../environments/environment';
 
       <div *ngIf="!loading && error" class="page-error">
         <i class="bi bi-exclamation-triangle"></i>
-        <p>Could not load projects. Please try again later.</p>
-        <button class="btn-retry" (click)="loadData()">Retry</button>
+        <p>No se pudieron cargar los proyectos. Intenta de nuevo más tarde.</p>
+        <button class="btn-retry" (click)="loadData()">Reintentar</button>
       </div>
 
       <div *ngIf="!loading && !error && !projects.length" class="page-empty">
         <i class="bi bi-folder"></i>
-        <p>No projects added yet.</p>
+        <p>No hay proyectos aún.</p>
       </div>
 
       <div *ngIf="!loading && projects.length" class="page-content" data-aos="fade-up">
@@ -40,16 +41,20 @@ import { environment } from '../../environments/environment';
               data-aos="fade-up"
               [attr.data-aos-delay]="i * 80"
               [class.featured]="project.isFeatured"
-              (click)="selectedProject = project"
+              (click)="openProject(project)"
+              role="button"
+              [attr.aria-label]="'Ver detalle de ' + project.title"
+              tabindex="0"
+              (keydown.enter)="openProject(project)"
             >
               <div class="project-banner">
                 <img
                   class="project-image"
                   [src]="getPrimaryImage(project) || 'assets/project-placeholder.svg'"
-                  [alt]="project.title"
+                  [alt]="'Captura del proyecto ' + project.title"
                 />
                 <span class="project-featured-badge" *ngIf="project.isFeatured">
-                  <i class="bi bi-star-fill"></i> Featured
+                  <i class="bi bi-star-fill"></i> Destacado
                 </span>
               </div>
               <div class="project-body">
@@ -60,8 +65,73 @@ import { environment } from '../../environments/environment';
                 <p class="project-description">{{ project.description }}</p>
                 <div class="project-links">
                   <a *ngIf="project.demoUrl" [href]="project.demoUrl" target="_blank" class="project-link" (click)="$event.stopPropagation()"><i class="bi bi-box-arrow-up-right"></i> Demo</a>
-                  <a *ngIf="project.githubUrl" [href]="project.githubUrl" target="_blank" class="project-link" (click)="$event.stopPropagation()"><i class="bi bi-github"></i> Code</a>
+                  <a *ngIf="project.githubUrl" [href]="project.githubUrl" target="_blank" class="project-link" (click)="$event.stopPropagation()"><i class="bi bi-github"></i> Código</a>
                 </div>
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <div class="modal-overlay" *ngIf="selectedProject" (click)="closeProject()" (keydown.escape)="closeProject()" role="dialog" aria-modal="true" [attr.aria-label]="'Detalle del proyecto: ' + selectedProject.title">
+        <div class="modal-content" (click)="stopEvent($event)" role="document" tabindex="-1">
+          <button class="modal-close" (click)="closeProject()" aria-label="Cerrar">
+            <i class="bi bi-x-lg" aria-hidden="true"></i>
+          </button>
+          <div class="modal-body">
+            <div class="modal-media">
+              <iframe
+                *ngIf="getVideoUrl(selectedProject.videoUrl)"
+                class="modal-video"
+                [src]="getVideoUrl(selectedProject.videoUrl)"
+                frameborder="0"
+                allowfullscreen
+                title="Video del proyecto"
+              ></iframe>
+              <img
+                *ngIf="!getVideoUrl(selectedProject.videoUrl) && !selectedImage"
+                class="modal-image"
+                [src]="getPrimaryImage(selectedProject) || 'assets/project-placeholder.svg'"
+                [alt]="'Imagen principal de ' + selectedProject.title"
+              />
+              <img
+                *ngIf="selectedImage"
+                class="modal-image"
+                [src]="selectedImage"
+                [alt]="'Imagen del proyecto ' + selectedProject.title"
+              />
+            </div>
+            <div class="modal-details">
+              <h2 class="modal-title">{{ selectedProject.title }}</h2>
+              <div class="modal-techs">
+                <span class="modal-tech" *ngFor="let tech of selectedProject.technologies">
+                  {{ tech.name }}
+                </span>
+              </div>
+              <p class="modal-description">{{ selectedProject.description }}</p>
+              <div class="modal-gallery" *ngIf="selectedProject.images?.length">
+                <span class="gallery-label">Galería</span>
+                <div class="gallery-thumbs">
+                  <img
+                    *ngFor="let img of selectedProject.images"
+                    [src]="getImageUrl(img)"
+                    [class.active]="getImageUrl(img) === selectedImage"
+                    (click)="viewImage(img)"
+                    class="gallery-thumb"
+                    [attr.aria-label]="'Ver imagen'"
+                    role="button"
+                    tabindex="0"
+                    (keydown.enter)="viewImage(img)"
+                  />
+                </div>
+              </div>
+              <div class="modal-actions">
+                <a *ngIf="selectedProject.demoUrl" [href]="selectedProject.demoUrl" target="_blank" class="modal-btn primary" [attr.aria-label]="'Ver demo de ' + selectedProject.title">
+                  <i class="bi bi-box-arrow-up-right" aria-hidden="true"></i> Demo
+                </a>
+                <a *ngIf="selectedProject.githubUrl" [href]="selectedProject.githubUrl" target="_blank" class="modal-btn secondary" [attr.aria-label]="'Ver código de ' + selectedProject.title">
+                  <i class="bi bi-github" aria-hidden="true"></i> Código
+                </a>
               </div>
             </div>
           </div>
@@ -101,12 +171,40 @@ import { environment } from '../../environments/environment';
     .project-links { display: flex; gap: 12px; }
     .project-link { font-size: 0.82rem; color: var(--accent); text-decoration: none; display: inline-flex; align-items: center; gap: 4px; }
     .project-link:hover { opacity: 0.8; }
+    .modal-overlay { position: fixed; inset: 0; background: rgba(0,0,0,0.75); z-index: 1000; display: flex; align-items: center; justify-content: center; padding: 20px; }
+    .modal-content { background: var(--bg-card); border: 1px solid var(--border); border-radius: 20px; max-width: 900px; width: 100%; max-height: 90vh; overflow-y: auto; position: relative; }
+    .modal-close { position: absolute; top: 16px; right: 16px; width: 36px; height: 36px; border-radius: 50%; border: 1px solid var(--border); background: var(--bg-secondary); color: var(--text-primary); font-size: 1rem; cursor: pointer; z-index: 10; display: flex; align-items: center; justify-content: center; transition: var(--transition); }
+    .modal-close:hover { border-color: var(--accent); color: var(--accent); }
+    .modal-body { display: grid; grid-template-columns: 1fr 1fr; gap: 0; }
+    @media (max-width: 768px) { .modal-body { grid-template-columns: 1fr; } }
+    .modal-media { position: relative; background: #000; border-radius: 20px 0 0 20px; overflow: hidden; min-height: 300px; }
+    @media (max-width: 768px) { .modal-media { border-radius: 20px 20px 0 0; min-height: 240px; } }
+    .modal-video { width: 100%; height: 100%; min-height: 350px; border: none; }
+    .modal-image { width: 100%; height: 100%; object-fit: cover; position: absolute; inset: 0; }
+    .modal-details { padding: 32px; display: flex; flex-direction: column; gap: 16px; }
+    .modal-title { font-size: 1.4rem; font-weight: 700; color: var(--white); margin: 0; }
+    .modal-techs { display: flex; flex-wrap: wrap; gap: 6px; }
+    .modal-tech { background: rgba(var(--accent-rgb, 100, 255, 218), 0.1); color: var(--accent); padding: 4px 12px; border-radius: 6px; font-size: 0.78rem; }
+    .modal-description { font-size: 0.9rem; color: var(--text-secondary); line-height: 1.6; margin: 0; }
+    .gallery-label { font-size: 0.82rem; color: var(--text-muted); font-weight: 500; display: block; margin-bottom: 8px; }
+    .gallery-thumbs { display: flex; gap: 8px; flex-wrap: wrap; }
+    .gallery-thumb { width: 60px; height: 60px; border-radius: 8px; object-fit: cover; cursor: pointer; border: 2px solid transparent; transition: var(--transition); }
+    .gallery-thumb:hover { border-color: var(--accent); }
+    .gallery-thumb.active { border-color: var(--accent); }
+    .modal-actions { display: flex; gap: 12px; flex-wrap: wrap; margin-top: auto; }
+    .modal-btn { padding: 10px 20px; border-radius: 10px; font-size: 0.85rem; font-weight: 600; text-decoration: none; display: inline-flex; align-items: center; gap: 6px; transition: var(--transition); }
+    .modal-btn.primary { background: linear-gradient(135deg, var(--accent), var(--accent-secondary)); color: var(--bg-primary); }
+    .modal-btn.primary:hover { transform: translateY(-2px); box-shadow: 0 6px 20px rgba(100,255,218,0.3); }
+    .modal-btn.secondary { background: transparent; border: 1px solid var(--border); color: var(--text-primary); }
+    .modal-btn.secondary:hover { border-color: var(--accent); }
   `]
 })
 export class ProjectsPageComponent implements OnInit {
   private api = inject(ApiService);
+  private sanitizer = inject(DomSanitizer);
   projects: Project[] = [];
   selectedProject: Project | null = null;
+  selectedImage: string | null = null;
   loading = true;
   error = false;
 
@@ -119,7 +217,12 @@ export class ProjectsPageComponent implements OnInit {
     this.error = false;
     this.api.getPublicProjects().subscribe({
       next: (projects) => {
-        this.projects = projects || [];
+        this.projects = (projects || []).map((p) => ({
+          ...p,
+          technologies: (p.technologies as any[] | undefined)?.map((t: any) =>
+            t.technology ? { ...t.technology, id: t.technology.id } : t
+          ) || [],
+        }));
         this.loading = false;
         setTimeout(() => this.initAOS(), 100);
       },
@@ -138,5 +241,42 @@ export class ProjectsPageComponent implements OnInit {
     if (!url) return null;
     if (url.startsWith('http://') || url.startsWith('https://') || url.startsWith('data:')) return url;
     return `${environment.uploadUrl}/${url}`;
+  }
+
+  getImageUrl(image: any): string {
+    if (!image?.url) return '';
+    if (image.url.startsWith('http://') || image.url.startsWith('https://') || image.url.startsWith('data:')) return image.url;
+    return `${environment.uploadUrl}/${image.url}`;
+  }
+
+  getVideoUrl(url: string | null | undefined): SafeResourceUrl | null {
+    if (!url) return null;
+    const match = url.match(/(?:youtube\.com\/watch\?v=|youtu\.be\/|youtube\.com\/embed\/)([a-zA-Z0-9_-]+)/);
+    if (match) {
+      return this.sanitizer.bypassSecurityTrustResourceUrl(`https://www.youtube.com/embed/${match[1]}`);
+    }
+    const vimeoMatch = url.match(/vimeo\.com\/(\d+)/);
+    if (vimeoMatch) {
+      return this.sanitizer.bypassSecurityTrustResourceUrl(`https://player.vimeo.com/video/${vimeoMatch[1]}`);
+    }
+    return null;
+  }
+
+  openProject(project: Project): void {
+    this.selectedProject = project;
+    this.selectedImage = null;
+  }
+
+  closeProject(): void {
+    this.selectedProject = null;
+    this.selectedImage = null;
+  }
+
+  stopEvent(event: Event): void {
+    event.stopPropagation();
+  }
+
+  viewImage(img: any): void {
+    this.selectedImage = this.getImageUrl(img);
   }
 }

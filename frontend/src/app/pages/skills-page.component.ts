@@ -12,8 +12,8 @@ import { Skill } from '../core/models';
     <div class="page-wrapper">
       <div class="page-header">
         <div class="container">
-          <a routerLink="/portfolio" class="back-link">&larr; Back to Portfolio</a>
-          <h1>Skills</h1>
+          <a routerLink="/portfolio" class="back-link">&larr; Volver al Portafolio</a>
+          <h1>Habilidades</h1>
         </div>
       </div>
 
@@ -21,13 +21,13 @@ import { Skill } from '../core/models';
 
       <div *ngIf="!loading && error" class="page-error">
         <i class="bi bi-exclamation-triangle"></i>
-        <p>Could not load skills. Please try again later.</p>
-        <button class="btn-retry" (click)="loadData()">Retry</button>
+        <p>No se pudieron cargar las habilidades. Intenta de nuevo más tarde.</p>
+        <button class="btn-retry" (click)="loadData()">Reintentar</button>
       </div>
 
       <div *ngIf="!loading && !error && !skills.length" class="page-empty">
         <i class="bi bi-gear"></i>
-        <p>No skills added yet.</p>
+        <p>No hay habilidades aún.</p>
       </div>
 
       <div *ngIf="!loading && skills.length" class="page-content">
@@ -138,7 +138,7 @@ export class SkillsPageComponent implements OnInit {
     return map[cat] || 'bi-star';
   }
 
-  getLevelLabel(p: number): string { return p >= 90 ? 'Expert' : p >= 75 ? 'Advanced' : p >= 50 ? 'Intermediate' : 'Beginner'; }
+  getLevelLabel(p: number): string { return p >= 90 ? 'Experto' : p >= 75 ? 'Avanzado' : p >= 50 ? 'Intermedio' : 'Principiante'; }
   getLevelClass(p: number): string { return p >= 90 ? 'level-expert' : p >= 75 ? 'level-advanced' : p >= 50 ? 'level-intermediate' : 'level-beginner'; }
   getBarColor(p: number): string { return p >= 90 ? '#22c55e' : p >= 75 ? '#3b82f6' : p >= 50 ? '#f59e0b' : '#ef4444'; }
 }

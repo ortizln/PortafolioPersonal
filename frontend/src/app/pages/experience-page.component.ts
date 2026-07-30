@@ -12,8 +12,8 @@ import { Experience } from '../core/models';
     <div class="page-wrapper">
       <div class="page-header">
         <div class="container">
-          <a routerLink="/portfolio" class="back-link">&larr; Back to Portfolio</a>
-          <h1>Work Experience</h1>
+          <a routerLink="/portfolio" class="back-link">&larr; Volver al Portafolio</a>
+          <h1>Experiencia Laboral</h1>
         </div>
       </div>
 
@@ -21,13 +21,13 @@ import { Experience } from '../core/models';
 
       <div *ngIf="!loading && error" class="page-error">
         <i class="bi bi-exclamation-triangle"></i>
-        <p>Could not load experiences. Please try again later.</p>
-        <button class="btn-retry" (click)="loadData()">Retry</button>
+        <p>No se pudieron cargar las experiencias. Intenta de nuevo más tarde.</p>
+        <button class="btn-retry" (click)="loadData()">Reintentar</button>
       </div>
 
       <div *ngIf="!loading && !error && !experiences.length" class="page-empty">
         <i class="bi bi-briefcase"></i>
-        <p>No work experience added yet.</p>
+        <p>No hay experiencia laboral aún.</p>
       </div>
 
       <div *ngIf="!loading && experiences.length" class="page-content">
@@ -53,13 +53,13 @@ import { Experience } from '../core/models';
                     <h3 class="timeline-position">{{ exp.position }}</h3>
                     <span class="timeline-company">{{ exp.company }}</span>
                   </div>
-                  <span class="timeline-badge" *ngIf="exp.current">Current</span>
+                  <span class="timeline-badge" *ngIf="exp.current">Actual</span>
                 </div>
 
                 <div class="timeline-meta">
                   <span class="timeline-date">
                     <i class="bi bi-calendar3"></i>
-                    {{ exp.startDate | date:'MMM yyyy' }} - {{ exp.current ? 'Present' : (exp.endDate | date:'MMM yyyy') }}
+                    {{ exp.startDate | date:'MMM yyyy' }} - {{ exp.current ? 'Actualidad' : (exp.endDate | date:'MMM yyyy') }}
                   </span>
                   <span class="timeline-location" *ngIf="exp.location">
                     <i class="bi bi-geo-alt"></i> {{ exp.location }}

@@ -13,8 +13,8 @@ import { Profile, SocialLink } from '../core/models';
     <div class="page-wrapper">
       <div class="page-header">
         <div class="container">
-          <a routerLink="/portfolio" class="back-link">&larr; Back to Portfolio</a>
-          <h1>Contact</h1>
+          <a routerLink="/portfolio" class="back-link">&larr; Volver al Portafolio</a>
+          <h1>Contacto</h1>
         </div>
       </div>
 
@@ -22,36 +22,36 @@ import { Profile, SocialLink } from '../core/models';
 
       <div *ngIf="!loading && error" class="page-error">
         <i class="bi bi-exclamation-triangle"></i>
-        <p>Could not load contact information. Please try again later.</p>
-        <button class="btn-retry" (click)="loadData()">Retry</button>
+        <p>No se pudo cargar la información de contacto. Intenta de nuevo más tarde.</p>
+        <button class="btn-retry" (click)="loadData()">Reintentar</button>
       </div>
 
       <div *ngIf="!loading && !error" class="page-content">
         <div class="container">
           <div class="contact-layout">
             <div class="contact-info" data-aos="fade-right">
-              <h2 class="contact-heading">Let's work together</h2>
-              <p class="contact-text">I'm always open to new opportunities, collaborations, and interesting projects. Feel free to reach out!</p>
+              <h2 class="contact-heading">Trabajemos juntos</h2>
+              <p class="contact-text">Siempre estoy abierto a nuevas oportunidades, colaboraciones y proyectos interesantes. ¡No dudes en contactarme!</p>
 
               <div class="contact-details">
                 <div class="contact-item" *ngIf="profile?.email">
                   <div class="contact-item-icon"><i class="bi bi-envelope-fill"></i></div>
                   <div class="contact-item-text">
-                    <span class="contact-item-label">Email</span>
+                    <span class="contact-item-label">Correo</span>
                     <a [href]="'mailto:' + profile!.email" class="contact-item-value">{{ profile!.email }}</a>
                   </div>
                 </div>
                 <div class="contact-item" *ngIf="profile?.phone">
                   <div class="contact-item-icon"><i class="bi bi-telephone-fill"></i></div>
                   <div class="contact-item-text">
-                    <span class="contact-item-label">Phone</span>
+                    <span class="contact-item-label">Teléfono</span>
                     <span class="contact-item-value">{{ profile!.phone }}</span>
                   </div>
                 </div>
                 <div class="contact-item" *ngIf="profile?.location">
                   <div class="contact-item-icon"><i class="bi bi-geo-alt-fill"></i></div>
                   <div class="contact-item-text">
-                    <span class="contact-item-label">Location</span>
+                    <span class="contact-item-label">Ubicación</span>
                     <span class="contact-item-value">{{ profile!.location }}</span>
                   </div>
                 </div>
@@ -67,35 +67,35 @@ import { Profile, SocialLink } from '../core/models';
             <div class="contact-form-wrapper" data-aos="fade-left">
               <div class="success-message" *ngIf="submitted">
                 <i class="bi bi-check-circle-fill"></i>
-                <h3>Message Sent!</h3>
-                <p>Thank you for reaching out. I'll get back to you soon.</p>
-                <button class="btn-secondary" (click)="submitted = false">Send Another</button>
+                <h3>¡Mensaje Enviado!</h3>
+                <p>Gracias por contactarme. Te responderé pronto.</p>
+                <button class="btn-secondary" (click)="submitted = false">Enviar otro</button>
               </div>
 
               <form #contactForm="ngForm" (ngSubmit)="onSubmit(contactForm)" class="contact-form" *ngIf="!submitted">
                 <div class="form-group">
-                  <label class="form-label" for="name">Name</label>
-                  <input id="name" name="name" type="text" class="form-input" [(ngModel)]="formData.name" required minlength="2" #name="ngModel" placeholder="Your name" />
-                  <span class="form-error" *ngIf="name.invalid && name.touched">Please enter your name</span>
+                  <label class="form-label" for="name">Nombre</label>
+                  <input id="name" name="name" type="text" class="form-input" [(ngModel)]="formData.name" required minlength="2" #name="ngModel" placeholder="Tu nombre" />
+                  <span class="form-error" *ngIf="name.invalid && name.touched">Por favor ingresa tu nombre</span>
                 </div>
                 <div class="form-group">
-                  <label class="form-label" for="email">Email</label>
-                  <input id="email" name="email" type="email" class="form-input" [(ngModel)]="formData.email" required email #email="ngModel" placeholder="your@email.com" />
-                  <span class="form-error" *ngIf="email.invalid && email.touched">Please enter a valid email</span>
+                  <label class="form-label" for="email">Correo</label>
+                  <input id="email" name="email" type="email" class="form-input" [(ngModel)]="formData.email" required email #email="ngModel" placeholder="tu@correo.com" />
+                  <span class="form-error" *ngIf="email.invalid && email.touched">Ingresa un correo válido</span>
                 </div>
                 <div class="form-group">
-                  <label class="form-label" for="subject">Subject</label>
-                  <input id="subject" name="subject" type="text" class="form-input" [(ngModel)]="formData.subject" required minlength="3" #subject="ngModel" placeholder="What's this about?" />
-                  <span class="form-error" *ngIf="subject.invalid && subject.touched">Please enter a subject</span>
+                  <label class="form-label" for="subject">Asunto</label>
+                  <input id="subject" name="subject" type="text" class="form-input" [(ngModel)]="formData.subject" required minlength="3" #subject="ngModel" placeholder="¿De qué trata?" />
+                  <span class="form-error" *ngIf="subject.invalid && subject.touched">Ingresa un asunto</span>
                 </div>
                 <div class="form-group">
-                  <label class="form-label" for="message">Message</label>
-                  <textarea id="message" name="message" class="form-input form-textarea" rows="5" [(ngModel)]="formData.message" required minlength="10" #message="ngModel" placeholder="Your message..."></textarea>
-                  <span class="form-error" *ngIf="message.invalid && message.touched">Message must be at least 10 characters</span>
+                  <label class="form-label" for="message">Mensaje</label>
+                  <textarea id="message" name="message" class="form-input form-textarea" rows="5" [(ngModel)]="formData.message" required minlength="10" #message="ngModel" placeholder="Tu mensaje..."></textarea>
+                  <span class="form-error" *ngIf="message.invalid && message.touched">El mensaje debe tener al menos 10 caracteres</span>
                 </div>
                 <button type="submit" class="btn-primary" [disabled]="contactForm.invalid || sending">
-                  <span *ngIf="!sending"><i class="bi bi-send-fill"></i> Send Message</span>
-                  <span *ngIf="sending"><i class="bi bi-hourglass-split"></i> Sending...</span>
+                  <span *ngIf="!sending"><i class="bi bi-send-fill"></i> Enviar Mensaje</span>
+                  <span *ngIf="sending"><i class="bi bi-hourglass-split"></i> Enviando...</span>
                 </button>
               </form>
             </div>

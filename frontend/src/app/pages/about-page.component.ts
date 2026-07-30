@@ -13,8 +13,8 @@ import { UploadUrlPipe } from '../shared/upload-url.pipe';
     <div class="page-wrapper">
       <div class="page-header">
         <div class="container">
-          <a routerLink="/portfolio" class="back-link">&larr; Back to Portfolio</a>
-          <h1>About Me</h1>
+          <a routerLink="/portfolio" class="back-link">&larr; Volver al Portafolio</a>
+          <h1>Sobre Mí</h1>
         </div>
       </div>
 
@@ -22,13 +22,13 @@ import { UploadUrlPipe } from '../shared/upload-url.pipe';
 
       <div *ngIf="!loading && error" class="page-error">
         <i class="bi bi-exclamation-triangle"></i>
-        <p>Could not load profile. Please try again later.</p>
-        <button class="btn-retry" (click)="loadData()">Retry</button>
+        <p>No se pudo cargar el perfil. Intenta de nuevo más tarde.</p>
+        <button class="btn-retry" (click)="loadData()">Reintentar</button>
       </div>
 
       <div *ngIf="!loading && !error && !profile" class="page-empty">
         <i class="bi bi-person"></i>
-        <p>No profile information yet.</p>
+        <p>No hay información de perfil aún.</p>
       </div>
 
       <div *ngIf="!loading && profile" class="page-content">
@@ -48,7 +48,7 @@ import { UploadUrlPipe } from '../shared/upload-url.pipe';
             <div class="about-info-section" data-aos="fade-left">
               <h2 class="about-name">{{ profile.fullName }}</h2>
               <p class="about-title">{{ profile.professionalTitle }}</p>
-              <p class="about-bio">{{ profile.aboutMe || profile.description || 'No description available.' }}</p>
+              <p class="about-bio">{{ profile.aboutMe || profile.description || 'No hay descripción disponible.' }}</p>
 
               <div class="about-details">
                 <div class="detail-item" *ngIf="profile.email">
@@ -69,7 +69,7 @@ import { UploadUrlPipe } from '../shared/upload-url.pipe';
 
               <div class="about-cv" *ngIf="profile.cvFile">
                 <a [href]="profile.cvFile | uploadUrl" target="_blank" class="cv-download-btn">
-                  <i class="bi bi-download"></i> Download CV
+                  <i class="bi bi-download"></i> Descargar CV
                 </a>
               </div>
 
