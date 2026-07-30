@@ -5,11 +5,10 @@ services:
       dockerfile: Dockerfile
     container_name: portfolio-api
     restart: unless-stopped
-    ports:
-      - '3000:3000'
+    network_mode: host
     environment:
       NODE_ENV: production
-      DATABASE_URL: postgresql://postgres:12345@host.docker.internal:5432/portfolio_db?schema=public
+      DATABASE_URL: postgresql://postgres:12345@192.168.1.71:5432/portfolio_db?schema=public
       JWT_SECRET: ${JWT_SECRET:-cambiar-este-secret-en-produccion}
       JWT_REFRESH_SECRET: ${JWT_REFRESH_SECRET:-cambiar-este-refresh-secret}
       CORS_ORIGIN: http://192.168.1.71,https://alan-tek.com,http://alan-tek.com
@@ -17,8 +16,6 @@ services:
       RATE_LIMIT_MAX: '100'
     volumes:
       - backend_uploads:/app/uploads
-    extra_hosts:
-      - "host.docker.internal:host-gateway"
 
 volumes:
   backend_uploads:
