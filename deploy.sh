@@ -3,7 +3,7 @@ set -e
 
 # ============================================
 # Script de Deploy - Portafolio Personal
-# Servidor: 192.168.100.125
+# Servidor: 192.168.100.215
 # ============================================
 
 SCRIPT_DIR="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)"
@@ -11,7 +11,7 @@ DEPLOY_DIR="/var/www/portfolio"
 BACKEND_DIR="$SCRIPT_DIR/backend"
 FRONTEND_DIR="$SCRIPT_DIR/frontend"
 NGINX_CONF="$SCRIPT_DIR/nginx/portfolio.conf"
-SERVER_IP="192.168.100.125"
+SERVER_IP="192.168.100.215"
 
 # Detectar si se necesita sudo
 if [ "$(id -u)" -eq 0 ]; then
