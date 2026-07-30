@@ -79,7 +79,7 @@ import { environment } from '../../environments/environment';
             <i class="bi bi-x-lg" aria-hidden="true"></i>
           </button>
           <div class="modal-body">
-            <div class="modal-media">
+            <div class="modal-media" [class.portrait]="imageOrientation === 'portrait'">
               <div class="carousel-container" *ngIf="carouselSlides.length > 0">
                 <div class="carousel-slide">
                   <iframe
@@ -95,6 +95,7 @@ import { environment } from '../../environments/environment';
                     class="modal-image"
                     [src]="carouselSlides[currentSlide].url"
                     [alt]="'Imagen del proyecto ' + selectedProject.title"
+                    (load)="onImageLoad($event)"
                   />
                 </div>
                 <button class="carousel-btn carousel-prev" (click)="prevSlide()" *ngIf="carouselSlides.length > 1" aria-label="Anterior">
@@ -134,6 +135,20 @@ import { environment } from '../../environments/environment';
                 </span>
               </div>
               <p class="modal-description">{{ selectedProject.description }}</p>
+              <div class="modal-links" *ngIf="selectedProject.demoUrl || selectedProject.githubUrl || selectedProject.videoUrl">
+                <div class="modal-link-item" *ngIf="selectedProject.demoUrl">
+                  <i class="bi bi-box-arrow-up-right" aria-hidden="true"></i>
+                  <a [href]="selectedProject.demoUrl" target="_blank" rel="noopener noreferrer">Demo en vivo</a>
+                </div>
+                <div class="modal-link-item" *ngIf="selectedProject.githubUrl">
+                  <i class="bi bi-github" aria-hidden="true"></i>
+                  <a [href]="selectedProject.githubUrl" target="_blank" rel="noopener noreferrer">Repositorio</a>
+                </div>
+                <div class="modal-link-item" *ngIf="selectedProject.videoUrl">
+                  <i class="bi bi-play-circle" aria-hidden="true"></i>
+                  <a [href]="selectedProject.videoUrl" target="_blank" rel="noopener noreferrer">Video demostrativo</a>
+                </div>
+              </div>
               <div class="modal-actions">
                 <a *ngIf="selectedProject.demoUrl" [href]="selectedProject.demoUrl" target="_blank" class="modal-btn primary" [attr.aria-label]="'Ver demo de ' + selectedProject.title">
                   <i class="bi bi-box-arrow-up-right" aria-hidden="true"></i> Demo
@@ -186,12 +201,13 @@ import { environment } from '../../environments/environment';
     .modal-close:hover { border-color: var(--accent); color: var(--accent); }
     .modal-body { display: grid; grid-template-columns: 1fr 1fr; gap: 0; }
     @media (max-width: 768px) { .modal-body { grid-template-columns: 1fr; } }
-    .modal-media { position: relative; background: #000; border-radius: 20px 0 0 20px; overflow: hidden; min-height: 300px; display: flex; flex-direction: column; }
-    @media (max-width: 768px) { .modal-media { border-radius: 20px 20px 0 0; min-height: 240px; } }
-    .carousel-container { position: relative; flex: 1; display: flex; align-items: center; justify-content: center; min-height: 300px; }
-    .carousel-slide { width: 100%; height: 100%; position: absolute; inset: 0; display: flex; align-items: center; justify-content: center; }
+    .modal-media { position: relative; background: #000; border-radius: 20px 0 0 20px; overflow: hidden; min-height: 200px; display: flex; flex-direction: column; }
+    @media (max-width: 768px) { .modal-media { border-radius: 20px 20px 0 0; min-height: 200px; } }
+    .carousel-container { position: relative; flex: 1; display: flex; align-items: center; justify-content: center; overflow: hidden; background: #000; min-height: 200px; max-height: 70vh; }
+    .carousel-slide { width: 100%; height: 100%; display: flex; align-items: center; justify-content: center; }
     .modal-video { width: 100%; height: 100%; min-height: 350px; border: none; }
-    .modal-image { width: 100%; height: 100%; object-fit: cover; }
+    .modal-image { max-width: 100%; max-height: 70vh; width: 100%; height: 100%; object-fit: contain; }
+    .modal-media.portrait .modal-image { width: auto; height: 100%; }
     .carousel-btn { position: absolute; top: 50%; transform: translateY(-50%); width: 36px; height: 36px; border-radius: 50%; border: 1px solid rgba(255,255,255,0.3); background: rgba(0,0,0,0.5); color: #fff; font-size: 1.1rem; cursor: pointer; z-index: 5; display: flex; align-items: center; justify-content: center; transition: var(--transition); }
     .carousel-btn:hover { background: rgba(0,0,0,0.8); border-color: var(--accent); color: var(--accent); }
     .carousel-prev { left: 10px; }
@@ -208,6 +224,10 @@ import { environment } from '../../environments/environment';
     .modal-techs { display: flex; flex-wrap: wrap; gap: 6px; }
     .modal-tech { background: rgba(var(--accent-rgb, 100, 255, 218), 0.1); color: var(--accent); padding: 4px 12px; border-radius: 6px; font-size: 0.78rem; }
     .modal-description { font-size: 0.9rem; color: var(--text-secondary); line-height: 1.6; margin: 0; }
+    .modal-links { display: flex; flex-direction: column; gap: 6px; }
+    .modal-link-item { display: flex; align-items: center; gap: 6px; font-size: 0.85rem; }
+    .modal-link-item a { color: var(--accent); text-decoration: none; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
+    .modal-link-item a:hover { text-decoration: underline; }
     .modal-actions { display: flex; gap: 12px; flex-wrap: wrap; margin-top: auto; }
     .modal-btn { padding: 10px 20px; border-radius: 10px; font-size: 0.85rem; font-weight: 600; text-decoration: none; display: inline-flex; align-items: center; gap: 6px; transition: var(--transition); }
     .modal-btn.primary { background: linear-gradient(135deg, var(--accent), var(--accent-secondary)); color: var(--bg-primary); }
@@ -223,6 +243,7 @@ export class ProjectsPageComponent implements OnInit {
   selectedProject: Project | null = null;
   currentSlide = 0;
   carouselSlides: { type: 'video' | 'image'; url: any }[] = [];
+  imageOrientation: 'portrait' | 'landscape' | 'square' = 'landscape';
   loading = true;
   error = false;
 
@@ -289,6 +310,7 @@ export class ProjectsPageComponent implements OnInit {
 
   openProject(project: Project): void {
     this.selectedProject = project;
+    this.imageOrientation = 'landscape';
     this.buildCarousel(project);
   }
 
@@ -296,6 +318,17 @@ export class ProjectsPageComponent implements OnInit {
     this.selectedProject = null;
     this.carouselSlides = [];
     this.currentSlide = 0;
+    this.imageOrientation = 'landscape';
+  }
+
+  onImageLoad(event: Event): void {
+    const img = event.target as HTMLImageElement;
+    if (img && img.naturalWidth && img.naturalHeight) {
+      const ratio = img.naturalWidth / img.naturalHeight;
+      if (ratio < 0.9) this.imageOrientation = 'portrait';
+      else if (ratio > 1.1) this.imageOrientation = 'landscape';
+      else this.imageOrientation = 'square';
+    }
   }
 
   private buildCarousel(project: Project): void {
@@ -314,12 +347,14 @@ export class ProjectsPageComponent implements OnInit {
   nextSlide(): void {
     if (this.carouselSlides.length > 1) {
       this.currentSlide = (this.currentSlide + 1) % this.carouselSlides.length;
+      this.imageOrientation = 'landscape';
     }
   }
 
   prevSlide(): void {
     if (this.carouselSlides.length > 1) {
       this.currentSlide = (this.currentSlide - 1 + this.carouselSlides.length) % this.carouselSlides.length;
+      this.imageOrientation = 'landscape';
     }
   }
 

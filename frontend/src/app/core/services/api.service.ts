@@ -116,15 +116,21 @@ export class ApiService {
   }
 
   getCertificationById(id: number): Observable<Certification> {
-    return this.http.get<Certification>(`${this.apiUrl}/certifications/${id}`);
+    return this.http.get<{ certification: Certification }>(`${this.apiUrl}/certifications/${id}`).pipe(
+      map((res) => res.certification)
+    );
   }
 
   createCertification(data: Partial<Certification>): Observable<Certification> {
-    return this.http.post<Certification>(`${this.apiUrl}/certifications`, data);
+    return this.http.post<{ certification: Certification }>(`${this.apiUrl}/certifications`, data).pipe(
+      map((res) => res.certification)
+    );
   }
 
   updateCertification(id: number, data: Partial<Certification>): Observable<Certification> {
-    return this.http.put<Certification>(`${this.apiUrl}/certifications/${id}`, data);
+    return this.http.put<{ certification: Certification }>(`${this.apiUrl}/certifications/${id}`, data).pipe(
+      map((res) => res.certification)
+    );
   }
 
   deleteCertification(id: number): Observable<void> {
@@ -134,13 +140,17 @@ export class ApiService {
   uploadCertificationFile(id: number, file: File): Observable<CertificateFile> {
     const formData = new FormData();
     formData.append('certificate', file);
-    return this.http.post<CertificateFile>(`${this.apiUrl}/certifications/${id}/files`, formData);
+    return this.http.post<{ file: CertificateFile }>(`${this.apiUrl}/certifications/${id}/files`, formData).pipe(
+      map((res) => res.file)
+    );
   }
 
   uploadCertificationImage(id: number, file: File): Observable<any> {
     const formData = new FormData();
     formData.append('certificate-image', file);
-    return this.http.post<any>(`${this.apiUrl}/certifications/${id}/image`, formData);
+    return this.http.post<{ certification: Certification }>(`${this.apiUrl}/certifications/${id}/image`, formData).pipe(
+      map((res) => res.certification)
+    );
   }
 
   // Projects
@@ -374,19 +384,31 @@ export class ApiService {
   }
 
   getPublicExperiences(): Observable<Experience[]> {
-    return this.http.get<Experience[]>(`${this.apiUrl}/public/experiences`);
+    return this.http.get<{ experiences: Experience[] }>(`${this.apiUrl}/public/experiences`).pipe(
+      map((res) => res.experiences || [])
+    );
   }
 
   getPublicEducation(): Observable<Education[]> {
-    return this.http.get<Education[]>(`${this.apiUrl}/public/education`);
+    return this.http.get<{ education: Education[] }>(`${this.apiUrl}/public/education`).pipe(
+      map((res) => res.education || [])
+    );
   }
 
   getPublicCertifications(): Observable<Certification[]> {
-    return this.http.get<Certification[]>(`${this.apiUrl}/public/certifications`);
+    return this.http.get<{ certifications: Certification[] }>(`${this.apiUrl}/public/certifications`).pipe(
+      map((res) => res.certifications || [])
+    );
   }
 
   getPublicSkills(): Observable<Skill[]> {
-    return this.http.get<Skill[]>(`${this.apiUrl}/public/skills`);
+    return this.http.get<{ skills: { [key: string]: Skill[] } }>(`${this.apiUrl}/public/skills`).pipe(
+      map((res) => {
+        const all: Skill[] = [];
+        Object.values(res.skills || {}).forEach((arr) => all.push(...arr));
+        return all;
+      })
+    );
   }
 
   // Upload

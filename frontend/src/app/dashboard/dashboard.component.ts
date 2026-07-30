@@ -61,15 +61,26 @@ import { Observable } from 'rxjs';
 
       <section class="card-modern project-status">
         <h2>Project Status</h2>
-        <div class="status-chart">
-          <div *ngFor="let entry of projectStats | keyvalue" class="status-bar-item">
+        <div class="status-summary">
+          <span class="status-total">Total: {{ projectStats.total || 0 }}</span>
+        </div>
+        <div class="status-chart" *ngIf="projectStats.byStatus">
+          <h3>By Status</h3>
+          <div *ngFor="let entry of (projectStats.byStatus || {}) | keyvalue" class="status-bar-item">
             <div class="status-bar-label">
-              <span>{{ entry.key }}</span>
+              <span>{{ statusLabel(entry.key) }}</span>
               <span>{{ entry.value }}</span>
             </div>
             <div class="status-bar-track">
               <div class="status-bar-fill" [style.width.%]="barPercent(entry.value)"></div>
             </div>
+          </div>
+        </div>
+        <div class="tech-chart" *ngIf="projectStats.technologyCounts">
+          <h3>Technologies</h3>
+          <div *ngFor="let entry of (projectStats.technologyCounts || {}) | keyvalue" class="tech-item">
+            <span class="tech-name">{{ entry.key }}</span>
+            <span class="tech-count">{{ entry.value }}</span>
           </div>
         </div>
       </section>
@@ -135,7 +146,18 @@ export class DashboardComponent implements OnInit {
   }
 
   barPercent(value: number): number {
-    const max = Math.max(...Object.values(this.projectStats), 1);
+    const max = Math.max(...Object.values(this.projectStats.byStatus || {}), 1);
     return (value / max) * 100;
+  }
+
+  statusLabel(status: string): string {
+    const map: Record<string, string> = {
+      DRAFT: 'Borrador',
+      IN_PROGRESS: 'En Progreso',
+      COMPLETED: 'Completado',
+      ARCHIVED: 'Archivado',
+      UNKNOWN: 'Desconocido',
+    };
+    return map[status] || status;
   }
 }

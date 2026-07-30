@@ -1,102 +1,114 @@
 <div class="certificate-list">
   <header class="page-header">
     <div>
-      <h1>Certificates</h1>
-      <p>Manage your professional certifications and credentials</p>
+      <h1>Certificados</h1>
+      <p>Gestiona tus certificaciones y credenciales profesionales</p>
     </div>
-    <button type="button" class="btn-gradient" (click)="openAdd()">+ Add Certificate</button>
+    <button type="button" class="btn-gradient" (click)="openAdd()">+ Nuevo Certificado</button>
   </header>
 
-  <div class="loading-state" *ngIf="loading">Loading certificates...</div>
+  <div class="loading-state" *ngIf="loading">Cargando certificados...</div>
 
   <div class="empty-state" *ngIf="!loading && certificates.length === 0 && !showForm">
-    No certificates yet. Add your first one!
+    No hay certificados aún. ¡Agrega el primero!
   </div>
 
   <div class="form-overlay" *ngIf="showForm">
     <div class="form-card">
-      <h2>{{ editingId ? 'Edit Certificate' : 'New Certificate' }}</h2>
+      <h2>{{ editingId ? 'Editar Certificado' : 'Nuevo Certificado' }}</h2>
       <form [formGroup]="certForm" (ngSubmit)="save()" autocomplete="off">
         <div class="form-grid">
           <div class="form-group">
-            <label for="name">Name</label>
-            <input id="name" class="form-control" formControlName="name" placeholder="Certificate name" />
+            <label for="name">Nombre</label>
+            <input id="name" class="form-control" formControlName="name" placeholder="Nombre del certificado" />
           </div>
           <div class="form-group">
-            <label for="issuingOrganization">Issuing Organization</label>
-            <input id="issuingOrganization" class="form-control" formControlName="issuingOrganization" placeholder="e.g. Google, AWS" />
+            <label for="issuingOrganization">Organización Emisora</label>
+            <input id="issuingOrganization" class="form-control" formControlName="issuingOrganization" placeholder="Ej. Google, AWS" />
           </div>
           <div class="form-group">
-            <label for="issueDate">Issue Date</label>
+            <label for="issueDate">Fecha Emisión</label>
             <input id="issueDate" class="form-control" formControlName="issueDate" type="date" />
           </div>
           <div class="form-group">
-            <label for="expiryDate">Expiration Date</label>
+            <label for="expiryDate">Fecha Expiración</label>
             <input id="expiryDate" class="form-control" formControlName="expiryDate" type="date" />
           </div>
           <div class="form-group checkbox-group">
             <input id="doesNotExpire" formControlName="doesNotExpire" type="checkbox" class="checkbox-control" />
-            <label for="doesNotExpire">Does not expire</label>
+            <label for="doesNotExpire">No expira</label>
           </div>
           <div class="form-group">
-            <label for="credentialId">Credential ID</label>
-            <input id="credentialId" class="form-control" formControlName="credentialId" placeholder="Credential identifier" />
+            <label for="credentialId">ID de Credencial</label>
+            <input id="credentialId" class="form-control" formControlName="credentialId" placeholder="Identificador de la credencial" />
           </div>
           <div class="form-group">
-            <label for="credentialUrl">Credential URL</label>
+            <label for="credentialUrl">URL de Credencial</label>
             <input id="credentialUrl" class="form-control" formControlName="credentialUrl" placeholder="https://credential.example.com" />
           </div>
           <div class="form-group">
-            <label for="category">Category</label>
-            <input id="category" class="form-control" formControlName="category" placeholder="e.g. Cloud, DevOps" />
+            <label for="category">Categoría</label>
+            <input id="category" class="form-control" formControlName="category" placeholder="Ej. Cloud, DevOps" />
           </div>
           <div class="form-group">
-            <label for="educationId">Related Education</label>
+            <label for="educationId">Educación Relacionada</label>
             <select id="educationId" class="form-control" formControlName="educationId">
-              <option [ngValue]="null">None</option>
+              <option [ngValue]="null">Ninguna</option>
               <option *ngFor="let edu of educationList" [ngValue]="edu.id">{{ edu.institution }} - {{ edu.degree }}</option>
             </select>
           </div>
           <div class="form-group full-width">
-            <label for="description">Description</label>
-            <textarea id="description" class="form-control" formControlName="description" rows="3" placeholder="Certificate description"></textarea>
+            <label for="description">Descripción</label>
+            <textarea id="description" class="form-control" formControlName="description" rows="3" placeholder="Descripción del certificado"></textarea>
           </div>
 
-          <div class="form-group full-width" *ngIf="editingId">
-            <label>Certificate Image</label>
-            <label class="upload-zone" [class.upload-zone--has-image]="!!certImagePreview">
-              <input type="file" (change)="uploadCertImage($event)" accept=".png,.jpg,.jpeg,.webp" />
-              <img *ngIf="certImagePreview" [src]="certImagePreview" class="image-preview" />
-              <i class="bi bi-image" *ngIf="!certImagePreview"></i>
-              <span *ngIf="!certImagePreview">Click to upload certificate image</span>
-              <span class="upload-name" *ngIf="certImagePreview">Click to change image</span>
-              <span *ngIf="!certImagePreview" style="font-size:0.75rem;color:var(--text-muted)">PNG, JPG, WebP</span>
+          <div class="form-group full-width">
+            <label>Imagen del Certificado</label>
+            <label class="upload-zone" [class.upload-zone--has-image]="!!(certImagePreview || pendingImagePreview)">
+              <input type="file" (change)="onPendingImageSelected($event)" accept=".png,.jpg,.jpeg,.webp" />
+              <img *ngIf="pendingImagePreview" [src]="pendingImagePreview" class="image-preview" />
+              <img *ngIf="!pendingImagePreview && certImagePreview" [src]="certImagePreview" class="image-preview" />
+              <i class="bi bi-image" *ngIf="!(certImagePreview || pendingImagePreview)"></i>
+              <span *ngIf="!(certImagePreview || pendingImagePreview)">Haz clic para subir imagen del certificado</span>
+              <span class="upload-name" *ngIf="certImagePreview || pendingImagePreview">Cambiar imagen</span>
+              <span *ngIf="!(certImagePreview || pendingImagePreview)" style="font-size:0.75rem;color:var(--text-muted)">PNG, JPG, WebP</span>
             </label>
+            <div *ngIf="pendingImagePreview" style="margin-top:4px">
+              <button type="button" class="btn-remove-small" (click)="removePendingImage()">Quitar imagen</button>
+            </div>
           </div>
 
-          <div class="form-group full-width" *ngIf="editingId">
-            <label>Certificate Files</label>
+          <div class="form-group full-width">
+            <label>Archivo del Certificado (PDF o imagen)</label>
             <label class="upload-zone">
-              <input type="file" (change)="uploadFile($event)" accept=".pdf,.png,.jpg,.jpeg" />
+              <input type="file" (change)="onPendingFileSelected($event)" accept=".pdf,.png,.jpg,.jpeg,.webp" />
               <i class="bi bi-file-earmark-plus"></i>
-              <span>Click to upload certificate file</span>
+              <span *ngIf="!pendingCertPreview">Haz clic para subir el archivo del certificado</span>
+              <span *ngIf="pendingCertPreview">{{ pendingCertPreview }}</span>
               <span style="font-size:0.75rem;color:var(--text-muted)">PDF, PNG, JPG</span>
             </label>
-            <div class="file-list" *ngIf="certFiles.length > 0">
+            <div *ngIf="pendingCertPreview" style="margin-top:4px">
+              <button type="button" class="btn-remove-small" (click)="removePendingFile()">Quitar archivo</button>
+            </div>
+          </div>
+
+          <div class="form-group full-width" *ngIf="editingId && certFiles.length > 0">
+            <label>Archivos Guardados</label>
+            <div class="file-list">
               <div class="file-item" *ngFor="let f of certFiles">
-                <span class="file-icon">{{ f.fileType?.includes('pdf') ? '📄' : '🖼' }}</span>
-                <span class="file-name">{{ f.fileName }}</span>
-                <a [href]="f.fileUrl" target="_blank" class="file-preview-link">Preview</a>
+                <span class="file-icon">{{ isImage(f.mimeType) ? '🖼' : '📄' }}</span>
+                <span class="file-name">{{ f.originalName }}</span>
+                <a [href]="getFileUrl(f)" target="_blank" class="file-preview-link">Ver</a>
                 <button type="button" class="file-remove" (click)="removeCertFile(f)">&times;</button>
               </div>
             </div>
           </div>
 
           <div class="form-actions">
-            <button type="button" class="btn-secondary" (click)="cancelForm()">Cancel</button>
+            <button type="button" class="btn-secondary" (click)="cancelForm()">Cancelar</button>
             <button type="submit" class="btn-primary" [disabled]="saving">
               <span class="spinner" *ngIf="saving"></span>
-              {{ saving ? 'Saving...' : (editingId ? 'Update' : 'Create') }}
+              {{ saving ? 'Guardando...' : (editingId ? 'Actualizar' : 'Crear') }}
             </button>
           </div>
         </div>
@@ -107,8 +119,8 @@
   <div class="card-grid" *ngIf="certificates.length > 0">
     <div class="cert-card" *ngFor="let cert of certificates">
       <div class="cert-card-top">
-        <img *ngIf="$any(cert).imageUrl" [src]="getUploadUrl($any(cert).imageUrl)" class="cert-thumb" />
-        <div class="cert-icon" *ngIf="!$any(cert).imageUrl">
+        <img *ngIf="cert.imageUrl" [src]="getUploadUrl(cert.imageUrl)" class="cert-thumb" />
+        <div class="cert-icon" *ngIf="!cert.imageUrl">
           <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
             <circle cx="12" cy="8" r="4"/>
             <path d="M20 21a8 8 0 1 0-16 0"/>
@@ -117,29 +129,33 @@
         </div>
         <div class="cert-info">
           <div class="cert-name">{{ cert.name }}</div>
-          <div class="cert-org">{{ $any(cert).issuer }}</div>
+          <div class="cert-org">{{ cert.issuingOrganization }}</div>
         </div>
       </div>
       <div class="cert-meta">
-        <span class="cert-date">Issued: {{ cert.issueDate | date:'MMM yyyy' }}</span>
-        <span *ngIf="cert.expirationDate" class="cert-expiry">Expires: {{ cert.expirationDate | date:'MMM yyyy' }}</span>
-        <span *ngIf="!cert.expirationDate && cert.doesNotExpire" class="cert-noexpire">No expiration</span>
+        <span class="cert-date">Emitido: {{ cert.issueDate | date:'MMM yyyy' }}</span>
+        <span *ngIf="cert.expiryDate" class="cert-expiry">Expira: {{ cert.expiryDate | date:'MMM yyyy' }}</span>
+        <span *ngIf="!cert.expiryDate && cert['doesNotExpire']" class="cert-noexpire">No expira</span>
         <span class="badge-category" *ngIf="cert.category">{{ cert.category }}</span>
       </div>
       <div class="cert-description" *ngIf="cert.description">{{ cert.description }}</div>
       <div class="cert-links" *ngIf="cert.credentialUrl">
         <a [href]="cert.credentialUrl" target="_blank" rel="noopener" class="credential-link">
           <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M18 13v6a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2V8a2 2 0 0 1 2-2h6"/><polyline points="15 3 21 3 21 9"/><line x1="10" y1="14" x2="21" y2="3"/></svg>
-          View Credential
+          Ver Credencial
         </a>
       </div>
       <div class="cert-files" *ngIf="cert.files?.length">
-        <span class="files-label">Files:</span>
-        <a *ngFor="let f of cert.files" [href]="f.fileUrl" target="_blank" class="file-link">{{ f.fileName }}</a>
+        <span class="files-label">Archivos:</span>
+        <a *ngFor="let f of cert.files" [href]="getUploadUrl(f.path)" target="_blank" class="file-link">
+          <span *ngIf="isImage(f.mimeType)">🖼</span>
+          <span *ngIf="isPdf(f.mimeType)">📄</span>
+          {{ f.originalName }}
+        </a>
       </div>
       <div class="cert-actions">
-        <button type="button" class="btn-accent" (click)="openEdit(cert)">Edit</button>
-        <button type="button" class="btn-danger" (click)="deleteCertificate(cert.id)">Delete</button>
+        <button type="button" class="btn-accent" (click)="openEdit(cert)">Editar</button>
+        <button type="button" class="btn-danger" (click)="deleteCertificate(cert.id)">Eliminar</button>
       </div>
     </div>
   </div>

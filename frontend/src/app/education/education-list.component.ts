@@ -63,15 +63,24 @@ export class EducationListComponent implements OnInit {
   openAdd(): void {
     this.editingId = null;
     this.educationForm.reset({ current: false });
+    const endDate = this.educationForm.get('endDate');
+    endDate?.enable();
     this.showForm = true;
   }
 
   openEdit(edu: Education): void {
     this.editingId = edu.id;
+    const endDateCtrl = this.educationForm.get('endDate');
+    if (edu.current) {
+      endDateCtrl?.disable();
+    } else {
+      endDateCtrl?.enable();
+    }
     this.educationForm.patchValue({
       institution: edu.institution,
       degree: edu.degree,
       field: edu.field,
+      level: edu.level || '',
       description: edu.description,
       startDate: edu.startDate?.slice(0, 10),
       endDate: edu.endDate?.slice(0, 10) ?? null,
@@ -84,6 +93,8 @@ export class EducationListComponent implements OnInit {
   cancelForm(): void {
     this.showForm = false;
     this.editingId = null;
+    const endDate = this.educationForm.get('endDate');
+    endDate?.enable();
     this.educationForm.reset({ current: false });
   }
 
@@ -96,6 +107,7 @@ export class EducationListComponent implements OnInit {
       institution: form.institution,
       degree: form.degree,
       field: form.field,
+      level: form.level,
       description: form.description,
       startDate: form.startDate,
       endDate: form.current ? null : form.endDate || null,
@@ -109,24 +121,24 @@ export class EducationListComponent implements OnInit {
 
     request.subscribe({
       next: () => {
-        this.showToast(this.editingId ? 'Education updated' : 'Education created', 'success');
+        this.showToast(this.editingId ? 'Educación actualizada' : 'Educación creada', 'success');
         this.cancelForm();
         this.loadEducation();
       },
-      error: () => this.showToast('Failed to save education', 'error'),
+      error: () => this.showToast('Error al guardar educación', 'error'),
       complete: () => (this.saving = false),
     });
   }
 
   async deleteEducation(id: number): Promise<void> {
-    const ok = await this.confirmService.confirm({ message: 'Delete this education entry?' });
+    const ok = await this.confirmService.confirm({ message: '¿Eliminar esta educación?' });
     if (!ok) return;
     this.apiService.deleteEducation(id).subscribe({
       next: () => {
-        this.showToast('Education deleted', 'success');
+        this.showToast('Educación eliminada', 'success');
         this.loadEducation();
       },
-      error: () => this.showToast('Failed to delete education', 'error'),
+      error: () => this.showToast('Error al eliminar educación', 'error'),
     });
   }
 

@@ -577,6 +577,21 @@ select.form-control {
   to { opacity: 1; transform: translateY(0); }
 }
 
+.btn-remove-small {
+  background: transparent;
+  border: 1px solid var(--border);
+  color: var(--error, #ef4444);
+  padding: 4px 12px;
+  border-radius: 6px;
+  font-size: 0.78rem;
+  cursor: pointer;
+  transition: var(--transition);
+  &:hover {
+    border-color: var(--error, #ef4444);
+    background: rgba(239, 68, 68, 0.1);
+  }
+}
+
 @keyframes spin {
   to { transform: rotate(360deg); }
 }

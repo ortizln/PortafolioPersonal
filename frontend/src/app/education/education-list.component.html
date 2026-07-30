@@ -1,62 +1,61 @@
 <div class="education-list">
   <header class="page-header">
     <div>
-      <h1>Education</h1>
-      <p>Manage your academic background and qualifications</p>
+      <h1>Educación</h1>
+      <p>Gestiona tu formación académica y títulos</p>
     </div>
-    <button type="button" class="btn-gradient" (click)="openAdd()">+ Add Education</button>
+    <button type="button" class="btn-gradient" (click)="openAdd()">+ Nueva Educación</button>
   </header>
 
-  <div class="loading-state" *ngIf="loading">Loading education...</div>
+  <div class="loading-state" *ngIf="loading">Cargando educación...</div>
 
   <div class="empty-state" *ngIf="!loading && educationList.length === 0 && !showForm">
-    No education entries yet. Add your first one!
+    No hay entradas de educación aún. ¡Agrega la primera!
   </div>
 
   <!-- Inline form -->
   <div class="form-overlay" *ngIf="showForm">
     <div class="form-card">
-      <h2>{{ editingId ? 'Edit Education' : 'New Education' }}</h2>
+      <h2>{{ editingId ? 'Editar Educación' : 'Nueva Educación' }}</h2>
       <form [formGroup]="educationForm" (ngSubmit)="save()" autocomplete="off">
         <div class="form-grid">
           <div class="form-group">
-            <label for="institution">Institution</label>
-            <input id="institution" class="form-control" formControlName="institution" placeholder="University or school name" />
+            <label for="institution">Institución</label>
+            <input id="institution" class="form-control" formControlName="institution" placeholder="Nombre de la universidad o escuela" />
           </div>
           <div class="form-group">
-            <label for="degree">Degree</label>
-            <input id="degree" class="form-control" formControlName="degree" placeholder="Bachelor's, Master's, etc." />
+            <label for="degree">Título</label>
+            <input id="degree" class="form-control" formControlName="degree" placeholder="Ingeniería, Maestría, etc." />
           </div>
           <div class="form-group">
-            <label for="field">Field of Study</label>
-            <input id="field" class="form-control" formControlName="field" placeholder="Computer Science" />
+            <label for="field">Campo de Estudio</label>
+            <input id="field" class="form-control" formControlName="field" placeholder="Ciencias de la Computación" />
           </div>
           <div class="form-group">
-            <label for="level">Level</label>
-            <input id="level" class="form-control" formControlName="level" placeholder="Undergraduate, Graduate" />
+            <label for="level">Nivel</label>
+            <input id="level" class="form-control" formControlName="level" placeholder="Pregrado, Postgrado" />
           </div>
           <div class="form-group">
-            <label for="startDate">Start Date</label>
+            <label for="startDate">Fecha Inicio</label>
             <input id="startDate" class="form-control" formControlName="startDate" type="date" />
           </div>
           <div class="form-group">
-            <label for="endDate">End Date</label>
+            <label for="endDate">Fecha Fin</label>
             <input id="endDate" class="form-control" formControlName="endDate" type="date" />
-
             <div class="checkbox-group">
               <input id="current" class="checkbox-control" formControlName="current" type="checkbox" />
-              <label for="current">Currently enrolled</label>
+              <label for="current">Actualmente cursando</label>
             </div>
           </div>
           <div class="form-group full-width">
-            <label for="description">Description</label>
-            <textarea id="description" class="form-control" formControlName="description" rows="3" placeholder="Additional details about your studies"></textarea>
+            <label for="description">Descripción</label>
+            <textarea id="description" class="form-control" formControlName="description" rows="3" placeholder="Detalles adicionales sobre tus estudios"></textarea>
           </div>
           <div class="form-actions">
-            <button type="button" class="btn-secondary" (click)="cancelForm()">Cancel</button>
+            <button type="button" class="btn-secondary" (click)="cancelForm()">Cancelar</button>
             <button type="submit" class="btn-primary" [disabled]="saving">
               <span class="spinner" *ngIf="saving"></span>
-              {{ saving ? 'Saving...' : (editingId ? 'Update' : 'Create') }}
+              {{ saving ? 'Guardando...' : (editingId ? 'Actualizar' : 'Crear') }}
             </button>
           </div>
         </div>
@@ -78,19 +77,19 @@
           <div class="edu-institution">{{ edu.institution }}</div>
           <div class="edu-degree">{{ edu.degree }}</div>
           <div class="edu-field" *ngIf="edu.field">{{ edu.field }}</div>
-          <span class="edu-level" *ngIf="edu.grade">Grade: {{ edu.grade }}</span>
+          <span class="edu-level" *ngIf="edu.grade">Calificación: {{ edu.grade }}</span>
         </div>
       </div>
       <div class="edu-dates">
         <span>{{ edu.startDate | date:'MMM yyyy' }}</span>
         <span>&mdash;</span>
-        <span>{{ edu.current ? 'Present' : (edu.endDate | date:'MMM yyyy') }}</span>
-        <span class="current-badge" *ngIf="edu.current">Current</span>
+        <span>{{ edu.current ? 'Presente' : (edu.endDate | date:'MMM yyyy') }}</span>
+        <span class="current-badge" *ngIf="edu.current">Actual</span>
       </div>
       <div class="edu-description" *ngIf="edu.description">{{ edu.description }}</div>
       <div class="edu-actions">
-        <button type="button" class="btn-accent" (click)="openEdit(edu)">Edit</button>
-        <button type="button" class="btn-danger" (click)="deleteEducation(edu.id)">Delete</button>
+        <button type="button" class="btn-accent" (click)="openEdit(edu)">Editar</button>
+        <button type="button" class="btn-danger" (click)="deleteEducation(edu.id)">Eliminar</button>
       </div>
     </div>
   </div>

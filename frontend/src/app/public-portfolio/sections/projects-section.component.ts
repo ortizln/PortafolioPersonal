@@ -109,7 +109,7 @@ import { UploadUrlPipe } from '../../shared/upload-url.pipe';
             <i class="bi bi-x-lg" aria-hidden="true"></i>
           </button>
           <div class="modal-body">
-            <div class="modal-media">
+            <div class="modal-media" [class.portrait]="imageOrientation === 'portrait'">
               <div class="carousel-container" *ngIf="carouselSlides.length > 0">
                 <div class="carousel-slide">
                   <iframe
@@ -125,6 +125,7 @@ import { UploadUrlPipe } from '../../shared/upload-url.pipe';
                     class="modal-image"
                     [src]="carouselSlides[currentSlide].url"
                     [alt]="'Imagen del proyecto ' + selectedProject.title"
+                    (load)="onImageLoad($event)"
                   />
                 </div>
                 <button class="carousel-btn carousel-prev" (click)="prevSlide()" *ngIf="carouselSlides.length > 1" aria-label="Anterior">
@@ -164,6 +165,20 @@ import { UploadUrlPipe } from '../../shared/upload-url.pipe';
                 </span>
               </div>
               <p class="modal-description">{{ selectedProject.description }}</p>
+              <div class="modal-links" *ngIf="selectedProject.demoUrl || selectedProject.githubUrl || selectedProject.videoUrl">
+                <div class="modal-link-item" *ngIf="selectedProject.demoUrl">
+                  <i class="bi bi-box-arrow-up-right" aria-hidden="true"></i>
+                  <a [href]="selectedProject.demoUrl" target="_blank" rel="noopener noreferrer">Demo en vivo</a>
+                </div>
+                <div class="modal-link-item" *ngIf="selectedProject.githubUrl">
+                  <i class="bi bi-github" aria-hidden="true"></i>
+                  <a [href]="selectedProject.githubUrl" target="_blank" rel="noopener noreferrer">Repositorio</a>
+                </div>
+                <div class="modal-link-item" *ngIf="selectedProject.videoUrl">
+                  <i class="bi bi-play-circle" aria-hidden="true"></i>
+                  <a [href]="selectedProject.videoUrl" target="_blank" rel="noopener noreferrer">Video demostrativo</a>
+                </div>
+              </div>
               <div class="modal-actions">
                 <a *ngIf="selectedProject.demoUrl" [href]="selectedProject.demoUrl" target="_blank" class="modal-btn primary" [attr.aria-label]="'Ver demo de ' + selectedProject.title">
                   <i class="bi bi-box-arrow-up-right" aria-hidden="true"></i> Demo
@@ -186,6 +201,7 @@ export class ProjectsSectionComponent {
   currentSlide = 0;
   carouselSlides: { type: 'video' | 'image'; url: any }[] = [];
   activeFilter = 'all';
+  imageOrientation: 'portrait' | 'landscape' | 'square' = 'landscape';
 
   get availableTechs(): string[] {
     const set = new Set<string>();
@@ -233,6 +249,7 @@ export class ProjectsSectionComponent {
 
   openProject(project: Project): void {
     this.selectedProject = project;
+    this.imageOrientation = 'landscape';
     this.buildCarousel(project);
   }
 
@@ -240,6 +257,7 @@ export class ProjectsSectionComponent {
     this.selectedProject = null;
     this.carouselSlides = [];
     this.currentSlide = 0;
+    this.imageOrientation = 'landscape';
   }
 
   private buildCarousel(project: Project): void {
@@ -258,12 +276,24 @@ export class ProjectsSectionComponent {
   nextSlide(): void {
     if (this.carouselSlides.length > 1) {
       this.currentSlide = (this.currentSlide + 1) % this.carouselSlides.length;
+      this.imageOrientation = 'landscape';
     }
   }
 
   prevSlide(): void {
     if (this.carouselSlides.length > 1) {
       this.currentSlide = (this.currentSlide - 1 + this.carouselSlides.length) % this.carouselSlides.length;
+      this.imageOrientation = 'landscape';
+    }
+  }
+
+  onImageLoad(event: Event): void {
+    const img = event.target as HTMLImageElement;
+    if (img && img.naturalWidth && img.naturalHeight) {
+      const ratio = img.naturalWidth / img.naturalHeight;
+      if (ratio < 0.9) this.imageOrientation = 'portrait';
+      else if (ratio > 1.1) this.imageOrientation = 'landscape';
+      else this.imageOrientation = 'square';
     }
   }
 

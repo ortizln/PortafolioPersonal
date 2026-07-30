@@ -22,6 +22,10 @@ export class CertificateListComponent implements OnInit {
   educationList: { id: number; institution: string; degree: string }[] = [];
   certFiles: CertificateFile[] = [];
   certImagePreview: string | null = null;
+  pendingImageFile: File | null = null;
+  pendingImagePreview: string | null = null;
+  pendingCertFile: File | null = null;
+  pendingCertPreview: string | null = null;
   showForm = false;
   editingId: number | null = null;
   saving = false;
@@ -61,7 +65,7 @@ export class CertificateListComponent implements OnInit {
   private loadCertificates(): void {
     this.apiService.getCertificationsAll().subscribe({
       next: (list) => (this.certificates = list),
-      error: () => this.showToast('Failed to load certificates', 'error'),
+      error: () => this.showToast('Error al cargar certificados', 'error'),
       complete: () => (this.loading = false),
     });
   }
@@ -82,6 +86,10 @@ export class CertificateListComponent implements OnInit {
     this.editingId = null;
     this.certFiles = [];
     this.certImagePreview = null;
+    this.pendingImageFile = null;
+    this.pendingImagePreview = null;
+    this.pendingCertFile = null;
+    this.pendingCertPreview = null;
     this.certForm.reset({ doesNotExpire: false, educationId: null });
     this.showForm = true;
   }
@@ -90,6 +98,10 @@ export class CertificateListComponent implements OnInit {
     this.editingId = cert.id;
     this.certFiles = [...(cert.files || [])];
     this.certImagePreview = this.apiService.getUploadUrl((cert as any).imageUrl);
+    this.pendingImageFile = null;
+    this.pendingImagePreview = null;
+    this.pendingCertFile = null;
+    this.pendingCertPreview = null;
     this.certForm.patchValue({
       name: cert.name,
       issuingOrganization: cert.issuingOrganization,
@@ -109,7 +121,38 @@ export class CertificateListComponent implements OnInit {
     this.editingId = null;
     this.certFiles = [];
     this.certImagePreview = null;
+    this.pendingImageFile = null;
+    this.pendingImagePreview = null;
+    this.pendingCertFile = null;
+    this.pendingCertPreview = null;
     this.certForm.reset({ doesNotExpire: false, educationId: null });
+  }
+
+  onPendingImageSelected(event: Event): void {
+    const input = event.target as HTMLInputElement;
+    if (!input.files?.length) return;
+    const file = input.files[0];
+    this.pendingImageFile = file;
+    const reader = new FileReader();
+    reader.onload = (e) => (this.pendingImagePreview = e.target?.result as string);
+    reader.readAsDataURL(file);
+  }
+
+  onPendingFileSelected(event: Event): void {
+    const input = event.target as HTMLInputElement;
+    if (!input.files?.length) return;
+    this.pendingCertFile = input.files[0];
+    this.pendingCertPreview = input.files[0].name;
+  }
+
+  removePendingImage(): void {
+    this.pendingImageFile = null;
+    this.pendingImagePreview = null;
+  }
+
+  removePendingFile(): void {
+    this.pendingCertFile = null;
+    this.pendingCertPreview = null;
   }
 
   save(): void {
@@ -134,25 +177,53 @@ export class CertificateListComponent implements OnInit {
       : this.apiService.createCertification(payload);
 
     request.subscribe({
-      next: () => {
-        this.showToast(this.editingId ? 'Certificate updated' : 'Certificate created', 'success');
-        this.cancelForm();
-        this.loadCertificates();
+      next: (saved) => {
+        this.showToast(this.editingId ? 'Certificado actualizado' : 'Certificado creado', 'success');
+        const certId = (saved as any).id || this.editingId;
+        const uploads: Promise<void>[] = [];
+
+        if (this.pendingImageFile && certId) {
+          uploads.push(new Promise((resolve) => {
+            this.apiService.uploadCertificationImage(certId, this.pendingImageFile!).subscribe({
+              next: () => { resolve(); },
+              error: () => { this.showToast('Error al subir imagen', 'error'); resolve(); },
+            });
+          }));
+        }
+
+        if (this.pendingCertFile && certId) {
+          uploads.push(new Promise((resolve) => {
+            this.apiService.uploadCertificationFile(certId, this.pendingCertFile!).subscribe({
+              next: () => resolve(),
+              error: () => { this.showToast('Error al subir archivo', 'error'); resolve(); },
+            });
+          }));
+        }
+
+        Promise.all(uploads).then(() => {
+          this.cancelForm();
+          this.loadCertificates();
+        });
+
+        if (uploads.length === 0) {
+          this.cancelForm();
+          this.loadCertificates();
+        }
       },
-      error: () => this.showToast('Failed to save certificate', 'error'),
+      error: () => this.showToast('Error al guardar certificado', 'error'),
       complete: () => (this.saving = false),
     });
   }
 
   async deleteCertificate(id: number): Promise<void> {
-    const ok = await this.confirmService.confirm({ message: 'Delete this certificate?' });
+    const ok = await this.confirmService.confirm({ message: '¿Eliminar este certificado?' });
     if (!ok) return;
     this.apiService.deleteCertification(id).subscribe({
       next: () => {
-        this.showToast('Certificate deleted', 'success');
+        this.showToast('Certificado eliminado', 'success');
         this.loadCertificates();
       },
-      error: () => this.showToast('Failed to delete certificate', 'error'),
+      error: () => this.showToast('Error al eliminar certificado', 'error'),
     });
   }
 
@@ -163,10 +234,10 @@ export class CertificateListComponent implements OnInit {
     this.apiService.uploadCertificationFile(this.editingId, file).subscribe({
       next: (certFile) => {
         this.certFiles.push(certFile);
-        this.showToast('File uploaded', 'success');
+        this.showToast('Archivo subido', 'success');
         this.loadCertificates();
       },
-      error: () => this.showToast('Failed to upload file', 'error'),
+      error: () => this.showToast('Error al subir archivo', 'error'),
     });
     input.value = '';
   }
@@ -178,29 +249,41 @@ export class CertificateListComponent implements OnInit {
     this.certImagePreview = URL.createObjectURL(file);
     this.apiService.uploadCertificationImage(this.editingId, file).subscribe({
       next: () => {
-        this.showToast('Certificate image uploaded', 'success');
+        this.showToast('Imagen de certificado subida', 'success');
         this.loadCertificates();
       },
-      error: () => this.showToast('Failed to upload image', 'error'),
+      error: () => this.showToast('Error al subir imagen', 'error'),
     });
     input.value = '';
   }
 
   async removeCertFile(file: CertificateFile): Promise<void> {
-    const ok = await this.confirmService.confirm({ message: `Remove "${file.filename}"?` });
+    const ok = await this.confirmService.confirm({ message: `¿Eliminar "${file.originalName}"?` });
     if (!ok) return;
-    this.apiService.deleteFile(environment.uploadUrl + '/' + file.path).subscribe({
+    this.apiService.deleteFile(file.path).subscribe({
       next: () => {
         this.certFiles = this.certFiles.filter((f) => f.id !== file.id);
-        this.showToast('File removed', 'success');
+        this.showToast('Archivo eliminado', 'success');
         this.loadCertificates();
       },
-      error: () => this.showToast('Failed to remove file', 'error'),
+      error: () => this.showToast('Error al eliminar archivo', 'error'),
     });
   }
 
   getUploadUrl(path: string | null | undefined): string {
     return this.apiService.getUploadUrl(path);
+  }
+
+  getFileUrl(file: CertificateFile): string {
+    return this.apiService.getUploadUrl(file.path);
+  }
+
+  isImage(mimeType: string): boolean {
+    return mimeType?.startsWith('image/');
+  }
+
+  isPdf(mimeType: string): boolean {
+    return mimeType === 'application/pdf';
   }
 
   private showToast(message: string, type: 'success' | 'error'): void {

@@ -329,6 +329,51 @@
   transition: width 1s ease;
 }
 
+.status-summary {
+  margin-bottom: 16px;
+}
+
+.status-total {
+  font-size: 0.95rem;
+  color: var(--text-primary);
+  font-weight: 600;
+}
+
+.project-status h3 {
+  font-size: 0.85rem;
+  color: var(--text-muted);
+  text-transform: uppercase;
+  letter-spacing: 0.08em;
+  margin: 16px 0 12px;
+}
+
+.tech-chart {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 8px;
+  margin-top: 4px;
+}
+
+.tech-item {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  padding: 6px 12px;
+  background: var(--bg-secondary);
+  border: 1px solid var(--border);
+  border-radius: 8px;
+  font-size: 0.82rem;
+}
+
+.tech-name {
+  color: var(--text-secondary);
+}
+
+.tech-count {
+  color: var(--accent);
+  font-weight: 600;
+}
+
 @keyframes fadeInUp {
   from { opacity: 0; transform: translateY(20px); }
   to { opacity: 1; transform: translateY(0); }
