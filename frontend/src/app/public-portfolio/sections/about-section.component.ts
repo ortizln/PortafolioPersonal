@@ -37,7 +37,7 @@ import { Profile } from '../../core/models';
               <span class="greeting-wave" aria-hidden="true">👋</span>
               Hola, soy <span class="greeting-name">{{ profile?.fullName }}</span>
             </h3>
-            <p class="about-text">{{ profile?.aboutMe || profile?.biography || profile?.description || 'No description available.' }}</p>
+            <p class="about-text">{{ profile?.aboutMe || profile?.biography || profile?.description || 'No hay descripción disponible.' }}</p>
 
             <div class="about-contact-row" *ngIf="profile?.email || profile?.phone || profile?.location">
               <div class="contact-chip" *ngIf="profile?.email">

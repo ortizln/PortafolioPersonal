@@ -48,7 +48,7 @@ import { NgIf, NgFor } from '@angular/common';
         <div class="footer-grid">
           <div class="footer-brand">
             <a class="footer-logo" routerLink="/" aria-label="Ir al inicio">&lt;Dev /&gt;</a>
-            <p class="footer-desc">Full Stack Developer. Creando soluciones digitales modernas con tecnologías de vanguardia.</p>
+            <p class="footer-desc">Desarrollador Full Stack. Creando soluciones digitales modernas con tecnologías de vanguardia.</p>
             <div class="footer-social">
               <a href="https://github.com" target="_blank" rel="noopener noreferrer" aria-label="GitHub"><i class="bi bi-github" aria-hidden="true"></i></a>
               <a href="https://linkedin.com" target="_blank" rel="noopener noreferrer" aria-label="LinkedIn"><i class="bi bi-linkedin" aria-hidden="true"></i></a>
@@ -100,7 +100,7 @@ export class PublicLayoutComponent {
     { label: 'Sobre Mí', href: '/about' },
     { label: 'Experiencia', href: '/experience' },
     { label: 'Proyectos', href: '/projects' },
-    { label: 'Skills', href: '/skills' },
+    { label: 'Habilidades', href: '/skills' },
     { label: 'Contacto', href: '/contact' },
   ];
 

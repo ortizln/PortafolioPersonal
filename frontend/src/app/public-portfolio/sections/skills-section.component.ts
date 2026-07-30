@@ -89,10 +89,10 @@ export class SkillsSectionComponent {
   }
 
   getLevelLabel(percentage: number): string {
-    if (percentage >= 90) return 'Expert';
-    if (percentage >= 75) return 'Advanced';
-    if (percentage >= 50) return 'Intermediate';
-    return 'Beginner';
+    if (percentage >= 90) return 'Experto';
+    if (percentage >= 75) return 'Avanzado';
+    if (percentage >= 50) return 'Intermedio';
+    return 'Principiante';
   }
 
   getLevelClass(percentage: number): string {

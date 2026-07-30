@@ -33,7 +33,7 @@ import { Profile, SocialLink } from '../../core/models';
         </h1>
 
         <p class="hero-title" data-aos="fade-up" data-aos-delay="200" role="text">
-          {{ profile?.professionalTitle || 'Full Stack Developer' }}
+          {{ profile?.professionalTitle || 'Desarrollador Full Stack' }}
           <span class="hero-cursor" aria-hidden="true">|</span>
         </p>
 
@@ -83,7 +83,7 @@ import { Profile, SocialLink } from '../../core/models';
         <div class="mouse">
           <div class="mouse-wheel"></div>
         </div>
-        <span>Scroll</span>
+        <span>Desplazar</span>
       </div>
     </section>
   `,

@@ -26,12 +26,12 @@ import { Education } from '../../core/models';
               <i class="bi bi-mortarboard-fill" aria-hidden="true"></i>
             </div>
             <div class="edu-content">
-              <h3 class="edu-degree">{{ edu.degree }} in {{ edu.field }}</h3>
+              <h3 class="edu-degree">{{ edu.degree }} en {{ edu.field }}</h3>
               <h4 class="edu-institution">{{ edu.institution }}</h4>
               <div class="edu-meta">
                 <span class="edu-date">
                   <i class="bi bi-calendar3" aria-hidden="true"></i>
-                  {{ edu.startDate | date:'yyyy' }} - {{ edu.current ? 'Present' : (edu.endDate | date:'yyyy') }}
+                  {{ edu.startDate | date:'yyyy' }} - {{ edu.current ? 'Presente' : (edu.endDate | date:'yyyy') }}
                 </span>
                 <span class="edu-grade" *ngIf="edu.grade">
                   <i class="bi bi-trophy" aria-hidden="true"></i> {{ edu.grade }}
