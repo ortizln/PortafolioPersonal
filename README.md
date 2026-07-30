@@ -3,7 +3,7 @@
 Sistema de portafolio profesional administrable. Frontend Angular 18 + Backend Node/Express/Prisma + PostgreSQL.
 
 ```
-Usuario → Nginx (192.168.100.215) → /portfolio/     → Angular SPA (standalone)
+Usuario → Nginx (192.168.1.71) → /portfolio/     → Angular SPA (standalone)
                                    → /portfolio/api/* → Docker: Backend (Express :3000)
                                    → /portfolio/uploads → Archivos estáticos
 ```
@@ -131,7 +131,7 @@ Admin: `admin@portfolio.com` / `Admin123!` + 15 technologies + 10 skills + 3 lan
 | 2 | `prisma.uploadedFile` referenciado en UploadController pero no existe en schema | Crash si se invoca |
 | 3 | GitHub/GitLab sync son stubs sin implementación real | No sincroniza repos |
 | 4 | `docker-compose.prod.yml` tiene DB password hardcodeada | Riesgo de seguridad |
-| 5 | CORS hardcodeado a `http://192.168.100.215` | No portable |
+| 5 | CORS hardcodeado a `http://192.168.1.71` | No portable |
 | 6 | Sin envío de emails (SMTP configurado pero no implementado) | No hay notificaciones ni recovery |
 | 7 | Sin reintento automático de requests tras refresh token | Pérdida de datos si token expira |
 
@@ -140,7 +140,7 @@ Admin: `admin@portfolio.com` / `Admin123!` + 15 technologies + 10 skills + 3 lan
 ## Deploy
 
 ```bash
-# En el servidor Linux (192.168.100.215)
+# En el servidor Linux (192.168.1.71)
 cd ~/PortafolioPersonal
 ./deploy.sh
 ```
