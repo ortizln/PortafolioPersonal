@@ -181,6 +181,11 @@ export class ApiService {
     return this.http.delete<void>(`${this.apiUrl}/projects/${projectId}/images/${imageId}`);
   }
 
+  // Technologies
+  getTechnologiesAll(): Observable<Technology[]> {
+    return this.http.get<Technology[]>(`${this.apiUrl}/technologies`);
+  }
+
   // Skills
   getSkillsAll(): Observable<Skill[]> {
     return this.http.get<Skill[]>(`${this.apiUrl}/skills`);

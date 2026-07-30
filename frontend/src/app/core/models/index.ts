@@ -132,7 +132,7 @@ export interface ProjectImage {
 }
 
 export interface Technology {
-  id: number;
+  id: string;
   name: string;
   description?: string;
   icon?: string;
@@ -206,7 +206,7 @@ export interface ContactMessage {
 }
 
 export interface Category {
-  id: number;
+  id: string;
   name: string;
   slug: string;
   description?: string;

@@ -29,8 +29,8 @@ export class ProjectListComponent implements OnInit {
   loading = true;
   projectForm!: FormGroup;
 
-  selectedTechIds: number[] = [];
-  selectedCategoryIds: number[] = [];
+  selectedTechIds: string[] = [];
+  selectedCategoryIds: string[] = [];
 
   toasts: { message: string; type: 'success' | 'error'; id: number }[] = [];
   private toastId = 0;
@@ -78,19 +78,8 @@ export class ProjectListComponent implements OnInit {
   }
 
   private loadTechnologies(): void {
-    this.apiService.getSkillsAll().subscribe({
-      next: () => {
-        this.technologies = [
-          { id: 1, name: 'Angular', icon: '', color: '#dd0031', createdAt: new Date().toISOString(), updatedAt: new Date().toISOString() },
-          { id: 2, name: 'React', icon: '', color: '#61dafb', createdAt: new Date().toISOString(), updatedAt: new Date().toISOString() },
-          { id: 3, name: 'Node.js', icon: '', color: '#339933', createdAt: new Date().toISOString(), updatedAt: new Date().toISOString() },
-          { id: 4, name: 'TypeScript', icon: '', color: '#3178c6', createdAt: new Date().toISOString(), updatedAt: new Date().toISOString() },
-          { id: 5, name: 'Python', icon: '', color: '#3776ab', createdAt: new Date().toISOString(), updatedAt: new Date().toISOString() },
-          { id: 6, name: 'Java', icon: '', color: '#007396', createdAt: new Date().toISOString(), updatedAt: new Date().toISOString() },
-          { id: 7, name: 'Docker', icon: '', color: '#2496ed', createdAt: new Date().toISOString(), updatedAt: new Date().toISOString() },
-          { id: 8, name: 'PostgreSQL', icon: '', color: '#336791', createdAt: new Date().toISOString(), updatedAt: new Date().toISOString() },
-        ];
-      },
+    this.apiService.getTechnologiesAll().subscribe({
+      next: (list) => (this.technologies = list),
     });
   }
 
@@ -204,23 +193,23 @@ export class ProjectListComponent implements OnInit {
     });
   }
 
-  toggleTech(techId: number): void {
+  toggleTech(techId: string): void {
     const idx = this.selectedTechIds.indexOf(techId);
     if (idx >= 0) this.selectedTechIds.splice(idx, 1);
     else this.selectedTechIds.push(techId);
   }
 
-  toggleCategory(catId: number): void {
+  toggleCategory(catId: string): void {
     const idx = this.selectedCategoryIds.indexOf(catId);
     if (idx >= 0) this.selectedCategoryIds.splice(idx, 1);
     else this.selectedCategoryIds = [catId];
   }
 
-  isTechSelected(id: number): boolean {
+  isTechSelected(id: string): boolean {
     return this.selectedTechIds.includes(id);
   }
 
-  isCatSelected(id: number): boolean {
+  isCatSelected(id: string): boolean {
     return this.selectedCategoryIds.includes(id);
   }
 

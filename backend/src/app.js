@@ -86,6 +86,7 @@ const uploadRoutes = require('./routes/upload.routes');
 const settingRoutes = require('./routes/setting.routes');
 const publicRoutes = require('./routes/public.routes');
 const statsRoutes = require('./routes/stats.routes');
+const technologyRoutes = require('./routes/technology.routes');
 
 app.use('/api/auth', authRoutes);
 app.use('/api/users', userRoutes);
@@ -102,6 +103,7 @@ app.use('/api/categories', categoryRoutes);
 app.use('/api/contact', contactRoutes);
 app.use('/api/uploads', uploadRoutes);
 app.use('/api/settings', settingRoutes);
+app.use('/api/technologies', technologyRoutes);
 app.use('/api/public', publicRoutes);
 app.use('/api/stats', statsRoutes);
 
