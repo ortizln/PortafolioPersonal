@@ -65,7 +65,15 @@ export class ProjectListComponent implements OnInit {
 
   private loadProjects(): void {
     this.apiService.getProjectsAll().subscribe({
-      next: (list) => (this.projects = list.sort((a, b) => b.order - a.order)),
+      next: (list) => (this.projects = (list as any[]).map((p) => ({
+        ...p,
+        technologies: (p.technologies || []).map((t: any) =>
+          t.technology ? { ...t.technology, id: t.technology.id } : t
+        ),
+        categories: (p.categories || []).map((c: any) =>
+          c.category ? { ...c.category, id: c.category.id } : c
+        ),
+      })).sort((a: any, b: any) => b.order - a.order)),
       error: () => this.showToast('Failed to load projects', 'error'),
       complete: () => (this.loading = false),
     });
@@ -97,8 +105,11 @@ export class ProjectListComponent implements OnInit {
     this.editingId = project.id;
     this.projectImages = [...(project.images || [])];
     this.bannerPreview = this.getPrimaryImage(project);
-    this.selectedTechIds = (project.technologies || []).map((t) => t.id);
-    this.selectedCategoryIds = project.categories?.[0]?.id ? [project.categories[0].id] : [];
+    this.selectedTechIds = (project.technologies as any[] || []).map((t) => t.technology?.id ?? t.id).filter(Boolean);
+    this.selectedCategoryIds = ((project.categories as any[]) || [])
+      .map((c) => c.category?.id ?? c.id)
+      .filter(Boolean)
+      .slice(0, 1);
 
     this.projectForm.patchValue({
       title: project.title,
@@ -171,7 +182,10 @@ export class ProjectListComponent implements OnInit {
         this.showToast(this.editingId ? 'Project updated' : 'Project created', 'success');
         if (!this.editingId && form.bannerImage) {
           const file: File = form.bannerImage;
-          this.apiService.addProjectImage(saved.id, file, true).subscribe();
+          this.apiService.addProjectImage(saved.id, file, true).subscribe({
+            next: () => this.showToast('Image uploaded', 'success'),
+            error: () => this.showToast('Failed to upload image', 'error'),
+          });
         }
         this.cancelForm();
         this.loadProjects();

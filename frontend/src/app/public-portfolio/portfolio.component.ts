@@ -152,7 +152,12 @@ export class PortfolioComponent implements OnInit {
 
     this.api.getPublicProjects().subscribe({
       next: (projects) => {
-        this.projects = projects || [];
+        this.projects = (projects || []).map((p) => ({
+          ...p,
+          technologies: (p.technologies as any[] | undefined)?.map((t: any) =>
+            t.technology ? { ...t.technology, id: t.technology.id } : t
+          ) || [],
+        }));
         this.stats.projects = this.projects.length;
       },
       error: () => {},
