@@ -18,7 +18,7 @@ interface NavItem {
         <div class="sidebar-header">
           <a class="sidebar-brand" routerLink="/admin">
             <span class="brand-icon">&lt;/&gt;</span>
-            <span class="brand-text" *ngIf="!isSidebarCollapsed">DevBlackSheep</span>
+            <span class="brand-text" *ngIf="!isSidebarCollapsed">Alan Tek</span>
           </a>
           <button class="sidebar-close" (click)="toggleMobileSidebar()" *ngIf="isMobileSidebarOpen">
             <i class="bi bi-x-lg"></i>

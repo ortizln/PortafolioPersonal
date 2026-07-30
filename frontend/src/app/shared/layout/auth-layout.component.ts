@@ -17,7 +17,7 @@ import { RouterOutlet } from '@angular/router';
         <div class="auth-card">
           <div class="auth-brand">
             <span class="brand-icon">&lt;/&gt;</span>
-            <span class="brand-name">DevBlackSheep</span>
+            <span class="brand-name">Alan Tek</span>
           </div>
           <router-outlet></router-outlet>
         </div>

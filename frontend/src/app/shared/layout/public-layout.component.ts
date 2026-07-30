@@ -52,7 +52,7 @@ import { NgIf, NgFor } from '@angular/common';
             <div class="footer-social">
               <a href="https://github.com" target="_blank" rel="noopener noreferrer" aria-label="GitHub"><i class="bi bi-github" aria-hidden="true"></i></a>
               <a href="https://linkedin.com" target="_blank" rel="noopener noreferrer" aria-label="LinkedIn"><i class="bi bi-linkedin" aria-hidden="true"></i></a>
-              <a href="mailto:hello@devblacksheep.com" aria-label="Enviar correo"><i class="bi bi-envelope-fill" aria-hidden="true"></i></a>
+              <a href="mailto:alexis.ortiz81@outlook.com" aria-label="Enviar correo"><i class="bi bi-envelope-fill" aria-hidden="true"></i></a>
             </div>
           </div>
           <div class="footer-col">
@@ -67,8 +67,8 @@ import { NgIf, NgFor } from '@angular/common';
           <div class="footer-col">
             <h4 id="foot-contact">Contacto</h4>
             <ul aria-labelledby="foot-contact">
-              <li><i class="bi bi-geo-alt" aria-hidden="true"></i> Ciudad de México, MX</li>
-              <li><i class="bi bi-envelope" aria-hidden="true"></i> hello&#64;devblacksheep.com</li>
+              <li><i class="bi bi-geo-alt" aria-hidden="true"></i> Ciudad de Tulcan, EC</li>
+              <li><i class="bi bi-envelope" aria-hidden="true"></i> alexis.ortiz81&#64;outlook.com</li>
               <li><i class="bi bi-file-text" aria-hidden="true"></i> <a href="#" aria-label="Descargar currículum">Descargar CV</a></li>
             </ul>
           </div>
@@ -81,7 +81,7 @@ import { NgIf, NgFor } from '@angular/common';
           </div>
         </div>
         <div class="footer-bottom">
-          <p>&copy; {{ currentYear }} DevBlackSheep. Todos los derechos reservados.</p>
+          <p>&copy; {{ currentYear }} Alan Tek. Todos los derechos reservados.</p>
           <span class="footer-version" aria-label="Versión v2.0.0">v2.0.0</span>
         </div>
       </div>
