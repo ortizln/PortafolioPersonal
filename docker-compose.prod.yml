@@ -8,10 +8,10 @@ services:
     network_mode: host
     environment:
       NODE_ENV: production
-      DATABASE_URL: postgresql://postgres:086411421@192.168.100.215:5432/portfolio_db?schema=public
+      DATABASE_URL: postgresql://postgres:086411421@192.168.1.43:5432/portfolio_db?schema=public
       JWT_SECRET: ${JWT_SECRET:-cambiar-este-secret-en-produccion}
       JWT_REFRESH_SECRET: ${JWT_REFRESH_SECRET:-cambiar-este-refresh-secret}
-      CORS_ORIGIN: http://192.168.100.215,https://alan-tek.com,http://alan-tek.com
+      CORS_ORIGIN: http://192.168.1.43,https://alan-tek.com,http://alan-tek.com
       RATE_LIMIT_WINDOW: '15'
       RATE_LIMIT_MAX: '100'
     volumes:
