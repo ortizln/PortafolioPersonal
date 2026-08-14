@@ -32,14 +32,23 @@ if ! command -v docker &> /dev/null; then
   exit 1
 fi
 
-# Verificar que existe el .env con DATABASE_URL
-if [ ! -f "$ENV_FILE" ]; then
-  echo "Error: no existe $ENV_FILE. Copiarlo desde .env.prod.example."
+# Verificar que existe el contenedor del backend (fuente de DATABASE_URL)
+if ! docker inspect portfolio-api &> /dev/null; then
+  echo "Error: no se encontro el contenedor 'portfolio-api'."
+  echo "Asegurate de que el backend este levantado (docker compose -f docker-compose.prod.yml ps)."
   exit 1
 fi
 
-# Cargar DATABASE_URL sin exportar el resto
-DATABASE_URL="$(grep -E '^DATABASE_URL=' "$ENV_FILE" | head -n1 | cut -d= -f2-)"
+# Obtener DATABASE_URL: primero del .env, si no del contenedor en ejecucion
+DATABASE_URL=""
+if [ -f "$ENV_FILE" ]; then
+  DATABASE_URL="$(grep -E '^DATABASE_URL=' "$ENV_FILE" | head -n1 | cut -d= -f2-)"
+fi
+
+if [ -z "$DATABASE_URL" ]; then
+  echo "No hay .env en la raiz, leyendo DATABASE_URL del contenedor portfolio-api..."
+  DATABASE_URL="$(docker inspect portfolio-api --format '{{range .Config.Env}}{{println .}}{{end}}' | grep '^DATABASE_URL=' | head -n1 | cut -d= -f2-)"
+fi
 
 # Parsear URL: postgres(ql)://usuario:clave@host:puerto/bd?params
 DB_URL_RE='^postgres(ql)?://([^:]+):([^@]+)@([^:/]+):([0-9]+)/([^?]+)'
@@ -94,11 +103,17 @@ docker run --rm \
   alpine:3 tar czf "/backup/uploads_${TS}.tar.gz" -C /data .
 echo "  OK ($(du -h "$TARGET"/uploads_*.tar.gz | cut -f1))"
 
-# ---------- 3. .env (secretos) ----------
-echo ""
-echo "[3/3] Copia de .env..."
-cp "$ENV_FILE" "$TARGET/.env"
-echo "  OK"
+# ---------- 3. .env (secretos, opcional) ----------
+if [ -f "$ENV_FILE" ]; then
+  echo ""
+  echo "[3/3] Copia de .env..."
+  cp "$ENV_FILE" "$TARGET/.env"
+  echo "  OK"
+else
+  echo ""
+  echo "[3/3] Sin .env en la raiz, se omite su copia."
+  echo "  Los secretos reales quedan en el contenedor portfolio-api."
+fi
 
 # ---------- Retención ----------
 echo ""
