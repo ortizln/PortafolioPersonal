@@ -1152,28 +1152,42 @@ Fases:
 
 **Resultado:** base actual estable y segura.
 
-### Comandos de backup (ejecutar en el servidor `192.168.100.215`)
+### Backup (ejecutar en el servidor `192.168.100.215`)
 
-Backup de PostgreSQL (contenedor `postgres`):
+Método recomendado — script `backup.sh` (raíz del repo), que respalda PostgreSQL, uploads y `.env`:
 
 ```bash
-docker exec postgres pg_dump -U postgres portfolio_db > backup_portfolio_$(date +%Y%m%d).sql
+cd /ruta/al/repo
+chmod +x backup.sh
+./backup.sh
+```
+
+Crea en `/var/backups/portfolio/<fecha>/`:
+- `database.sql.gz` — dump de `portfolio_db` (usa `pg_dump` del sistema, o imagen docker `postgres:16-alpine` si no está instalado).
+- `uploads_<fecha>.tar.gz` — volumen `backend_uploads`.
+- `.env` — variables de entorno (secreto, imprescindible para restaurar JWT).
+
+Conserva los últimos 7 backups (configurable con `RETENTION_DAYS`) y requiere que `DATABASE_URL` del `.env` use el formato `postgresql://usuario:clave@host:puerto/bd`.
+
+Referencia manual si se prefiere:
+
+```bash
+# Dump DB
+PGPASSWORD='CLAVE' pg_dump -h localhost -p 5432 -U postgres portfolio_db | gzip > backup_$(date +%Y%m%d).sql.gz
+
+# Uploads
+docker run --rm -v backend_uploads:/data:ro -v "$PWD":/backup alpine \
+  tar czf /backup/uploads_$(date +%Y%m%d).tar.gz -C /data .
 ```
 
 Restaurar cuando sea necesario:
 
 ```bash
-cat backup_portfolio_YYYYMMDD.sql | docker exec -i postgres psql -U postgres portfolio_db
+gunzip -c database.sql.gz | PGPASSWORD='CLAVE' psql -h localhost -U postgres portfolio_db
+tar xzf uploads_*.tar.gz   # en el volumen backend_uploads
 ```
 
-Backup de archivos subidos (volumen `backend_uploads`):
-
-```bash
-docker run --rm -v backend_uploads:/data -v "$PWD":/backup alpine \
-  tar czf /backup/uploads_$(date +%Y%m%d).tar.gz -C /data .
-```
-
-> Guardar ambos archivos fuera del servidor (otro disco / nube). Los volúmenes Docker se destruyen con `docker compose down -v`, así que el backup debe ser externo.
+> Guardar los archivos de backup fuera del servidor (otro disco / nube). Los volúmenes Docker se destruyen con `docker compose down -v`, así que el backup debe ser externo. La contraseña de la BD no debe contener `:` ni `@` (el parser del script no la soporta).
 
 ---
 
