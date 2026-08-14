@@ -166,10 +166,6 @@ import { UploadUrlPipe } from '../../shared/upload-url.pipe';
               </div>
               <p class="modal-description">{{ selectedProject.description }}</p>
               <div class="modal-links" *ngIf="selectedProject.demoUrl || selectedProject.githubUrl || selectedProject.videoUrl">
-                <div class="modal-link-item" *ngIf="selectedProject.demoUrl">
-                  <i class="bi bi-box-arrow-up-right" aria-hidden="true"></i>
-                  <a [href]="selectedProject.demoUrl" target="_blank" rel="noopener noreferrer">Demo en vivo</a>
-                </div>
                 <div class="modal-link-item" *ngIf="selectedProject.githubUrl">
                   <i class="bi bi-github" aria-hidden="true"></i>
                   <a [href]="selectedProject.githubUrl" target="_blank" rel="noopener noreferrer">Repositorio</a>
