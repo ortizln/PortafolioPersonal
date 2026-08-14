@@ -3,7 +3,7 @@ set -e
 
 # ============================================
 # Script de Deploy - Portafolio Personal
-# Servidor: 192.168.1.43
+# Servidor: 192.168.100.215
 # ============================================
 
 SCRIPT_DIR="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)"
@@ -11,7 +11,7 @@ DEPLOY_DIR="/var/www/portfolio"
 BACKEND_DIR="$SCRIPT_DIR/backend"
 FRONTEND_DIR="$SCRIPT_DIR/frontend"
 NGINX_CONF="$SCRIPT_DIR/nginx/portfolio.conf"
-SERVER_IP="192.168.1.43"
+SERVER_IP="192.168.100.215"
 
 # Detectar si se necesita sudo
 if [ "$(id -u)" -eq 0 ]; then
@@ -51,6 +51,13 @@ fi
 # 5. Verificar que Node.js esta instalado (para build del frontend)
 if ! command -v node &> /dev/null; then
     echo "Error: Node.js no esta instalado."
+    exit 1
+fi
+
+# 5b. Verificar que el archivo .env existe (docker-compose.prod.yml lo requiere)
+if [ ! -f "$SCRIPT_DIR/.env" ]; then
+    echo "Error: No existe el archivo .env en la raiz del proyecto."
+    echo "Crearlo desde .env.prod.example:  cp .env.prod.example .env"
     exit 1
 fi
 

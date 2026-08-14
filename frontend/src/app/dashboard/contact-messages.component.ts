@@ -1,15 +1,7 @@
-import { Component, OnInit } from '@angular/core';
+import { Component, OnInit, inject } from '@angular/core';
 import { CommonModule } from '@angular/common';
-
-interface ContactMessage {
-  id: string;
-  name: string;
-  email: string;
-  subject: string;
-  message: string;
-  date: string;
-  isRead: boolean;
-}
+import { ApiService } from '../core/services/api.service';
+import { ContactMessage } from '../core/models';
 
 @Component({
   selector: 'app-contact-messages',
@@ -19,9 +11,15 @@ interface ContactMessage {
   styleUrls: ['./contact-messages.component.scss']
 })
 export class ContactMessagesComponent implements OnInit {
+  private apiService = inject(ApiService);
+
   messages: ContactMessage[] = [];
   expandedId: string | null = null;
   showDeleteConfirm: string | null = null;
+  loading = true;
+
+  toasts: { message: string; type: 'success' | 'error'; id: number }[] = [];
+  private toastId = 0;
 
   get unreadCount(): number {
     return this.messages.filter(m => !m.isRead).length;
@@ -32,31 +30,12 @@ export class ContactMessagesComponent implements OnInit {
   }
 
   loadMessages(): void {
-    const stored = localStorage.getItem('portfolio_contact_messages');
-    this.messages = stored ? JSON.parse(stored) : [
-      {
-        id: '1', name: 'Alice Johnson', email: 'alice@example.com',
-        subject: 'Collaboration Opportunity',
-        message: 'Hi, I came across your portfolio and I am impressed by your work. I would love to discuss a potential collaboration on a web development project. Let me know if you are interested!',
-        date: '2026-05-01T10:30:00', isRead: false
-      },
-      {
-        id: '2', name: 'Bob Smith', email: 'bob@example.com',
-        subject: 'Job Offer',
-        message: 'We have a senior developer position that matches your skill set. Please reach out to discuss details and compensation.',
-        date: '2026-04-28T14:15:00', isRead: true
-      },
-      {
-        id: '3', name: 'Carol White', email: 'carol@example.com',
-        subject: 'Freelance Project',
-        message: 'Need help building a dashboard with Angular. The project timeline is about 3 months. Are you available for freelance work?',
-        date: '2026-04-25T09:00:00', isRead: false
-      },
-    ];
-  }
-
-  saveMessages(): void {
-    localStorage.setItem('portfolio_contact_messages', JSON.stringify(this.messages));
+    this.loading = true;
+    this.apiService.getContactMessagesAll().subscribe({
+      next: (list) => (this.messages = list),
+      error: () => this.showToast('No se pudieron cargar los mensajes', 'error'),
+      complete: () => (this.loading = false)
+    });
   }
 
   toggleExpand(id: string): void {
@@ -64,11 +43,13 @@ export class ContactMessagesComponent implements OnInit {
   }
 
   markAsRead(id: string): void {
-    const msg = this.messages.find(m => m.id === id);
-    if (msg) {
-      msg.isRead = true;
-      this.saveMessages();
-    }
+    this.apiService.markContactMessageAsRead(id).subscribe({
+      next: (updated) => {
+        const idx = this.messages.findIndex(m => m.id === id);
+        if (idx !== -1) this.messages[idx] = updated;
+      },
+      error: () => this.showToast('Error al marcar el mensaje', 'error')
+    });
   }
 
   markAsReadEvent(event: Event, id: string): void {
@@ -92,10 +73,15 @@ export class ContactMessagesComponent implements OnInit {
   confirmDelete(): void {
     const id = this.showDeleteConfirm;
     if (!id) return;
-    this.messages = this.messages.filter(m => m.id !== id);
-    if (this.expandedId === id) this.expandedId = null;
-    this.showDeleteConfirm = null;
-    this.saveMessages();
+    this.apiService.deleteContactMessage(id).subscribe({
+      next: () => {
+        this.messages = this.messages.filter(m => m.id !== id);
+        if (this.expandedId === id) this.expandedId = null;
+        this.showDeleteConfirm = null;
+        this.showToast('Mensaje eliminado', 'success');
+      },
+      error: () => this.showToast('Error al eliminar el mensaje', 'error')
+    });
   }
 
   stopPropagation(event: Event): void {
@@ -104,9 +90,17 @@ export class ContactMessagesComponent implements OnInit {
 
   formatDate(dateStr: string): string {
     const d = new Date(dateStr);
-    return d.toLocaleDateString('en-US', {
+    return d.toLocaleDateString('es-ES', {
       year: 'numeric', month: 'short', day: 'numeric',
       hour: '2-digit', minute: '2-digit'
     });
+  }
+
+  private showToast(message: string, type: 'success' | 'error'): void {
+    const id = ++this.toastId;
+    this.toasts.push({ message, type, id });
+    setTimeout(() => {
+      this.toasts = this.toasts.filter((t) => t.id !== id);
+    }, 3500);
   }
 }

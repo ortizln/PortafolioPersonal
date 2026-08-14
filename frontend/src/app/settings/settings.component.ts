@@ -1,15 +1,8 @@
-import { Component, OnInit } from '@angular/core';
+import { Component, OnInit, inject } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { FormsModule } from '@angular/forms';
-import { ConfirmService } from '../core/services/confirm.service';
-
-interface Setting {
-  id: string;
-  key: string;
-  value: string;
-  description: string;
-  editMode: 'text' | 'json';
-}
+import { ApiService } from '../core/services/api.service';
+import { Setting } from '../core/models';
 
 @Component({
   selector: 'app-settings',
@@ -19,39 +12,42 @@ interface Setting {
   styleUrls: ['./settings.component.scss']
 })
 export class SettingsComponent implements OnInit {
+  private apiService = inject(ApiService);
+
   settings: Setting[] = [];
   showForm = false;
   editingSetting: Setting | null = null;
-  form = { key: '', value: '', description: '', editMode: 'text' as Setting['editMode'] };
+  form = { key: '', value: '', description: '', editMode: 'text' as 'text' | 'json' };
   isSubmitting = false;
+  loading = true;
 
-  constructor(private confirmService: ConfirmService) {}
+  toasts: { message: string; type: 'success' | 'error'; id: number }[] = [];
+  private toastId = 0;
 
   ngOnInit(): void {
     this.loadSettings();
   }
 
   loadSettings(): void {
-    try {
-      const stored = localStorage.getItem('portfolio_settings');
-      this.settings = stored ? JSON.parse(stored) : [
-        { id: '1', key: 'site_title', value: 'My Portfolio', description: 'Site title shown in the browser tab', editMode: 'text' },
-        { id: '2', key: 'site_description', value: 'Personal portfolio showcasing my work', description: 'Meta description for SEO', editMode: 'text' },
-        { id: '3', key: 'social_links', value: JSON.stringify({ github: 'https://github.com/user' }, null, 2), description: 'Social links configuration', editMode: 'json' },
-      ];
-    } catch {
-      this.settings = [];
-    }
+    this.loading = true;
+    this.apiService.getSettingsAll().subscribe({
+      next: (list) => {
+        this.settings = list.map((s) => ({
+          ...s,
+          value: typeof s.value === 'object' && s.value !== null
+            ? JSON.stringify(s.value, null, 2)
+            : String(s.value ?? '')
+        }));
+      },
+      error: () => this.showToast('No se pudieron cargar los ajustes', 'error'),
+      complete: () => (this.loading = false)
+    });
   }
 
-  saveSettings(): void {
-    localStorage.setItem('portfolio_settings', JSON.stringify(this.settings));
-  }
-
-  isValidJson(str: string): boolean {
+  isJsonObject(str: string): boolean {
     try {
-      JSON.parse(str);
-      return true;
+      const parsed = JSON.parse(str);
+      return typeof parsed === 'object' && parsed !== null && !Array.isArray(parsed);
     } catch {
       return false;
     }
@@ -68,8 +64,8 @@ export class SettingsComponent implements OnInit {
     this.form = {
       key: setting.key,
       value: setting.value,
-      description: setting.description,
-      editMode: setting.editMode
+      description: setting.description || '',
+      editMode: this.isJsonObject(setting.value) ? 'json' : 'text'
     };
     this.showForm = true;
   }
@@ -82,55 +78,85 @@ export class SettingsComponent implements OnInit {
   submitForm(): void {
     if (!this.form.key.trim()) return;
     this.isSubmitting = true;
-    const data: Setting = {
-      id: this.editingSetting?.id || crypto.randomUUID(),
-      key: this.form.key,
-      value: this.form.value,
-      description: this.form.description,
-      editMode: this.form.editMode
-    };
-    if (this.editingSetting) {
-      const idx = this.settings.findIndex(s => s.id === this.editingSetting!.id);
-      if (idx !== -1) this.settings[idx] = data;
-    } else {
-      this.settings.push(data);
-    }
-    this.settings.sort((a, b) => a.key.localeCompare(b.key));
-    this.saveSettings();
-    this.showForm = false;
-    this.editingSetting = null;
-    this.isSubmitting = false;
-  }
 
-  async deleteSetting(id: string): Promise<void> {
-    const ok = await this.confirmService.confirm({ message: 'Delete this setting?' });
-    if (!ok) return;
-    this.settings = this.settings.filter(s => s.id !== id);
-    this.saveSettings();
+    let value: any = this.form.value;
+    if (this.form.editMode === 'json') {
+      if (!this.isValidJson(this.form.value)) {
+        this.showToast('El valor JSON no es válido', 'error');
+        this.isSubmitting = false;
+        return;
+      }
+      value = JSON.parse(this.form.value);
+    }
+
+    this.apiService.updateSetting(this.form.key, {
+      value,
+      description: this.form.description || null
+    }).subscribe({
+      next: () => {
+        this.showToast(this.editingSetting ? 'Ajuste actualizado' : 'Ajuste creado', 'success');
+        this.loadSettings();
+        this.cancelForm();
+      },
+      error: () => this.showToast('Error al guardar el ajuste', 'error'),
+      complete: () => (this.isSubmitting = false)
+    });
   }
 
   toggleEditMode(setting: Setting): void {
-    setting.editMode = setting.editMode === 'text' ? 'json' : 'text';
-    if (setting.editMode === 'json') {
+    const isJson = this.isJsonObject(setting.value);
+    if (!isJson && setting.value.trim().startsWith('{')) {
       try {
         JSON.parse(setting.value);
       } catch {
-        setting.value = JSON.stringify(setting.value, null, 2);
+        return;
       }
     }
-    this.saveSettings();
+    setting.value = isJson ? this.stringify(setting.value) : setting.value;
+    this.apiService.updateSetting(setting.key, {
+      value: isJson ? JSON.parse(this.stringify(setting.value)) : setting.value
+    }).subscribe({
+      error: () => this.showToast('Error al guardar el ajuste', 'error')
+    });
   }
 
   formatJson(setting: Setting): void {
     try {
       const parsed = JSON.parse(setting.value);
       setting.value = JSON.stringify(parsed, null, 2);
-      this.saveSettings();
+      this.apiService.updateSetting(setting.key, { value: parsed }).subscribe({
+        error: () => this.showToast('Error al guardar el ajuste', 'error')
+      });
     } catch {
+    }
+  }
+
+  private stringify(value: string): string {
+    try {
+      return JSON.stringify(JSON.parse(value), null, 2);
+    } catch {
+      return value;
+    }
+  }
+
+  private isValidJson(str: string): boolean {
+    try {
+      JSON.parse(str);
+      return true;
+    } catch {
+      return false;
     }
   }
 
   trackById(index: number, item: Setting): string {
     return item.id;
+  }
+
+  private showToast(message: string, type: 'success' | 'error'): void {
+    const id = ++this.toastId;
+    this.toasts.push({ message, type, id });
+    setTimeout(() => {
+      this.toasts = this.toasts.filter((t) => t.id !== id);
+    }, 3500);
   }
 }

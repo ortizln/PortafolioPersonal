@@ -19,6 +19,7 @@ const authController = {
           email,
           password: hashedPassword,
           name,
+          role: 'USER',
           profile: { create: { fullName: profileData.fullName || name, professionalTitle: profileData.professionalTitle || '' } }
         },
         select: { id: true, email: true, name: true, role: true, isActive: true, createdAt: true }

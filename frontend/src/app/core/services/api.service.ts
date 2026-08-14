@@ -222,19 +222,25 @@ export class ApiService {
     return this.http.get<Language[]>(`${this.apiUrl}/languages`);
   }
 
-  getLanguageById(id: number): Observable<Language> {
-    return this.http.get<Language>(`${this.apiUrl}/languages/${id}`);
+  getLanguageById(id: string): Observable<Language> {
+    return this.http.get<{ language: Language }>(`${this.apiUrl}/languages/${id}`).pipe(
+      map((res) => res.language)
+    );
   }
 
   createLanguage(data: Partial<Language>): Observable<Language> {
-    return this.http.post<Language>(`${this.apiUrl}/languages`, data);
+    return this.http.post<{ language: Language }>(`${this.apiUrl}/languages`, data).pipe(
+      map((res) => res.language)
+    );
   }
 
-  updateLanguage(id: number, data: Partial<Language>): Observable<Language> {
-    return this.http.put<Language>(`${this.apiUrl}/languages/${id}`, data);
+  updateLanguage(id: string, data: Partial<Language>): Observable<Language> {
+    return this.http.put<{ language: Language }>(`${this.apiUrl}/languages/${id}`, data).pipe(
+      map((res) => res.language)
+    );
   }
 
-  deleteLanguage(id: number): Observable<void> {
+  deleteLanguage(id: string): Observable<void> {
     return this.http.delete<void>(`${this.apiUrl}/languages/${id}`);
   }
 
@@ -243,19 +249,25 @@ export class ApiService {
     return this.http.get<SocialLink[]>(`${this.apiUrl}/social-links`);
   }
 
-  getSocialLinkById(id: number): Observable<SocialLink> {
-    return this.http.get<SocialLink>(`${this.apiUrl}/social-links/${id}`);
+  getSocialLinkById(id: string): Observable<SocialLink> {
+    return this.http.get<{ socialLink: SocialLink }>(`${this.apiUrl}/social-links/${id}`).pipe(
+      map((res) => res.socialLink)
+    );
   }
 
   createSocialLink(data: Partial<SocialLink>): Observable<SocialLink> {
-    return this.http.post<SocialLink>(`${this.apiUrl}/social-links`, data);
+    return this.http.post<{ socialLink: SocialLink }>(`${this.apiUrl}/social-links`, data).pipe(
+      map((res) => res.socialLink)
+    );
   }
 
-  updateSocialLink(id: number, data: Partial<SocialLink>): Observable<SocialLink> {
-    return this.http.put<SocialLink>(`${this.apiUrl}/social-links/${id}`, data);
+  updateSocialLink(id: string, data: Partial<SocialLink>): Observable<SocialLink> {
+    return this.http.put<{ socialLink: SocialLink }>(`${this.apiUrl}/social-links/${id}`, data).pipe(
+      map((res) => res.socialLink)
+    );
   }
 
-  deleteSocialLink(id: number): Observable<void> {
+  deleteSocialLink(id: string): Observable<void> {
     return this.http.delete<void>(`${this.apiUrl}/social-links/${id}`);
   }
 
@@ -264,19 +276,25 @@ export class ApiService {
     return this.http.get<Repository[]>(`${this.apiUrl}/repositories`);
   }
 
-  getRepositoryById(id: number): Observable<Repository> {
-    return this.http.get<Repository>(`${this.apiUrl}/repositories/${id}`);
+  getRepositoryById(id: string): Observable<Repository> {
+    return this.http.get<{ repository: Repository }>(`${this.apiUrl}/repositories/${id}`).pipe(
+      map((res) => res.repository)
+    );
   }
 
   createRepository(data: Partial<Repository>): Observable<Repository> {
-    return this.http.post<Repository>(`${this.apiUrl}/repositories`, data);
+    return this.http.post<{ repository: Repository }>(`${this.apiUrl}/repositories`, data).pipe(
+      map((res) => res.repository)
+    );
   }
 
-  updateRepository(id: number, data: Partial<Repository>): Observable<Repository> {
-    return this.http.put<Repository>(`${this.apiUrl}/repositories/${id}`, data);
+  updateRepository(id: string, data: Partial<Repository>): Observable<Repository> {
+    return this.http.put<{ repository: Repository }>(`${this.apiUrl}/repositories/${id}`, data).pipe(
+      map((res) => res.repository)
+    );
   }
 
-  deleteRepository(id: number): Observable<void> {
+  deleteRepository(id: string): Observable<void> {
     return this.http.delete<void>(`${this.apiUrl}/repositories/${id}`);
   }
 
@@ -293,19 +311,25 @@ export class ApiService {
     return this.http.get<Category[]>(`${this.apiUrl}/categories`);
   }
 
-  getCategoryById(id: number): Observable<Category> {
-    return this.http.get<Category>(`${this.apiUrl}/categories/${id}`);
+  getCategoryById(id: string): Observable<Category> {
+    return this.http.get<{ category: Category }>(`${this.apiUrl}/categories/${id}`).pipe(
+      map((res) => res.category)
+    );
   }
 
   createCategory(data: Partial<Category>): Observable<Category> {
-    return this.http.post<Category>(`${this.apiUrl}/categories`, data);
+    return this.http.post<{ category: Category }>(`${this.apiUrl}/categories`, data).pipe(
+      map((res) => res.category)
+    );
   }
 
-  updateCategory(id: number, data: Partial<Category>): Observable<Category> {
-    return this.http.put<Category>(`${this.apiUrl}/categories/${id}`, data);
+  updateCategory(id: string, data: Partial<Category>): Observable<Category> {
+    return this.http.put<{ category: Category }>(`${this.apiUrl}/categories/${id}`, data).pipe(
+      map((res) => res.category)
+    );
   }
 
-  deleteCategory(id: number): Observable<void> {
+  deleteCategory(id: string): Observable<void> {
     return this.http.delete<void>(`${this.apiUrl}/categories/${id}`);
   }
 
@@ -316,20 +340,26 @@ export class ApiService {
     return this.http.get<ContactMessage[]>(`${this.apiUrl}/contact`, { params: httpParams });
   }
 
-  getContactMessageById(id: number): Observable<ContactMessage> {
-    return this.http.get<ContactMessage>(`${this.apiUrl}/contact/${id}`);
+  getContactMessageById(id: string): Observable<ContactMessage> {
+    return this.http.get<{ contact: ContactMessage }>(`${this.apiUrl}/contact/${id}`).pipe(
+      map((res) => res.contact)
+    );
   }
 
   createContactMessage(data: Partial<ContactMessage>): Observable<ContactMessage> {
-    return this.http.post<ContactMessage>(`${this.apiUrl}/contact`, data);
+    return this.http.post<{ contact: ContactMessage }>(`${this.apiUrl}/contact`, data).pipe(
+      map((res) => res.contact)
+    );
   }
 
-  deleteContactMessage(id: number): Observable<void> {
+  deleteContactMessage(id: string): Observable<void> {
     return this.http.delete<void>(`${this.apiUrl}/contact/${id}`);
   }
 
-  markContactMessageAsRead(id: number): Observable<ContactMessage> {
-    return this.http.put<ContactMessage>(`${this.apiUrl}/contact/${id}/read`, {});
+  markContactMessageAsRead(id: string): Observable<ContactMessage> {
+    return this.http.put<{ contact: ContactMessage }>(`${this.apiUrl}/contact/${id}/read`, {}).pipe(
+      map((res) => res.contact)
+    );
   }
 
   // Settings
@@ -338,11 +368,15 @@ export class ApiService {
   }
 
   getSettingByKey(key: string): Observable<Setting> {
-    return this.http.get<Setting>(`${this.apiUrl}/settings/${key}`);
+    return this.http.get<{ setting: Setting }>(`${this.apiUrl}/settings/${key}`).pipe(
+      map((res) => res.setting)
+    );
   }
 
   updateSetting(key: string, data: Partial<Setting>): Observable<Setting> {
-    return this.http.put<Setting>(`${this.apiUrl}/settings/${key}`, data);
+    return this.http.put<{ setting: Setting }>(`${this.apiUrl}/settings/${key}`, data).pipe(
+      map((res) => res.setting)
+    );
   }
 
   // Stats

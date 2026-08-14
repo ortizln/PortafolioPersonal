@@ -3,6 +3,13 @@ const { AppError } = require('../middlewares/errorHandler');
 const path = require('path');
 const fs = require('fs');
 
+const uploadBase = path.join(__dirname, '..', '..', 'uploads');
+
+const resolveDiskPath = (storedPath) => {
+  if (!storedPath) return null;
+  return path.join(uploadBase, storedPath);
+};
+
 const uploadController = {
   async uploadFile(req, res, next) {
     try {
@@ -13,14 +20,17 @@ const uploadController = {
       const fieldname = req.file.fieldname;
       const urlPath = `${fieldname}s/${req.file.filename}`;
 
-      const file = await prisma.uploadedFile.create({
+      const file = await prisma.mediaFile.create({
         data: {
-          filename: req.file.filename,
+          fileName: req.file.filename,
           originalName: req.file.originalname,
           mimeType: req.file.mimetype,
           size: req.file.size,
           path: urlPath,
-          fieldname
+          url: `/${urlPath}`,
+          fieldname,
+          folder: `${fieldname}s`,
+          uploadedBy: req.user?.id || null
         }
       });
 
@@ -37,36 +47,47 @@ const uploadController = {
       }
 
       let thumbnailPath = null;
+      let thumbUrlPath = null;
+      let width = null;
+      let height = null;
 
-      if (typeof sharp !== 'undefined') {
-        try {
-          const sharp = require('sharp');
-          const thumbDir = path.join(__dirname, '..', '..', 'uploads', 'thumbnails');
-          if (!fs.existsSync(thumbDir)) {
-            fs.mkdirSync(thumbDir, { recursive: true });
-          }
-          const thumbFilename = `thumb_${req.file.filename}`;
-          await sharp(req.file.path)
-            .resize(300, 300, { fit: 'cover' })
-            .toFile(path.join(thumbDir, thumbFilename));
-          thumbnailPath = path.join(thumbDir, thumbFilename);
-        } catch {
-          thumbnailPath = req.file.path;
+      const sharp = require('sharp');
+      try {
+        const metadata = await sharp(req.file.path).metadata();
+        width = metadata.width || null;
+        height = metadata.height || null;
+
+        const thumbDir = path.join(uploadBase, 'thumbnails');
+        if (!fs.existsSync(thumbDir)) {
+          fs.mkdirSync(thumbDir, { recursive: true });
         }
+        const thumbFilename = `thumb_${req.file.filename}`;
+        await sharp(req.file.path)
+          .resize(300, 300, { fit: 'cover' })
+          .toFile(path.join(thumbDir, thumbFilename));
+        thumbnailPath = path.join(thumbDir, thumbFilename);
+        thumbUrlPath = `thumbnails/${thumbFilename}`;
+      } catch {
+        thumbnailPath = null;
       }
 
-      const urlPath = `${req.file.fieldname || 'image'}s/${req.file.filename}`;
-      const thumbUrlPath = thumbnailPath ? `thumbnails/thumb_${req.file.filename}` : null;
+      const fieldname = req.file.fieldname || 'image';
+      const urlPath = `${fieldname}s/${req.file.filename}`;
 
-      const image = await prisma.uploadedFile.create({
+      const image = await prisma.mediaFile.create({
         data: {
-          filename: req.file.filename,
+          fileName: req.file.filename,
           originalName: req.file.originalname,
           mimeType: req.file.mimetype,
           size: req.file.size,
           path: urlPath,
-          fieldname: req.file.fieldname || 'image',
-          thumbnail: thumbUrlPath
+          url: `/${urlPath}`,
+          width,
+          height,
+          fieldname,
+          folder: `${fieldname}s`,
+          thumbnail: thumbUrlPath,
+          uploadedBy: req.user?.id || null
         }
       });
 
@@ -78,8 +99,8 @@ const uploadController = {
 
   async deleteFile(req, res, next) {
     try {
-      const file = await prisma.uploadedFile.findFirst({
-        where: { filename: req.params.filename }
+      const file = await prisma.mediaFile.findFirst({
+        where: { fileName: req.params.filename, deletedAt: null }
       });
 
       if (!file) {
@@ -87,17 +108,19 @@ const uploadController = {
       }
 
       try {
-        if (fs.existsSync(file.path)) {
-          fs.unlinkSync(file.path);
+        const diskPath = resolveDiskPath(file.path);
+        if (diskPath && fs.existsSync(diskPath)) {
+          fs.unlinkSync(diskPath);
         }
-        if (file.thumbnail && fs.existsSync(file.thumbnail)) {
-          fs.unlinkSync(file.thumbnail);
+        const thumbPath = resolveDiskPath(file.thumbnail);
+        if (thumbPath && fs.existsSync(thumbPath)) {
+          fs.unlinkSync(thumbPath);
         }
       } catch {
         // ignore file system errors
       }
 
-      await prisma.uploadedFile.delete({
+      await prisma.mediaFile.delete({
         where: { id: file.id }
       });
 

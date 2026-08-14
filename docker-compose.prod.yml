@@ -8,12 +8,13 @@ services:
     network_mode: host
     environment:
       NODE_ENV: production
-      DATABASE_URL: postgresql://postgres:086411421@192.168.1.43:5432/portfolio_db?schema=public
-      JWT_SECRET: ${JWT_SECRET:-cambiar-este-secret-en-produccion}
-      JWT_REFRESH_SECRET: ${JWT_REFRESH_SECRET:-cambiar-este-refresh-secret}
-      CORS_ORIGIN: http://192.168.1.43,https://alan-tek.com,http://alan-tek.com
-      RATE_LIMIT_WINDOW: '15'
-      RATE_LIMIT_MAX: '100'
+      DATABASE_URL: ${DATABASE_URL:?DATABASE_URL es requerida en el .env}
+      JWT_SECRET: ${JWT_SECRET:?JWT_SECRET es requerido en el .env}
+      JWT_REFRESH_SECRET: ${JWT_REFRESH_SECRET:?JWT_REFRESH_SECRET es requerido en el .env}
+      CORS_ORIGIN: ${CORS_ORIGIN:?CORS_ORIGIN es requerido en el .env}
+      RATE_LIMIT_WINDOW: ${RATE_LIMIT_WINDOW:-15}
+      RATE_LIMIT_MAX: ${RATE_LIMIT_MAX:-100}
+      MAX_FILE_SIZE: ${MAX_FILE_SIZE:-20971520}
     volumes:
       - backend_uploads:/app/uploads
 

@@ -37,7 +37,7 @@ model User {
   email         String   @unique
   password      String
   name          String
-  role          Role     @default(ADMIN)
+  role          Role     @default(USER)
   isActive      Boolean  @default(true)
   refreshToken  String?
   lastLogin     DateTime?
@@ -56,6 +56,7 @@ model User {
   repositories  Repository[]
   auditLogs     AuditLog[]
   contactMessages ContactMessage[]
+  mediaFiles    MediaFile[]
 
   @@map("users")
 }
@@ -392,4 +393,30 @@ model AuditLog {
   user          User?    @relation(fields: [userId], references: [id])
 
   @@map("audit_logs")
+}
+
+model MediaFile {
+  id            String    @id @default(uuid())
+  fileName      String
+  originalName  String
+  mimeType      String
+  size          Int
+  path          String
+  url           String?
+  width         Int?
+  height        Int?
+  altText       String?
+  folder        String?
+  fieldname     String?
+  thumbnail     String?
+  uploadedBy    String?
+  createdAt     DateTime  @default(now())
+  updatedAt     DateTime  @updatedAt
+  deletedAt     DateTime?
+
+  user          User?     @relation(fields: [uploadedBy], references: [id])
+
+  @@index([folder])
+  @@index([createdAt])
+  @@map("media_files")
 }

@@ -1,22 +1,9 @@
-import { Component, OnInit } from '@angular/core';
+import { Component, OnInit, inject } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { FormsModule } from '@angular/forms';
+import { ApiService } from '../core/services/api.service';
 import { ConfirmService } from '../core/services/confirm.service';
-
-interface Repository {
-  id: string;
-  name: string;
-  fullName: string;
-  description: string;
-  url: string;
-  platform: 'github' | 'gitlab';
-  language: string;
-  stars: number;
-  forks: number;
-  isPrivate: boolean;
-  lastPushed: string;
-  topics: string[];
-}
+import { Repository } from '../core/models';
 
 @Component({
   selector: 'app-repository-list',
@@ -26,52 +13,62 @@ interface Repository {
   styleUrls: ['./repository-list.component.scss']
 })
 export class RepositoryListComponent implements OnInit {
+  private apiService = inject(ApiService);
+  private confirmService = inject(ConfirmService);
+
   repos: Repository[] = [];
   showForm = false;
   editingRepo: Repository | null = null;
   form = {
     name: '', fullName: '', description: '', url: '',
-    platform: 'github' as Repository['platform'],
+    platform: 'github' as 'github' | 'gitlab',
     language: '', stars: 0, forks: 0, isPrivate: false,
     lastPushed: '', topics: ''
   };
   isSubmitting = false;
   syncing = { github: false, gitlab: false };
+  loading = true;
 
-  constructor(private confirmService: ConfirmService) {}
+  toasts: { message: string; type: 'success' | 'error'; id: number }[] = [];
+  private toastId = 0;
+
+  constructor() {}
 
   ngOnInit(): void {
     this.loadRepos();
   }
 
   loadRepos(): void {
-    const stored = localStorage.getItem('portfolio_repos');
-    this.repos = stored ? JSON.parse(stored) : [
-      {
-        id: '1', name: 'portfolio', fullName: 'user/portfolio',
-        description: 'Personal portfolio website', url: 'https://github.com/user/portfolio',
-        platform: 'github', language: 'TypeScript', stars: 12, forks: 3,
-        isPrivate: false, lastPushed: '2026-04-20', topics: ['angular', 'portfolio', 'typescript']
-      },
-    ];
-  }
-
-  saveRepos(): void {
-    localStorage.setItem('portfolio_repos', JSON.stringify(this.repos));
+    this.loading = true;
+    this.apiService.getRepositoriesAll().subscribe({
+      next: (list) => (this.repos = list),
+      error: () => this.showToast('No se pudieron cargar los repositorios', 'error'),
+      complete: () => (this.loading = false)
+    });
   }
 
   syncGitHub(): void {
     this.syncing.github = true;
-    setTimeout(() => {
-      this.syncing.github = false;
-    }, 2000);
+    this.apiService.syncGithub().subscribe({
+      next: () => {
+        this.showToast('Repositorios de GitHub sincronizados', 'success');
+        this.loadRepos();
+      },
+      error: () => this.showToast('La sincronización de GitHub no está configurada aún', 'error'),
+      complete: () => (this.syncing.github = false)
+    });
   }
 
   syncGitLab(): void {
     this.syncing.gitlab = true;
-    setTimeout(() => {
-      this.syncing.gitlab = false;
-    }, 2000);
+    this.apiService.syncGitlab().subscribe({
+      next: () => {
+        this.showToast('Repositorios de GitLab sincronizados', 'success');
+        this.loadRepos();
+      },
+      error: () => this.showToast('La sincronización de GitLab no está configurada aún', 'error'),
+      complete: () => (this.syncing.gitlab = false)
+    });
   }
 
   openCreate(): void {
@@ -89,14 +86,14 @@ export class RepositoryListComponent implements OnInit {
     this.form = {
       name: repo.name,
       fullName: repo.fullName,
-      description: repo.description,
+      description: repo.description || '',
       url: repo.url,
-      platform: repo.platform,
-      language: repo.language,
+      platform: (repo.platform as 'github' | 'gitlab') || 'github',
+      language: repo.language || '',
       stars: repo.stars,
       forks: repo.forks,
       isPrivate: repo.isPrivate,
-      lastPushed: repo.lastPushed,
+      lastPushed: repo.lastPushed || '',
       topics: repo.topics.join(', ')
     };
     this.showForm = true;
@@ -110,40 +107,64 @@ export class RepositoryListComponent implements OnInit {
   submitForm(): void {
     if (!this.form.name.trim()) return;
     this.isSubmitting = true;
-    const data: Repository = {
-      id: this.editingRepo?.id || crypto.randomUUID(),
+    const payload = {
       name: this.form.name,
       fullName: this.form.fullName,
-      description: this.form.description,
+      description: this.form.description || null,
       url: this.form.url,
       platform: this.form.platform,
-      language: this.form.language,
+      language: this.form.language || null,
       stars: this.form.stars,
       forks: this.form.forks,
       isPrivate: this.form.isPrivate,
-      lastPushed: this.form.lastPushed,
+      lastPushed: this.form.lastPushed || null,
       topics: this.form.topics.split(',').map(t => t.trim()).filter(Boolean)
     };
+
     if (this.editingRepo) {
-      const idx = this.repos.findIndex(r => r.id === this.editingRepo!.id);
-      if (idx !== -1) this.repos[idx] = data;
+      this.apiService.updateRepository(this.editingRepo.id, payload).subscribe({
+        next: () => {
+          this.showToast('Repositorio actualizado', 'success');
+          this.loadRepos();
+          this.cancelForm();
+        },
+        error: () => this.showToast('Error al actualizar el repositorio', 'error'),
+        complete: () => (this.isSubmitting = false)
+      });
     } else {
-      this.repos.push(data);
+      this.apiService.createRepository(payload).subscribe({
+        next: () => {
+          this.showToast('Repositorio creado', 'success');
+          this.loadRepos();
+          this.cancelForm();
+        },
+        error: () => this.showToast('Error al crear el repositorio', 'error'),
+        complete: () => (this.isSubmitting = false)
+      });
     }
-    this.saveRepos();
-    this.showForm = false;
-    this.editingRepo = null;
-    this.isSubmitting = false;
   }
 
   async deleteRepo(id: string): Promise<void> {
-    const ok = await this.confirmService.confirm({ message: 'Delete this repository?' });
+    const ok = await this.confirmService.confirm({ message: '¿Eliminar este repositorio?' });
     if (!ok) return;
-    this.repos = this.repos.filter(r => r.id !== id);
-    this.saveRepos();
+    this.apiService.deleteRepository(id).subscribe({
+      next: () => {
+        this.repos = this.repos.filter(r => r.id !== id);
+        this.showToast('Repositorio eliminado', 'success');
+      },
+      error: () => this.showToast('Error al eliminar el repositorio', 'error')
+    });
   }
 
   openRepo(url: string): void {
     window.open(url, '_blank');
+  }
+
+  private showToast(message: string, type: 'success' | 'error'): void {
+    const id = ++this.toastId;
+    this.toasts.push({ message, type, id });
+    setTimeout(() => {
+      this.toasts = this.toasts.filter((t) => t.id !== id);
+    }, 3500);
   }
 }

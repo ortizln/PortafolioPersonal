@@ -1,15 +1,11 @@
-import { Component, OnInit } from '@angular/core';
+import { Component, OnInit, inject } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { FormsModule } from '@angular/forms';
+import { ApiService } from '../core/services/api.service';
 import { ConfirmService } from '../core/services/confirm.service';
+import { Language } from '../core/models';
 
-interface Language {
-  id: string;
-  name: string;
-  level: 'Beginner' | 'Intermediate' | 'Advanced' | 'Native';
-  percentage: number;
-  certification?: string;
-}
+type LanguageLevel = 'Beginner' | 'Intermediate' | 'Advanced' | 'Native';
 
 @Component({
   selector: 'app-language-list',
@@ -19,29 +15,30 @@ interface Language {
   styleUrls: ['./language-list.component.scss']
 })
 export class LanguageListComponent implements OnInit {
+  private apiService = inject(ApiService);
+  private confirmService = inject(ConfirmService);
+
   languages: Language[] = [];
   showForm = false;
   editingLanguage: Language | null = null;
-  form = { name: '', level: 'Beginner' as Language['level'], percentage: 0, certification: '' };
+  form = { name: '', level: 'Beginner' as LanguageLevel, percentage: 0, certification: '' };
   isSubmitting = false;
+  loading = true;
 
-  constructor(private confirmService: ConfirmService) {}
+  toasts: { message: string; type: 'success' | 'error'; id: number }[] = [];
+  private toastId = 0;
 
   ngOnInit(): void {
     this.loadLanguages();
   }
 
   loadLanguages(): void {
-    const stored = localStorage.getItem('portfolio_languages');
-    this.languages = stored ? JSON.parse(stored) : [
-      { id: '1', name: 'English', level: 'Native', percentage: 100, certification: 'TOEFL 110' },
-      { id: '2', name: 'Spanish', level: 'Native', percentage: 100 },
-      { id: '3', name: 'French', level: 'Intermediate', percentage: 55, certification: 'DELF B1' },
-    ];
-  }
-
-  saveLanguages(): void {
-    localStorage.setItem('portfolio_languages', JSON.stringify(this.languages));
+    this.loading = true;
+    this.apiService.getLanguagesAll().subscribe({
+      next: (list) => (this.languages = list),
+      error: () => this.showToast('No se pudieron cargar los idiomas', 'error'),
+      complete: () => (this.loading = false)
+    });
   }
 
   openCreate(): void {
@@ -54,7 +51,7 @@ export class LanguageListComponent implements OnInit {
     this.editingLanguage = lang;
     this.form = {
       name: lang.name,
-      level: lang.level,
+      level: (lang.level as LanguageLevel) || 'Beginner',
       percentage: lang.percentage,
       certification: lang.certification || ''
     };
@@ -69,40 +66,63 @@ export class LanguageListComponent implements OnInit {
   submitForm(): void {
     if (!this.form.name.trim()) return;
     this.isSubmitting = true;
+    const payload = {
+      name: this.form.name,
+      level: this.form.level,
+      percentage: this.form.percentage,
+      certification: this.form.certification || null
+    };
+
     if (this.editingLanguage) {
-      const idx = this.languages.findIndex(l => l.id === this.editingLanguage!.id);
-      if (idx !== -1) {
-        this.languages[idx] = {
-          ...this.languages[idx],
-          name: this.form.name,
-          level: this.form.level,
-          percentage: this.form.percentage,
-          certification: this.form.certification || undefined
-        };
-      }
+      this.apiService.updateLanguage(this.editingLanguage.id, payload).subscribe({
+        next: () => {
+          this.showToast('Idioma actualizado', 'success');
+          this.loadLanguages();
+          this.cancelForm();
+        },
+        error: () => this.showToast('Error al actualizar el idioma', 'error'),
+        complete: () => (this.isSubmitting = false)
+      });
     } else {
-      this.languages.push({
-        id: crypto.randomUUID(),
-        name: this.form.name,
-        level: this.form.level,
-        percentage: this.form.percentage,
-        certification: this.form.certification || undefined
+      this.apiService.createLanguage(payload).subscribe({
+        next: () => {
+          this.showToast('Idioma creado', 'success');
+          this.loadLanguages();
+          this.cancelForm();
+        },
+        error: () => this.showToast('Error al crear el idioma', 'error'),
+        complete: () => (this.isSubmitting = false)
       });
     }
-    this.saveLanguages();
-    this.showForm = false;
-    this.editingLanguage = null;
-    this.isSubmitting = false;
   }
 
   async deleteLanguage(id: string): Promise<void> {
-    const ok = await this.confirmService.confirm({ message: 'Delete this language?' });
+    const ok = await this.confirmService.confirm({ message: '¿Eliminar este idioma?' });
     if (!ok) return;
-    this.languages = this.languages.filter(l => l.id !== id);
-    this.saveLanguages();
+    this.apiService.deleteLanguage(id).subscribe({
+      next: () => {
+        this.languages = this.languages.filter((l) => l.id !== id);
+        this.showToast('Idioma eliminado', 'success');
+      },
+      error: () => this.showToast('Error al eliminar el idioma', 'error')
+    });
   }
 
   getLevelLabel(level: string): string {
-    return level;
+    const map: Record<string, string> = {
+      Beginner: 'Básico',
+      Intermediate: 'Intermedio',
+      Advanced: 'Avanzado',
+      Native: 'Nativo'
+    };
+    return map[level] || level;
+  }
+
+  private showToast(message: string, type: 'success' | 'error'): void {
+    const id = ++this.toastId;
+    this.toasts.push({ message, type, id });
+    setTimeout(() => {
+      this.toasts = this.toasts.filter((t) => t.id !== id);
+    }, 3500);
   }
 }

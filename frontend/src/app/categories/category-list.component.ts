@@ -1,14 +1,13 @@
-import { Component, OnInit } from '@angular/core';
+import { Component, OnInit, inject } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { FormsModule } from '@angular/forms';
+import { ApiService } from '../core/services/api.service';
 import { ConfirmService } from '../core/services/confirm.service';
+import { Category } from '../core/models';
 
-interface Category {
-  id: string;
-  name: string;
-  description: string;
-  slug: string;
-  projectCount: number;
+interface CategoryWithCount extends Category {
+  projectCount?: number;
+  _count?: { projects?: number };
 }
 
 @Component({
@@ -19,29 +18,35 @@ interface Category {
   styleUrls: ['./category-list.component.scss']
 })
 export class CategoryListComponent implements OnInit {
-  categories: Category[] = [];
+  private apiService = inject(ApiService);
+  private confirmService = inject(ConfirmService);
+
+  categories: CategoryWithCount[] = [];
   showForm = false;
-  editingCategory: Category | null = null;
+  editingCategory: CategoryWithCount | null = null;
   form = { name: '', description: '' };
   isSubmitting = false;
+  loading = true;
 
-  constructor(private confirmService: ConfirmService) {}
+  toasts: { message: string; type: 'success' | 'error'; id: number }[] = [];
+  private toastId = 0;
 
   ngOnInit(): void {
     this.loadCategories();
   }
 
   loadCategories(): void {
-    const stored = localStorage.getItem('portfolio_categories');
-    this.categories = stored ? JSON.parse(stored) : [
-      { id: '1', name: 'Frontend', description: 'Frontend development projects', slug: 'frontend', projectCount: 5 },
-      { id: '2', name: 'Backend', description: 'Backend APIs and services', slug: 'backend', projectCount: 3 },
-      { id: '3', name: 'Fullstack', description: 'Fullstack applications', slug: 'fullstack', projectCount: 7 },
-    ];
-  }
-
-  saveCategories(): void {
-    localStorage.setItem('portfolio_categories', JSON.stringify(this.categories));
+    this.loading = true;
+    this.apiService.getCategoriesAll().subscribe({
+      next: (list) => {
+        this.categories = (list as CategoryWithCount[]).map((c) => ({
+          ...c,
+          projectCount: c._count?.projects ?? c.projectCount ?? 0
+        }));
+      },
+      error: () => this.showToast('No se pudieron cargar las categorías', 'error'),
+      complete: () => (this.loading = false)
+    });
   }
 
   slugify(text: string): string {
@@ -60,9 +65,9 @@ export class CategoryListComponent implements OnInit {
     this.showForm = true;
   }
 
-  openEdit(cat: Category): void {
+  openEdit(cat: CategoryWithCount): void {
     this.editingCategory = cat;
-    this.form = { name: cat.name, description: cat.description };
+    this.form = { name: cat.name, description: cat.description || '' };
     this.showForm = true;
   }
 
@@ -74,36 +79,48 @@ export class CategoryListComponent implements OnInit {
   submitForm(): void {
     if (!this.form.name.trim()) return;
     this.isSubmitting = true;
-    const slug = this.slugify(this.form.name);
+    const payload = { name: this.form.name, description: this.form.description };
+
     if (this.editingCategory) {
-      const idx = this.categories.findIndex(c => c.id === this.editingCategory!.id);
-      if (idx !== -1) {
-        this.categories[idx] = {
-          ...this.categories[idx],
-          name: this.form.name,
-          description: this.form.description,
-          slug
-        };
-      }
+      this.apiService.updateCategory(this.editingCategory.id, payload).subscribe({
+        next: () => {
+          this.showToast('Categoría actualizada', 'success');
+          this.loadCategories();
+          this.cancelForm();
+        },
+        error: () => this.showToast('Error al actualizar la categoría', 'error'),
+        complete: () => (this.isSubmitting = false)
+      });
     } else {
-      this.categories.push({
-        id: crypto.randomUUID(),
-        name: this.form.name,
-        description: this.form.description,
-        slug,
-        projectCount: 0
+      this.apiService.createCategory(payload).subscribe({
+        next: () => {
+          this.showToast('Categoría creada', 'success');
+          this.loadCategories();
+          this.cancelForm();
+        },
+        error: () => this.showToast('Error al crear la categoría', 'error'),
+        complete: () => (this.isSubmitting = false)
       });
     }
-    this.saveCategories();
-    this.showForm = false;
-    this.editingCategory = null;
-    this.isSubmitting = false;
   }
 
   async deleteCategory(id: string): Promise<void> {
-    const ok = await this.confirmService.confirm({ message: 'Delete this category?' });
+    const ok = await this.confirmService.confirm({ message: '¿Eliminar esta categoría?' });
     if (!ok) return;
-    this.categories = this.categories.filter(c => c.id !== id);
-    this.saveCategories();
+    this.apiService.deleteCategory(id).subscribe({
+      next: () => {
+        this.categories = this.categories.filter(c => c.id !== id);
+        this.showToast('Categoría eliminada', 'success');
+      },
+      error: () => this.showToast('Error al eliminar la categoría', 'error')
+    });
+  }
+
+  private showToast(message: string, type: 'success' | 'error'): void {
+    const id = ++this.toastId;
+    this.toasts.push({ message, type, id });
+    setTimeout(() => {
+      this.toasts = this.toasts.filter((t) => t.id !== id);
+    }, 3500);
   }
 }

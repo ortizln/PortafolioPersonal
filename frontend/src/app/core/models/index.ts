@@ -157,7 +157,7 @@ export interface Skill {
 }
 
 export interface Language {
-  id: number;
+  id: string;
   name: string;
   level: string;
   percentage: number;
@@ -167,7 +167,7 @@ export interface Language {
 }
 
 export interface SocialLink {
-  id: number;
+  id: string;
   platform: string;
   url: string;
   icon?: string;
@@ -178,7 +178,7 @@ export interface SocialLink {
 }
 
 export interface Repository {
-  id: number;
+  id: string;
   name: string;
   fullName: string;
   description?: string;
@@ -196,7 +196,7 @@ export interface Repository {
 }
 
 export interface ContactMessage {
-  id: number;
+  id: string;
   name: string;
   email: string;
   subject?: string;
@@ -215,7 +215,7 @@ export interface Category {
 }
 
 export interface Setting {
-  id: number;
+  id: string;
   key: string;
   value: any;
   description?: string;

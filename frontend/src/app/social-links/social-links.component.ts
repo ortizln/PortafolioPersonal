@@ -1,16 +1,9 @@
-import { Component, OnInit } from '@angular/core';
+import { Component, OnInit, inject } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { FormsModule } from '@angular/forms';
+import { ApiService } from '../core/services/api.service';
 import { ConfirmService } from '../core/services/confirm.service';
-
-interface SocialLink {
-  id: string;
-  platform: string;
-  url: string;
-  icon: string;
-  order: number;
-  isActive: boolean;
-}
+import { SocialLink } from '../core/models';
 
 @Component({
   selector: 'app-social-links',
@@ -20,14 +13,19 @@ interface SocialLink {
   styleUrls: ['./social-links.component.scss']
 })
 export class SocialLinksComponent implements OnInit {
+  private apiService = inject(ApiService);
+  private confirmService = inject(ConfirmService);
+
   links: SocialLink[] = [];
   showForm = false;
   editingLink: SocialLink | null = null;
   useCustomPlatform = false;
   form = { platform: '', url: '', icon: '', order: 0, isActive: true };
   isSubmitting = false;
+  loading = true;
 
-  constructor(private confirmService: ConfirmService) {}
+  toasts: { message: string; type: 'success' | 'error'; id: number }[] = [];
+  private toastId = 0;
 
   predefinedPlatforms = [
     { name: 'GitHub', icon: 'bi-github' },
@@ -54,15 +52,12 @@ export class SocialLinksComponent implements OnInit {
   }
 
   loadLinks(): void {
-    const stored = localStorage.getItem('portfolio_social_links');
-    this.links = stored ? JSON.parse(stored) : [
-      { id: '1', platform: 'GitHub', url: 'https://github.com/user', icon: 'bi-github', order: 1, isActive: true },
-      { id: '2', platform: 'LinkedIn', url: 'https://linkedin.com/in/user', icon: 'bi-linkedin', order: 2, isActive: true },
-    ];
-  }
-
-  saveLinks(): void {
-    localStorage.setItem('portfolio_social_links', JSON.stringify(this.links));
+    this.loading = true;
+    this.apiService.getSocialLinksAll().subscribe({
+      next: (list) => (this.links = list),
+      error: () => this.showToast('No se pudieron cargar las redes sociales', 'error'),
+      complete: () => (this.loading = false)
+    });
   }
 
   onPlatformSelect(event: Event): void {
@@ -94,7 +89,7 @@ export class SocialLinksComponent implements OnInit {
     this.form = {
       platform: link.platform,
       url: link.url,
-      icon: link.icon,
+      icon: link.icon || 'bi-link-45deg',
       order: link.order,
       isActive: link.isActive
     };
@@ -109,36 +104,64 @@ export class SocialLinksComponent implements OnInit {
   submitForm(): void {
     if (!this.form.platform.trim() || !this.form.url.trim()) return;
     this.isSubmitting = true;
-    const data: SocialLink = {
-      id: this.editingLink?.id || crypto.randomUUID(),
+    const payload = {
       platform: this.form.platform,
       url: this.form.url,
-      icon: this.form.icon,
+      icon: this.form.icon || 'bi-link-45deg',
       order: this.form.order,
       isActive: this.form.isActive
     };
+
     if (this.editingLink) {
-      const idx = this.links.findIndex(l => l.id === this.editingLink!.id);
-      if (idx !== -1) this.links[idx] = data;
+      this.apiService.updateSocialLink(this.editingLink.id, payload).subscribe({
+        next: () => {
+          this.showToast('Red social actualizada', 'success');
+          this.loadLinks();
+          this.cancelForm();
+        },
+        error: () => this.showToast('Error al actualizar la red social', 'error'),
+        complete: () => (this.isSubmitting = false)
+      });
     } else {
-      this.links.push(data);
+      this.apiService.createSocialLink(payload).subscribe({
+        next: () => {
+          this.showToast('Red social creada', 'success');
+          this.loadLinks();
+          this.cancelForm();
+        },
+        error: () => this.showToast('Error al crear la red social', 'error'),
+        complete: () => (this.isSubmitting = false)
+      });
     }
-    this.links.sort((a, b) => a.order - b.order);
-    this.saveLinks();
-    this.showForm = false;
-    this.editingLink = null;
-    this.isSubmitting = false;
   }
 
   async deleteLink(id: string): Promise<void> {
-    const ok = await this.confirmService.confirm({ message: 'Delete this social link?' });
+    const ok = await this.confirmService.confirm({ message: '¿Eliminar esta red social?' });
     if (!ok) return;
-    this.links = this.links.filter(l => l.id !== id);
-    this.saveLinks();
+    this.apiService.deleteSocialLink(id).subscribe({
+      next: () => {
+        this.links = this.links.filter(l => l.id !== id);
+        this.showToast('Red social eliminada', 'success');
+      },
+      error: () => this.showToast('Error al eliminar la red social', 'error')
+    });
   }
 
   toggleActive(link: SocialLink): void {
-    link.isActive = !link.isActive;
-    this.saveLinks();
+    this.apiService.updateSocialLink(link.id, { isActive: !link.isActive }).subscribe({
+      next: (updated) => {
+        const idx = this.links.findIndex(l => l.id === link.id);
+        if (idx !== -1) this.links[idx] = updated;
+      },
+      error: () => this.showToast('Error al actualizar la red social', 'error')
+    });
+  }
+
+  private showToast(message: string, type: 'success' | 'error'): void {
+    const id = ++this.toastId;
+    this.toasts.push({ message, type, id });
+    setTimeout(() => {
+      this.toasts = this.toasts.filter((t) => t.id !== id);
+    }, 3500);
   }
 }

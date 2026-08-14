@@ -1,49 +1,51 @@
 <div class="header">
-  <h2>Repositories</h2>
+  <h2>Repositorios</h2>
   <div class="header-actions">
     <button class="btn-sync" [class.syncing]="syncing.github" (click)="syncGitHub()">
-      <i class="bi bi-github"></i> {{ syncing.github ? 'Syncing...' : 'Sync GitHub' }}
+      <i class="bi bi-github"></i> {{ syncing.github ? 'Sincronizando...' : 'Sincronizar GitHub' }}
     </button>
     <button class="btn-sync" [class.syncing]="syncing.gitlab" (click)="syncGitLab()">
-      <i class="bi bi-gitlab"></i> {{ syncing.gitlab ? 'Syncing...' : 'Sync GitLab' }}
+      <i class="bi bi-gitlab"></i> {{ syncing.gitlab ? 'Sincronizando...' : 'Sincronizar GitLab' }}
     </button>
-    <button class="btn-add" (click)="openCreate()"><i class="bi bi-plus-lg"></i> Add Repo</button>
+    <button class="btn-add" (click)="openCreate()"><i class="bi bi-plus-lg"></i> Agregar Repo</button>
   </div>
 </div>
 
+<div class="loading-state" *ngIf="loading">Cargando repositorios...</div>
+
 @if (showForm) {
   <div class="glass-form" autocomplete="off">
-    <h3>{{ editingRepo ? 'Edit' : 'New' }} Repository</h3>
+    <h3>{{ editingRepo ? 'Editar' : 'Nuevo' }} Repositorio</h3>
     <div class="form-grid">
       <div class="form-group">
-        <label>Name</label>
-        <input type="text" [(ngModel)]="form.name" placeholder="e.g. portfolio" />
+        <label>Nombre</label>
+        <input type="text" [(ngModel)]="form.name" placeholder="Ej. portfolio" />
       </div>
       <div class="form-group">
-        <label>Full Name</label>
-        <input type="text" [(ngModel)]="form.fullName" placeholder="user/repo" />
+        <label>Nombre Completo</label>
+        <input type="text" [(ngModel)]="form.fullName" placeholder="usuario/repo" />
       </div>
       <div class="form-group full-width">
-        <label>Description</label>
-        <textarea [(ngModel)]="form.description" placeholder="Repository description"></textarea>
+        <label>Descripción</label>
+        <textarea [(ngModel)]="form.description" placeholder="Descripción del repositorio"></textarea>
       </div>
       <div class="form-group full-width">
         <label>URL</label>
-        <input type="url" [(ngModel)]="form.url" placeholder="https://github.com/user/repo" />
+        <input type="url" [(ngModel)]="form.url" placeholder="https://github.com/usuario/repo" />
       </div>
       <div class="form-group">
-        <label>Platform</label>
+        <label>Plataforma</label>
         <select [(ngModel)]="form.platform">
           <option value="github">GitHub</option>
           <option value="gitlab">GitLab</option>
         </select>
       </div>
       <div class="form-group">
-        <label>Language</label>
+        <label>Lenguaje</label>
         <input type="text" [(ngModel)]="form.language" placeholder="TypeScript" />
       </div>
       <div class="form-group">
-        <label>Stars</label>
+        <label>Estrellas</label>
         <input type="number" [(ngModel)]="form.stars" min="0" />
       </div>
       <div class="form-group">
@@ -51,66 +53,74 @@
         <input type="number" [(ngModel)]="form.forks" min="0" />
       </div>
       <div class="form-group">
-        <label>Last Pushed</label>
+        <label>Última Actualización</label>
         <input type="date" [(ngModel)]="form.lastPushed" />
       </div>
       <div class="form-group">
-        <label>Private</label>
+        <label>Privado</label>
         <select [(ngModel)]="form.isPrivate">
           <option [value]="false">No</option>
-          <option [value]="true">Yes</option>
+          <option [value]="true">Sí</option>
         </select>
       </div>
       <div class="form-group full-width">
-        <label>Topics (comma separated)</label>
+        <label>Topics (separados por coma)</label>
         <input type="text" [(ngModel)]="form.topics" placeholder="angular, portfolio, typescript" />
       </div>
     </div>
     <div class="form-actions">
       <button class="btn-submit" (click)="submitForm()" [disabled]="isSubmitting || !form.name.trim()">
-        {{ editingRepo ? 'Update' : 'Create' }}
+        {{ editingRepo ? 'Actualizar' : 'Crear' }}
       </button>
-      <button class="btn-cancel" (click)="cancelForm()">Cancel</button>
+      <button class="btn-cancel" (click)="cancelForm()">Cancelar</button>
     </div>
   </div>
 }
 
-<div class="repos-grid">
-  @for (repo of repos; track repo.id) {
-    <div class="repo-card">
-      <div class="repo-header">
-        <span class="repo-name" (click)="openRepo(repo.url)">{{ repo.name }}</span>
-        <span class="repo-platform">{{ repo.platform }}</span>
-      </div>
-      @if (repo.description) {
-        <div class="repo-description">{{ repo.description }}</div>
-      }
-      <div class="repo-meta">
-        @if (repo.language) {
-          <span class="lang-badge">{{ repo.language }}</span>
+@if (!loading) {
+  <div class="repos-grid">
+    @for (repo of repos; track repo.id) {
+      <div class="repo-card">
+        <div class="repo-header">
+          <span class="repo-name" (click)="openRepo(repo.url)">{{ repo.name }}</span>
+          <span class="repo-platform">{{ repo.platform }}</span>
+        </div>
+        @if (repo.description) {
+          <div class="repo-description">{{ repo.description }}</div>
         }
-        <span class="stat"><i class="bi bi-star"></i> {{ repo.stars }}</span>
-        <span class="stat"><i class="bi bi-diagram-2"></i> {{ repo.forks }}</span>
-        @if (repo.isPrivate) {
-          <span class="private-badge">Private</span>
-        }
-      </div>
-      @if (repo.topics.length) {
-        <div class="repo-topics">
-          @for (topic of repo.topics; track topic) {
-            <span class="topic">{{ topic }}</span>
+        <div class="repo-meta">
+          @if (repo.language) {
+            <span class="lang-badge">{{ repo.language }}</span>
+          }
+          <span class="stat"><i class="bi bi-star"></i> {{ repo.stars }}</span>
+          <span class="stat"><i class="bi bi-diagram-2"></i> {{ repo.forks }}</span>
+          @if (repo.isPrivate) {
+            <span class="private-badge">Privado</span>
           }
         </div>
-      }
-      <div class="repo-footer">
-        <span>Pushed {{ repo.lastPushed }}</span>
-        <div class="card-actions">
-          <button class="btn-edit" (click)="openEdit(repo)">Edit</button>
-          <button class="btn-delete" (click)="deleteRepo(repo.id)">Delete</button>
+        @if (repo.topics.length) {
+          <div class="repo-topics">
+            @for (topic of repo.topics; track topic) {
+              <span class="topic">{{ topic }}</span>
+            }
+          </div>
+        }
+        <div class="repo-footer">
+          <span>Actualizado {{ repo.lastPushed }}</span>
+          <div class="card-actions">
+            <button class="btn-edit" (click)="openEdit(repo)">Editar</button>
+            <button class="btn-delete" (click)="deleteRepo(repo.id)">Eliminar</button>
+          </div>
         </div>
       </div>
-    </div>
-  } @empty {
-    <p style="color: var(--text-secondary); grid-column: 1 / -1; text-align: center; padding: 40px;">No repositories added yet.</p>
+    } @empty {
+      <p style="color: var(--text-secondary); grid-column: 1 / -1; text-align: center; padding: 40px;">Aún no hay repositorios agregados.</p>
+    }
+  </div>
+}
+
+<div class="toast-container">
+  @for (toast of toasts; track toast.id) {
+    <div class="toast" [class.error]="toast.type === 'error'">{{ toast.message }}</div>
   }
 </div>

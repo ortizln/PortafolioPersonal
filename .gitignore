@@ -11,10 +11,11 @@ backend/dist/
 .env
 .env.local
 .env.production
+.env.*.local
+backend/.env
 backend/.env.production
 
 # Database
-prisma/migrations/
 prisma/*.db
 prisma/*.db-journal
 

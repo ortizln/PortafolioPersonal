@@ -1,24 +1,26 @@
 <div class="header">
-  <h2>Social Links</h2>
-  <button class="btn-add" (click)="openCreate()"><i class="bi bi-plus-lg"></i> Add Link</button>
+  <h2>Redes Sociales</h2>
+  <button class="btn-add" (click)="openCreate()"><i class="bi bi-plus-lg"></i> Agregar Enlace</button>
 </div>
+
+<div class="loading-state" *ngIf="loading">Cargando redes sociales...</div>
 
 @if (showForm) {
   <div class="glass-form" autocomplete="off">
-    <h3>{{ editingLink ? 'Edit' : 'New' }} Social Link</h3>
+    <h3>{{ editingLink ? 'Editar' : 'Nueva' }} Red Social</h3>
     <div class="form-grid">
       <div class="form-group">
-        <label>Platform</label>
+        <label>Plataforma</label>
         @if (!useCustomPlatform) {
           <select (change)="onPlatformSelect($event)" [value]="editingLink && !useCustomPlatform ? form.platform : ''">
-            <option value="" disabled selected>Select platform</option>
+            <option value="" disabled selected>Selecciona plataforma</option>
             @for (p of predefinedPlatforms; track p.name) {
               <option [value]="p.name">{{ p.name }}</option>
             }
-            <option value="__custom__">Custom...</option>
+            <option value="__custom__">Personalizada...</option>
           </select>
         } @else {
-          <input type="text" [(ngModel)]="form.platform" placeholder="Custom platform name" />
+          <input type="text" [(ngModel)]="form.platform" placeholder="Nombre de la plataforma" />
         }
       </div>
       <div class="form-group">
@@ -26,51 +28,59 @@
         <input type="url" [(ngModel)]="form.url" placeholder="https://..." />
       </div>
       <div class="form-group">
-        <label>Icon (Bootstrap Icons class)</label>
+        <label>Ícono (clase Bootstrap Icons)</label>
         <input type="text" [(ngModel)]="form.icon" placeholder="bi-github" />
       </div>
       <div class="form-group">
-        <label>Order</label>
+        <label>Orden</label>
         <input type="number" [(ngModel)]="form.order" min="0" />
       </div>
       <div class="form-group full-width">
         <label class="checkbox-label">
           <input type="checkbox" [(ngModel)]="form.isActive" />
-          Active
+          Activa
         </label>
       </div>
     </div>
     <div class="form-actions">
       <button class="btn-submit" (click)="submitForm()" [disabled]="isSubmitting || !form.platform.trim() || !form.url.trim()">
-        {{ editingLink ? 'Update' : 'Create' }}
+        {{ editingLink ? 'Actualizar' : 'Crear' }}
       </button>
-      <button class="btn-cancel" (click)="cancelForm()">Cancel</button>
+      <button class="btn-cancel" (click)="cancelForm()">Cancelar</button>
     </div>
   </div>
 }
 
-<div class="links-grid">
-  @for (link of links; track link.id) {
-    <div class="link-card" [class.inactive]="!link.isActive">
-      <div class="card-header">
-        <i [class]="link.icon"></i>
-        <span class="platform-name">{{ link.platform }}</span>
-        <span class="order-badge">#{{ link.order }}</span>
-      </div>
-      <div class="card-body">
-        <a class="url" [href]="link.url" target="_blank" rel="noopener">{{ link.url }}</a>
-      </div>
-      <div class="card-actions">
-        <div class="action-buttons">
-          <button class="btn-edit" (click)="openEdit(link)">Edit</button>
-          <button class="btn-delete" (click)="deleteLink(link.id)">Delete</button>
+@if (!loading) {
+  <div class="links-grid">
+    @for (link of links; track link.id) {
+      <div class="link-card" [class.inactive]="!link.isActive">
+        <div class="card-header">
+          <i [class]="link.icon"></i>
+          <span class="platform-name">{{ link.platform }}</span>
+          <span class="order-badge">#{{ link.order }}</span>
         </div>
-        <div class="toggle" [class.active]="link.isActive" (click)="toggleActive(link)">
-          <div class="toggle-knob"></div>
+        <div class="card-body">
+          <a class="url" [href]="link.url" target="_blank" rel="noopener">{{ link.url }}</a>
+        </div>
+        <div class="card-actions">
+          <div class="action-buttons">
+            <button class="btn-edit" (click)="openEdit(link)">Editar</button>
+            <button class="btn-delete" (click)="deleteLink(link.id)">Eliminar</button>
+          </div>
+          <div class="toggle" [class.active]="link.isActive" (click)="toggleActive(link)">
+            <div class="toggle-knob"></div>
+          </div>
         </div>
       </div>
-    </div>
-  } @empty {
-    <p style="color: var(--text-secondary); grid-column: 1 / -1; text-align: center; padding: 40px;">No social links added yet.</p>
+    } @empty {
+      <p style="color: var(--text-secondary); grid-column: 1 / -1; text-align: center; padding: 40px;">Aún no hay redes sociales agregadas.</p>
+    }
+  </div>
+}
+
+<div class="toast-container">
+  @for (toast of toasts; track toast.id) {
+    <div class="toast" [class.error]="toast.type === 'error'">{{ toast.message }}</div>
   }
 </div>
