@@ -10,5 +10,11 @@ router.get('/experiences', publicController.getExperiences);
 router.get('/education', publicController.getEducation);
 router.get('/certifications', publicController.getCertifications);
 router.get('/skills', publicController.getSkills);
+router.get('/company', publicController.getCompany);
+router.get('/services', publicController.getServices);
+router.get('/clients', publicController.getClients);
+router.get('/testimonials', publicController.getTestimonials);
+router.get('/team', publicController.getTeam);
+router.get('/team/:slug', publicController.getTeamMember);
 
 module.exports = router;

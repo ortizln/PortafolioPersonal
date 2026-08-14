@@ -40,6 +40,11 @@ export const routes: Routes = [
       { path: 'categories', loadComponent: () => import('./categories/category-list.component').then((m) => m.CategoryListComponent) },
       { path: 'messages', loadComponent: () => import('./dashboard/contact-messages.component').then((m) => m.ContactMessagesComponent) },
       { path: 'settings', loadComponent: () => import('./settings/settings.component').then((m) => m.SettingsComponent) },
+      { path: 'company', loadComponent: () => import('./company/company-edit.component').then((m) => m.CompanyEditComponent) },
+      { path: 'services', loadComponent: () => import('./services/service-list.component').then((m) => m.ServiceListComponent) },
+      { path: 'clients', loadComponent: () => import('./clients/client-list.component').then((m) => m.ClientListComponent) },
+      { path: 'testimonials', loadComponent: () => import('./testimonials/testimonial-list.component').then((m) => m.TestimonialListComponent) },
+      { path: 'team', loadComponent: () => import('./team/team-list.component').then((m) => m.TeamListComponent) },
     ],
   },
   {

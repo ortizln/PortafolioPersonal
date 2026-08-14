@@ -1,0 +1,113 @@
+<div class="header">
+  <h2>Clientes</h2>
+  <button class="btn-save" (click)="openCreate()">+ Nuevo Cliente</button>
+</div>
+
+<div class="loading-state" *ngIf="loading">Cargando...</div>
+
+@if (!loading) {
+  <div class="table-card" *ngIf="clients.length > 0">
+    <table>
+      <thead>
+        <tr>
+          <th>Cliente</th>
+          <th>Industria</th>
+          <th>Público</th>
+          <th>Destacado</th>
+          <th>Testimonios</th>
+          <th>Acciones</th>
+        </tr>
+      </thead>
+      <tbody>
+        @for (client of clients; track client.id) {
+          <tr>
+            <td class="cell-main">
+              @if (client.logoUrl) {
+                <img class="logo" [src]="client.logoUrl" [alt]="client.name" />
+              } @else {
+                <span class="logo-placeholder">{{ client.name.charAt(0) }}</span>
+              }
+              <strong>{{ client.name }}</strong>
+            </td>
+            <td>{{ client.industry || '—' }}</td>
+            <td><span class="status" [class.active]="client.isPublic">{{ client.isPublic ? 'Sí' : 'No' }}</span></td>
+            <td><span class="status" [class.active]="client.isFeatured">{{ client.isFeatured ? '★' : '—' }}</span></td>
+            <td>{{ client._count?.testimonials ?? 0 }}</td>
+            <td class="actions">
+              <button class="btn-icon" title="Editar" (click)="openEdit(client)"><i class="bi bi-pencil"></i></button>
+              <button class="btn-icon danger" title="Eliminar" (click)="deleteClient(client)"><i class="bi bi-trash"></i></button>
+            </td>
+          </tr>
+        }
+      </tbody>
+    </table>
+  </div>
+
+  <div class="empty-state" *ngIf="clients.length === 0">
+    <i class="bi bi-people"></i>
+    <p>Aún no hay clientes registrados.</p>
+    <button class="btn-save" (click)="openCreate()">Registrar el primer cliente</button>
+  </div>
+}
+
+@if (showForm) {
+  <div class="glass-form">
+    <h3>{{ editingClient ? 'Editar Cliente' : 'Nuevo Cliente' }}</h3>
+    <div class="form-grid">
+      <div class="form-group">
+        <label>Nombre *</label>
+        <input type="text" [(ngModel)]="form.name" />
+      </div>
+      <div class="form-group">
+        <label>Logotipo (URL)</label>
+        <div class="upload-row">
+          <input type="text" [(ngModel)]="form.logoUrl" placeholder="https://..." />
+          <label class="btn-upload">
+            <i class="bi bi-upload"></i>
+            <input type="file" accept="image/*" (change)="uploadLogo($event)" hidden />
+          </label>
+        </div>
+      </div>
+      <div class="form-group">
+        <label>Sitio web</label>
+        <input type="text" [(ngModel)]="form.website" placeholder="https://..." />
+      </div>
+      <div class="form-group">
+        <label>Industria</label>
+        <input type="text" [(ngModel)]="form.industry" placeholder="Tecnología, Retail, ..." />
+      </div>
+      <div class="form-group">
+        <label>Orden</label>
+        <input type="number" [(ngModel)]="form.order" />
+      </div>
+      <div class="form-group">
+        <label>Público</label>
+        <label class="switch">
+          <input type="checkbox" [(ngModel)]="form.isPublic" />
+          <span class="slider"></span>
+        </label>
+      </div>
+      <div class="form-group">
+        <label>Destacado</label>
+        <label class="switch">
+          <input type="checkbox" [(ngModel)]="form.isFeatured" />
+          <span class="slider"></span>
+        </label>
+      </div>
+      <div class="form-group full-width">
+        <label>Descripción</label>
+        <textarea [(ngModel)]="form.description"></textarea>
+      </div>
+    </div>
+    <div class="form-actions">
+      <button class="btn-cancel" (click)="cancelForm()">Cancelar</button>
+      <button class="btn-submit" (click)="submitForm()" [disabled]="isSubmitting">{{ isSubmitting ? 'Guardando...' : 'Guardar' }}</button>
+    </div>
+  </div>
+}
+
+<div class="toast-container">
+  @for (toast of toasts; track toast.id) {
+    <div class="toast" [class.error]="toast.type === 'error'">{{ toast.message }}</div>
+  }
+</div>

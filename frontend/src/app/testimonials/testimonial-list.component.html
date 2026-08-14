@@ -1,0 +1,127 @@
+<div class="header">
+  <h2>Testimonios</h2>
+  <button class="btn-save" (click)="openCreate()">+ Nuevo Testimonio</button>
+</div>
+
+<div class="loading-state" *ngIf="loading">Cargando...</div>
+
+@if (!loading) {
+  <div class="table-card" *ngIf="testimonials.length > 0">
+    <table>
+      <thead>
+        <tr>
+          <th>Autor</th>
+          <th>Cliente</th>
+          <th>Valoración</th>
+          <th>Publicado</th>
+          <th>Acciones</th>
+        </tr>
+      </thead>
+      <tbody>
+        @for (t of testimonials; track t.id) {
+          <tr>
+            <td class="cell-main">
+              @if (t.photoUrl) {
+                <img class="photo" [src]="t.photoUrl" [alt]="t.authorName" />
+              } @else {
+                <span class="photo-placeholder">{{ t.authorName.charAt(0) }}</span>
+              }
+              <div>
+                <strong>{{ t.authorName }}</strong>
+                @if (t.authorPosition) {
+                  <small>{{ t.authorPosition }}{{ t.company ? ' · ' + t.company : '' }}</small>
+                }
+              </div>
+            </td>
+            <td>{{ t.client?.name || '—' }}</td>
+            <td class="stars">
+              @for (i of [1,2,3,4,5]; track i) {
+                <i class="bi {{ i <= (t.rating || 0) ? 'bi-star-fill' : 'bi-star' }}"></i>
+              }
+            </td>
+            <td><span class="status" [class.active]="t.isPublished">{{ t.isPublished ? 'Sí' : 'No' }}</span></td>
+            <td class="actions">
+              <button class="btn-icon" title="Editar" (click)="openEdit(t)"><i class="bi bi-pencil"></i></button>
+              <button class="btn-icon danger" title="Eliminar" (click)="deleteTestimonial(t)"><i class="bi bi-trash"></i></button>
+            </td>
+          </tr>
+        }
+      </tbody>
+    </table>
+  </div>
+
+  <div class="empty-state" *ngIf="testimonials.length === 0">
+    <i class="bi bi-chat-quote"></i>
+    <p>Aún no hay testimonios registrados.</p>
+    <button class="btn-save" (click)="openCreate()">Crear el primer testimonio</button>
+  </div>
+}
+
+@if (showForm) {
+  <div class="glass-form">
+    <h3>{{ editingTestimonial ? 'Editar Testimonio' : 'Nuevo Testimonio' }}</h3>
+    <div class="form-grid">
+      <div class="form-group">
+        <label>Nombre del autor *</label>
+        <input type="text" [(ngModel)]="form.authorName" />
+      </div>
+      <div class="form-group">
+        <label>Cargo</label>
+        <input type="text" [(ngModel)]="form.authorPosition" placeholder="CEO" />
+      </div>
+      <div class="form-group">
+        <label>Empresa (si no aplica cliente)</label>
+        <input type="text" [(ngModel)]="form.company" />
+      </div>
+      <div class="form-group">
+        <label>Cliente</label>
+        <select [(ngModel)]="form.clientId">
+          <option value="">Sin cliente</option>
+          @for (client of clients; track client.id) {
+            <option [value]="client.id">{{ client.name }}</option>
+          }
+        </select>
+      </div>
+      <div class="form-group">
+        <label>Valoración (1-5)</label>
+        <input type="number" min="1" max="5" [(ngModel)]="form.rating" />
+      </div>
+      <div class="form-group">
+        <label>Orden</label>
+        <input type="number" [(ngModel)]="form.order" />
+      </div>
+      <div class="form-group">
+        <label>Foto (URL)</label>
+        <input type="text" [(ngModel)]="form.photoUrl" placeholder="https://..." />
+      </div>
+      <div class="form-group">
+        <label>Publicado</label>
+        <label class="switch">
+          <input type="checkbox" [(ngModel)]="form.isPublished" />
+          <span class="slider"></span>
+        </label>
+      </div>
+      <div class="form-group">
+        <label>Destacado</label>
+        <label class="switch">
+          <input type="checkbox" [(ngModel)]="form.isFeatured" />
+          <span class="slider"></span>
+        </label>
+      </div>
+      <div class="form-group full-width">
+        <label>Contenido *</label>
+        <textarea [(ngModel)]="form.content"></textarea>
+      </div>
+    </div>
+    <div class="form-actions">
+      <button class="btn-cancel" (click)="cancelForm()">Cancelar</button>
+      <button class="btn-submit" (click)="submitForm()" [disabled]="isSubmitting">{{ isSubmitting ? 'Guardando...' : 'Guardar' }}</button>
+    </div>
+  </div>
+}
+
+<div class="toast-container">
+  @for (toast of toasts; track toast.id) {
+    <div class="toast" [class.error]="toast.type === 'error'">{{ toast.message }}</div>
+  }
+</div>

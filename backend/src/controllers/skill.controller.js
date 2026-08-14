@@ -1,11 +1,12 @@
 const prisma = require('../config/database');
 const { AppError } = require('../middlewares/errorHandler');
+const { buildProfileWhere, canManage, memberIdFromBody } = require('../utils/memberScope');
 
 const skillController = {
   async getAll(req, res, next) {
     try {
       const skills = await prisma.skill.findMany({
-        where: { userId: req.user.id, deletedAt: null },
+        where: buildProfileWhere(req, { deletedAt: null }),
         orderBy: { order: 'asc' }
       });
 
@@ -21,7 +22,7 @@ const skillController = {
         where: { id: req.params.id }
       });
 
-      if (!skill || skill.deletedAt || skill.userId !== req.user.id) {
+      if (!skill || skill.deletedAt || !canManage(req, skill)) {
         throw new AppError('Skill not found', 404);
       }
 
@@ -39,6 +40,7 @@ const skillController = {
       const skill = await prisma.skill.create({
         data: {
           userId: req.user.id,
+          memberId: memberIdFromBody(req),
           name,
           percentage,
           level,
@@ -62,15 +64,17 @@ const skillController = {
         where: { id: req.params.id }
       });
 
-      if (!existing || existing.deletedAt || existing.userId !== req.user.id) {
+      if (!existing || existing.deletedAt || !canManage(req, existing)) {
         throw new AppError('Skill not found', 404);
       }
 
       const { name, percentage, level, icon, color, order, category, technologyId } = req.body;
+      const memberId = memberIdFromBody(req);
 
       const skill = await prisma.skill.update({
         where: { id: req.params.id },
         data: {
+          ...(memberId !== undefined && { memberId }),
           ...(name !== undefined && { name }),
           ...(percentage !== undefined && { percentage }),
           ...(level !== undefined && { level }),
@@ -95,7 +99,7 @@ const skillController = {
         where: { id: req.params.id }
       });
 
-      if (!existing || existing.deletedAt || existing.userId !== req.user.id) {
+      if (!existing || existing.deletedAt || !canManage(req, existing)) {
         throw new AppError('Skill not found', 404);
       }
 

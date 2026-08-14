@@ -109,6 +109,11 @@ export class AdminLayoutComponent {
     { label: 'Categories', route: '/admin/categories', icon: 'bi-tags' },
     { label: 'Contact Messages', route: '/admin/messages', icon: 'bi-envelope' },
     { label: 'Settings', route: '/admin/settings', icon: 'bi-sliders' },
+    { label: 'Company', route: '/admin/company', icon: 'bi-building' },
+    { label: 'Services', route: '/admin/services', icon: 'bi-grid' },
+    { label: 'Clients', route: '/admin/clients', icon: 'bi-people' },
+    { label: 'Testimonials', route: '/admin/testimonials', icon: 'bi-chat-quote' },
+    { label: 'Team', route: '/admin/team', icon: 'bi-person-badge' },
   ];
 
   toggleSidebar(): void {

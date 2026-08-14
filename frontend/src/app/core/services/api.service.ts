@@ -6,7 +6,7 @@ import {
   User, Profile, Experience, Education, Certification,
   Project, ProjectImage, Technology, Skill, Language,
   SocialLink, Repository, ContactMessage, Category,
-  Setting, CertificateFile,
+  Setting, CertificateFile, Company, Service, Client, Testimonial, TeamMember,
 } from '../models';
 
 @Injectable({ providedIn: 'root' })
@@ -455,5 +455,163 @@ export class ApiService {
 
   deleteFile(filename: string): Observable<void> {
     return this.http.delete<void>(`${this.apiUrl}/upload/${filename}`);
+  }
+
+  // Company
+  getCompany(): Observable<Company> {
+    return this.http.get<{ company: Company }>(`${this.apiUrl}/company`).pipe(
+      map((res) => res.company)
+    );
+  }
+
+  upsertCompany(data: Partial<Company>): Observable<Company> {
+    return this.http.put<{ company: Company }>(`${this.apiUrl}/company`, data).pipe(
+      map((res) => res.company)
+    );
+  }
+
+  // Services
+  getServicesAll(): Observable<Service[]> {
+    return this.http.get<Service[]>(`${this.apiUrl}/services`);
+  }
+
+  getServiceById(id: string): Observable<Service> {
+    return this.http.get<{ service: Service }>(`${this.apiUrl}/services/${id}`).pipe(
+      map((res) => res.service)
+    );
+  }
+
+  createService(data: Partial<Service>): Observable<Service> {
+    return this.http.post<{ service: Service }>(`${this.apiUrl}/services`, data).pipe(
+      map((res) => res.service)
+    );
+  }
+
+  updateService(id: string, data: Partial<Service>): Observable<Service> {
+    return this.http.put<{ service: Service }>(`${this.apiUrl}/services/${id}`, data).pipe(
+      map((res) => res.service)
+    );
+  }
+
+  deleteService(id: string): Observable<void> {
+    return this.http.delete<void>(`${this.apiUrl}/services/${id}`);
+  }
+
+  // Clients
+  getClientsAll(): Observable<Client[]> {
+    return this.http.get<Client[]>(`${this.apiUrl}/clients`);
+  }
+
+  getClientById(id: string): Observable<Client> {
+    return this.http.get<{ client: Client }>(`${this.apiUrl}/clients/${id}`).pipe(
+      map((res) => res.client)
+    );
+  }
+
+  createClient(data: Partial<Client>): Observable<Client> {
+    return this.http.post<{ client: Client }>(`${this.apiUrl}/clients`, data).pipe(
+      map((res) => res.client)
+    );
+  }
+
+  updateClient(id: string, data: Partial<Client>): Observable<Client> {
+    return this.http.put<{ client: Client }>(`${this.apiUrl}/clients/${id}`, data).pipe(
+      map((res) => res.client)
+    );
+  }
+
+  deleteClient(id: string): Observable<void> {
+    return this.http.delete<void>(`${this.apiUrl}/clients/${id}`);
+  }
+
+  // Testimonials
+  getTestimonialsAll(): Observable<Testimonial[]> {
+    return this.http.get<Testimonial[]>(`${this.apiUrl}/testimonials`);
+  }
+
+  getTestimonialById(id: string): Observable<Testimonial> {
+    return this.http.get<{ testimonial: Testimonial }>(`${this.apiUrl}/testimonials/${id}`).pipe(
+      map((res) => res.testimonial)
+    );
+  }
+
+  createTestimonial(data: Partial<Testimonial>): Observable<Testimonial> {
+    return this.http.post<{ testimonial: Testimonial }>(`${this.apiUrl}/testimonials`, data).pipe(
+      map((res) => res.testimonial)
+    );
+  }
+
+  updateTestimonial(id: string, data: Partial<Testimonial>): Observable<Testimonial> {
+    return this.http.put<{ testimonial: Testimonial }>(`${this.apiUrl}/testimonials/${id}`, data).pipe(
+      map((res) => res.testimonial)
+    );
+  }
+
+  deleteTestimonial(id: string): Observable<void> {
+    return this.http.delete<void>(`${this.apiUrl}/testimonials/${id}`);
+  }
+
+  // Team members
+  getTeamAll(): Observable<TeamMember[]> {
+    return this.http.get<TeamMember[]>(`${this.apiUrl}/team`);
+  }
+
+  getTeamMemberById(id: string): Observable<TeamMember> {
+    return this.http.get<{ member: TeamMember }>(`${this.apiUrl}/team/${id}`).pipe(
+      map((res) => res.member)
+    );
+  }
+
+  createTeamMember(data: Partial<TeamMember>): Observable<TeamMember> {
+    return this.http.post<{ member: TeamMember }>(`${this.apiUrl}/team`, data).pipe(
+      map((res) => res.member)
+    );
+  }
+
+  updateTeamMember(id: string, data: Partial<TeamMember>): Observable<TeamMember> {
+    return this.http.put<{ member: TeamMember }>(`${this.apiUrl}/team/${id}`, data).pipe(
+      map((res) => res.member)
+    );
+  }
+
+  deleteTeamMember(id: string): Observable<void> {
+    return this.http.delete<void>(`${this.apiUrl}/team/${id}`);
+  }
+
+  // Public corporate endpoints
+  getPublicCompany(): Observable<Company> {
+    return this.http.get<{ company: Company }>(`${this.apiUrl}/public/company`).pipe(
+      map((res) => res.company)
+    );
+  }
+
+  getPublicServices(): Observable<Service[]> {
+    return this.http.get<{ services: Service[] }>(`${this.apiUrl}/public/services`).pipe(
+      map((res) => res.services || [])
+    );
+  }
+
+  getPublicClients(): Observable<Client[]> {
+    return this.http.get<{ clients: Client[] }>(`${this.apiUrl}/public/clients`).pipe(
+      map((res) => res.clients || [])
+    );
+  }
+
+  getPublicTestimonials(): Observable<Testimonial[]> {
+    return this.http.get<{ testimonials: Testimonial[] }>(`${this.apiUrl}/public/testimonials`).pipe(
+      map((res) => res.testimonials || [])
+    );
+  }
+
+  getPublicTeam(): Observable<TeamMember[]> {
+    return this.http.get<{ team: TeamMember[] }>(`${this.apiUrl}/public/team`).pipe(
+      map((res) => res.team || [])
+    );
+  }
+
+  getPublicTeamMember(slug: string): Observable<TeamMember> {
+    return this.http.get<{ member: TeamMember }>(`${this.apiUrl}/public/team/${slug}`).pipe(
+      map((res) => res.member)
+    );
   }
 }

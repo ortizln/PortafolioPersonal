@@ -87,6 +87,11 @@ const settingRoutes = require('./routes/setting.routes');
 const publicRoutes = require('./routes/public.routes');
 const statsRoutes = require('./routes/stats.routes');
 const technologyRoutes = require('./routes/technology.routes');
+const companyRoutes = require('./routes/company.routes');
+const serviceRoutes = require('./routes/service.routes');
+const clientRoutes = require('./routes/client.routes');
+const testimonialRoutes = require('./routes/testimonial.routes');
+const teamRoutes = require('./routes/team.routes');
 
 app.use('/api/auth', authRoutes);
 app.use('/api/users', userRoutes);
@@ -106,6 +111,11 @@ app.use('/api/settings', settingRoutes);
 app.use('/api/technologies', technologyRoutes);
 app.use('/api/public', publicRoutes);
 app.use('/api/stats', statsRoutes);
+app.use('/api/company', companyRoutes);
+app.use('/api/services', serviceRoutes);
+app.use('/api/clients', clientRoutes);
+app.use('/api/testimonials', testimonialRoutes);
+app.use('/api/team', teamRoutes);
 
 app.get('/api/health', (req, res) => {
   res.json({ status: 'ok', timestamp: new Date().toISOString() });

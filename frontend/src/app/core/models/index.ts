@@ -235,3 +235,130 @@ export interface AuditLog {
   userId?: string;
   createdAt: string;
 }
+
+export interface Company {
+  id: string;
+  name: string;
+  legalName?: string;
+  slug: string;
+  slogan?: string;
+  shortDescription?: string;
+  description?: string;
+  mission?: string;
+  vision?: string;
+  history?: string;
+  email?: string;
+  phone?: string;
+  whatsapp?: string;
+  website?: string;
+  address?: string;
+  city?: string;
+  country?: string;
+  logoUrl?: string;
+  logoDarkUrl?: string;
+  faviconUrl?: string;
+  heroImageUrl?: string;
+  primaryColor?: string;
+  secondaryColor?: string;
+  accentColor?: string;
+  foundedYear?: number;
+  seoTitle?: string;
+  seoDescription?: string;
+  isActive: boolean;
+  createdAt: string;
+  updatedAt: string;
+}
+
+export interface ServiceFeature {
+  id: string;
+  name: string;
+  description?: string;
+  icon?: string;
+  order: number;
+}
+
+export interface Service {
+  id: string;
+  name: string;
+  slug: string;
+  shortDescription?: string;
+  description?: string;
+  icon?: string;
+  coverImage?: string;
+  status: string;
+  order: number;
+  isFeatured: boolean;
+  seoTitle?: string;
+  seoDescription?: string;
+  createdAt: string;
+  updatedAt: string;
+  features?: ServiceFeature[];
+  technologies?: { technology: Technology }[];
+  _count?: { features?: number; technologies?: number };
+}
+
+export interface Client {
+  id: string;
+  name: string;
+  slug: string;
+  logoUrl?: string;
+  website?: string;
+  industry?: string;
+  description?: string;
+  isPublic: boolean;
+  isFeatured: boolean;
+  order: number;
+  createdAt: string;
+  updatedAt: string;
+  _count?: { testimonials?: number };
+}
+
+export interface Testimonial {
+  id: string;
+  clientId?: string;
+  authorName: string;
+  authorPosition?: string;
+  company?: string;
+  content: string;
+  rating?: number;
+  photoUrl?: string;
+  isPublished: boolean;
+  isFeatured: boolean;
+  order: number;
+  createdAt: string;
+  updatedAt: string;
+  client?: { id: string; name: string; logoUrl?: string; slug: string };
+}
+
+export interface TeamMember {
+  id: string;
+  slug: string;
+  fullName: string;
+  professionalTitle: string;
+  email?: string;
+  phone?: string;
+  location?: string;
+  bio?: string;
+  about?: string;
+  photoUrl?: string;
+  role?: string;
+  department?: string;
+  linkedinUrl?: string;
+  githubUrl?: string;
+  twitterUrl?: string;
+  order: number;
+  isActive: boolean;
+  isPublic: boolean;
+  isFounder: boolean;
+  seoTitle?: string;
+  seoDescription?: string;
+  createdAt: string;
+  updatedAt: string;
+  experiences?: Experience[];
+  educations?: Education[];
+  certifications?: Certification[];
+  skills?: any;
+  languages?: Language[];
+  socialLinks?: SocialLink[];
+  _count?: { experiences?: number; educations?: number; certifications?: number; skills?: number; languages?: number; socialLinks?: number };
+}

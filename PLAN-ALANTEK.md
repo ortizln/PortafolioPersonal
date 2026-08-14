@@ -1193,13 +1193,13 @@ tar xzf uploads_*.tar.gz   # en el volumen backend_uploads
 
 ## FASE 1 — Núcleo corporativo
 
-- [ ] Crear `Company`.
-- [ ] Crear `Service`.
-- [ ] Crear `Client`.
-- [ ] Crear `Testimonial`.
+- [x] Crear `Company`.
+- [x] Crear `Service`.
+- [x] Crear `Client`.
+- [x] Crear `Testimonial`.
 - [ ] Configuración de marca.
-- [ ] Nuevos endpoints.
-- [ ] CRUD administrativos.
+- [x] Nuevos endpoints.
+- [x] CRUD administrativos.
 
 **Resultado:** ALANTEK puede administrar información empresarial.
 
@@ -1207,16 +1207,16 @@ tar xzf uploads_*.tar.gz   # en el volumen backend_uploads
 
 ## FASE 2 — Equipo multi-perfil
 
-- [ ] Crear `TeamMember`.
-- [ ] Adaptar Experience.
-- [ ] Adaptar Education.
-- [ ] Adaptar Certification.
-- [ ] Adaptar Skill.
-- [ ] Adaptar Language.
-- [ ] Adaptar SocialLink.
+- [x] Crear `TeamMember`.
+- [x] Adaptar Experience.
+- [x] Adaptar Education.
+- [x] Adaptar Certification.
+- [x] Adaptar Skill.
+- [x] Adaptar Language.
+- [x] Adaptar SocialLink.
 - [ ] Crear `/equipo`.
 - [ ] Crear `/equipo/:slug`.
-- [ ] CRUD de miembros.
+- [x] CRUD de miembros.
 
 **Resultado:** múltiples integrantes con perfiles completos.
 

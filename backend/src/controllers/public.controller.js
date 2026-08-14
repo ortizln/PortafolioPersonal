@@ -220,6 +220,108 @@ const publicController = {
     } catch (error) {
       next(error);
     }
+  },
+
+  async getCompany(req, res, next) {
+    try {
+      const company = await prisma.company.findFirst({
+        where: { isActive: true },
+        orderBy: { createdAt: 'asc' }
+      });
+      res.json({ company });
+    } catch (error) {
+      next(error);
+    }
+  },
+
+  async getServices(req, res, next) {
+    try {
+      const services = await prisma.service.findMany({
+        where: { deletedAt: null, status: 'ACTIVE' },
+        include: {
+          features: { orderBy: { order: 'asc' } },
+          technologies: { include: { technology: true } }
+        },
+        orderBy: [{ order: 'asc' }, { createdAt: 'desc' }]
+      });
+      res.json({ services });
+    } catch (error) {
+      next(error);
+    }
+  },
+
+  async getClients(req, res, next) {
+    try {
+      const clients = await prisma.client.findMany({
+        where: { deletedAt: null, isPublic: true },
+        orderBy: [{ isFeatured: 'desc' }, { order: 'asc' }, { name: 'asc' }]
+      });
+      res.json({ clients });
+    } catch (error) {
+      next(error);
+    }
+  },
+
+  async getTestimonials(req, res, next) {
+    try {
+      const testimonials = await prisma.testimonial.findMany({
+        where: { deletedAt: null, isPublished: true },
+        include: { client: { select: { id: true, name: true, logoUrl: true, slug: true } } },
+        orderBy: [{ isFeatured: 'desc' }, { order: 'asc' }, { createdAt: 'desc' }]
+      });
+      res.json({ testimonials });
+    } catch (error) {
+      next(error);
+    }
+  },
+
+  async getTeam(req, res, next) {
+    try {
+      const members = await prisma.teamMember.findMany({
+        where: { deletedAt: null, isActive: true, isPublic: true },
+        include: {
+          skills: { where: { deletedAt: null }, include: { technology: true }, orderBy: { order: 'asc' } },
+          languages: { where: { deletedAt: null }, orderBy: { percentage: 'desc' } },
+          socialLinks: { where: { deletedAt: null, isActive: true }, orderBy: { order: 'asc' } },
+          _count: { select: { experiences: true, educations: true, certifications: true } }
+        },
+        orderBy: [{ isFounder: 'desc' }, { order: 'asc' }, { fullName: 'asc' }]
+      });
+      res.json({ team: members });
+    } catch (error) {
+      next(error);
+    }
+  },
+
+  async getTeamMember(req, res, next) {
+    try {
+      const member = await prisma.teamMember.findFirst({
+        where: { slug: req.params.slug, deletedAt: null, isActive: true, isPublic: true },
+        include: {
+          experiences: { where: { deletedAt: null }, orderBy: [{ current: 'desc' }, { startDate: 'desc' }] },
+          educations: { where: { deletedAt: null }, include: { certificates: { where: { deletedAt: null }, include: { files: true } } }, orderBy: { startDate: 'desc' } },
+          certifications: { where: { deletedAt: null }, include: { files: true }, orderBy: { issueDate: 'desc' } },
+          skills: { where: { deletedAt: null }, include: { technology: true }, orderBy: [{ category: 'asc' }, { order: 'asc' }] },
+          languages: { where: { deletedAt: null }, orderBy: { percentage: 'desc' } },
+          socialLinks: { where: { deletedAt: null, isActive: true }, orderBy: { order: 'asc' } }
+        }
+      });
+
+      if (!member) {
+        throw new AppError('Team member not found', 404);
+      }
+
+      const skillsByCategory = member.skills.reduce((acc, skill) => {
+        const category = skill.category || 'OTHER';
+        if (!acc[category]) acc[category] = [];
+        acc[category].push(skill);
+        return acc;
+      }, {});
+
+      res.json({ member: { ...member, skills: skillsByCategory } });
+    } catch (error) {
+      next(error);
+    }
   }
 };
 

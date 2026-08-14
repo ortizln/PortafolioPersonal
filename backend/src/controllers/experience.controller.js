@@ -1,11 +1,12 @@
 const prisma = require('../config/database');
 const { AppError } = require('../middlewares/errorHandler');
+const { buildProfileWhere, canManage, memberIdFromBody } = require('../utils/memberScope');
 
 const experienceController = {
   async getAll(req, res, next) {
     try {
       const experiences = await prisma.experience.findMany({
-        where: { userId: req.user.id, deletedAt: null },
+        where: buildProfileWhere(req, { deletedAt: null }),
         orderBy: { startDate: 'desc' }
       });
 
@@ -21,7 +22,7 @@ const experienceController = {
         where: { id: req.params.id }
       });
 
-      if (!experience || experience.deletedAt || experience.userId !== req.user.id) {
+      if (!experience || experience.deletedAt || !canManage(req, experience)) {
         throw new AppError('Experience not found', 404);
       }
 
@@ -39,6 +40,7 @@ const experienceController = {
       const experience = await prisma.experience.create({
         data: {
           userId: req.user.id,
+          memberId: memberIdFromBody(req),
           company,
           position,
           description,
@@ -64,7 +66,7 @@ const experienceController = {
         where: { id: req.params.id }
       });
 
-      if (!existing || existing.deletedAt || existing.userId !== req.user.id) {
+      if (!existing || existing.deletedAt || !canManage(req, existing)) {
         throw new AppError('Experience not found', 404);
       }
 
@@ -73,6 +75,7 @@ const experienceController = {
       const experience = await prisma.experience.update({
         where: { id: req.params.id },
         data: {
+          ...(memberIdFromBody(req) !== undefined && { memberId: memberIdFromBody(req) }),
           ...(company !== undefined && { company }),
           ...(position !== undefined && { position }),
           ...(description !== undefined && { description }),
@@ -99,7 +102,7 @@ const experienceController = {
         where: { id: req.params.id }
       });
 
-      if (!existing || existing.deletedAt || existing.userId !== req.user.id) {
+      if (!existing || existing.deletedAt || !canManage(req, existing)) {
         throw new AppError('Experience not found', 404);
       }
 

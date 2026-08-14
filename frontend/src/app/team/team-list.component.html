@@ -1,0 +1,157 @@
+<div class="header">
+  <h2>Equipo</h2>
+  <button class="btn-save" (click)="openCreate()">+ Nuevo Miembro</button>
+</div>
+
+<div class="loading-state" *ngIf="loading">Cargando...</div>
+
+@if (!loading) {
+  <div class="table-card" *ngIf="members.length > 0">
+    <table>
+      <thead>
+        <tr>
+          <th>Miembro</th>
+          <th>Departamento</th>
+          <th>Activo</th>
+          <th>Público</th>
+          <th>Fundador</th>
+          <th>Orden</th>
+          <th>Acciones</th>
+        </tr>
+      </thead>
+      <tbody>
+        @for (m of members; track m.id) {
+          <tr>
+            <td class="cell-main">
+              @if (m.photoUrl) {
+                <img class="photo" [src]="m.photoUrl" [alt]="m.fullName" />
+              } @else {
+                <span class="photo-placeholder">{{ m.fullName.charAt(0) }}</span>
+              }
+              <div>
+                <strong>{{ m.fullName }}</strong>
+                <small>{{ m.professionalTitle }}</small>
+              </div>
+            </td>
+            <td>{{ m.department || '—' }}</td>
+            <td><span class="status" [class.active]="m.isActive">{{ m.isActive ? 'Sí' : 'No' }}</span></td>
+            <td><span class="status" [class.active]="m.isPublic">{{ m.isPublic ? 'Sí' : 'No' }}</span></td>
+            <td><span class="status" [class.active]="m.isFounder">{{ m.isFounder ? '★' : '—' }}</span></td>
+            <td>{{ m.order }}</td>
+            <td class="actions">
+              <button class="btn-icon" title="Editar" (click)="openEdit(m)"><i class="bi bi-pencil"></i></button>
+              <button class="btn-icon danger" title="Eliminar" (click)="deleteMember(m)"><i class="bi bi-trash"></i></button>
+            </td>
+          </tr>
+        }
+      </tbody>
+    </table>
+  </div>
+
+  <div class="empty-state" *ngIf="members.length === 0">
+    <i class="bi bi-people"></i>
+    <p>Aún no hay miembros registrados.</p>
+    <button class="btn-save" (click)="openCreate()">Registrar el primer miembro</button>
+  </div>
+}
+
+@if (showForm) {
+  <div class="glass-form">
+    <h3>{{ editingMember ? 'Editar Miembro' : 'Nuevo Miembro' }}</h3>
+    <div class="form-grid">
+      <div class="form-group">
+        <label>Nombre completo *</label>
+        <input type="text" [(ngModel)]="form.fullName" />
+      </div>
+      <div class="form-group">
+        <label>Cargo profesional *</label>
+        <input type="text" [(ngModel)]="form.professionalTitle" placeholder="CEO, Desarrollador..." />
+      </div>
+      <div class="form-group">
+        <label>Rol interno</label>
+        <input type="text" [(ngModel)]="form.role" />
+      </div>
+      <div class="form-group">
+        <label>Departamento</label>
+        <input type="text" [(ngModel)]="form.department" placeholder="Ingeniería, Diseño..." />
+      </div>
+      <div class="form-group">
+        <label>Email</label>
+        <input type="email" [(ngModel)]="form.email" />
+      </div>
+      <div class="form-group">
+        <label>Teléfono</label>
+        <input type="text" [(ngModel)]="form.phone" />
+      </div>
+      <div class="form-group">
+        <label>Ubicación</label>
+        <input type="text" [(ngModel)]="form.location" />
+      </div>
+      <div class="form-group">
+        <label>Foto (URL)</label>
+        <div class="upload-row">
+          <input type="text" [(ngModel)]="form.photoUrl" placeholder="https://..." />
+          <label class="btn-upload">
+            <i class="bi bi-upload"></i>
+            <input type="file" accept="image/*" (change)="uploadPhoto($event)" hidden />
+          </label>
+        </div>
+      </div>
+      <div class="form-group">
+        <label>LinkedIn</label>
+        <input type="text" [(ngModel)]="form.linkedinUrl" />
+      </div>
+      <div class="form-group">
+        <label>GitHub</label>
+        <input type="text" [(ngModel)]="form.githubUrl" />
+      </div>
+      <div class="form-group">
+        <label>Twitter/X</label>
+        <input type="text" [(ngModel)]="form.twitterUrl" />
+      </div>
+      <div class="form-group">
+        <label>Orden</label>
+        <input type="number" [(ngModel)]="form.order" />
+      </div>
+      <div class="form-group">
+        <label>Activo</label>
+        <label class="switch">
+          <input type="checkbox" [(ngModel)]="form.isActive" />
+          <span class="slider"></span>
+        </label>
+      </div>
+      <div class="form-group">
+        <label>Visible en público</label>
+        <label class="switch">
+          <input type="checkbox" [(ngModel)]="form.isPublic" />
+          <span class="slider"></span>
+        </label>
+      </div>
+      <div class="form-group">
+        <label>Fundador</label>
+        <label class="switch">
+          <input type="checkbox" [(ngModel)]="form.isFounder" />
+          <span class="slider"></span>
+        </label>
+      </div>
+      <div class="form-group full-width">
+        <label>Bio corta</label>
+        <textarea [(ngModel)]="form.bio"></textarea>
+      </div>
+      <div class="form-group full-width">
+        <label>Sobre el miembro</label>
+        <textarea [(ngModel)]="form.about"></textarea>
+      </div>
+    </div>
+    <div class="form-actions">
+      <button class="btn-cancel" (click)="cancelForm()">Cancelar</button>
+      <button class="btn-submit" (click)="submitForm()" [disabled]="isSubmitting">{{ isSubmitting ? 'Guardando...' : 'Guardar' }}</button>
+    </div>
+  </div>
+}
+
+<div class="toast-container">
+  @for (toast of toasts; track toast.id) {
+    <div class="toast" [class.error]="toast.type === 'error'">{{ toast.message }}</div>
+  }
+</div>

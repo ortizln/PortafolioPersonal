@@ -1,11 +1,12 @@
 const prisma = require('../config/database');
 const { AppError } = require('../middlewares/errorHandler');
+const { buildProfileWhere, canManage, memberIdFromBody } = require('../utils/memberScope');
 
 const educationController = {
   async getAll(req, res, next) {
     try {
       const educations = await prisma.education.findMany({
-        where: { userId: req.user.id, deletedAt: null },
+        where: buildProfileWhere(req, { deletedAt: null }),
         orderBy: { startDate: 'desc' }
       });
 
@@ -21,7 +22,7 @@ const educationController = {
         where: { id: req.params.id }
       });
 
-      if (!education || education.deletedAt || education.userId !== req.user.id) {
+      if (!education || education.deletedAt || !canManage(req, education)) {
         throw new AppError('Education not found', 404);
       }
 
@@ -39,6 +40,7 @@ const educationController = {
       const education = await prisma.education.create({
         data: {
           userId: req.user.id,
+          memberId: memberIdFromBody(req),
           institution,
           degree,
           field,
@@ -63,15 +65,17 @@ const educationController = {
         where: { id: req.params.id }
       });
 
-      if (!existing || existing.deletedAt || existing.userId !== req.user.id) {
+      if (!existing || existing.deletedAt || !canManage(req, existing)) {
         throw new AppError('Education not found', 404);
       }
 
       const { institution, degree, field, level, startDate, endDate, current, grade, description } = req.body;
+      const memberId = memberIdFromBody(req);
 
       const education = await prisma.education.update({
         where: { id: req.params.id },
         data: {
+          ...(memberId !== undefined && { memberId }),
           ...(institution !== undefined && { institution }),
           ...(degree !== undefined && { degree }),
           ...(field !== undefined && { field }),
@@ -97,7 +101,7 @@ const educationController = {
         where: { id: req.params.id }
       });
 
-      if (!existing || existing.deletedAt || existing.userId !== req.user.id) {
+      if (!existing || existing.deletedAt || !canManage(req, existing)) {
         throw new AppError('Education not found', 404);
       }
 

@@ -1,11 +1,12 @@
 const prisma = require('../config/database');
 const { AppError } = require('../middlewares/errorHandler');
+const { buildProfileWhere, canManage, memberIdFromBody } = require('../utils/memberScope');
 
 const socialLinkController = {
   async getAll(req, res, next) {
     try {
       const socialLinks = await prisma.socialLink.findMany({
-        where: { userId: req.user.id, deletedAt: null },
+        where: buildProfileWhere(req, { deletedAt: null }),
         orderBy: { order: 'asc' }
       });
 
@@ -21,7 +22,7 @@ const socialLinkController = {
         where: { id: req.params.id }
       });
 
-      if (!socialLink || socialLink.deletedAt || socialLink.userId !== req.user.id) {
+      if (!socialLink || socialLink.deletedAt || !canManage(req, socialLink)) {
         throw new AppError('Social link not found', 404);
       }
 
@@ -39,6 +40,7 @@ const socialLinkController = {
       const socialLink = await prisma.socialLink.create({
         data: {
           userId: req.user.id,
+          memberId: memberIdFromBody(req),
           platform,
           url,
           icon: icon || null,
@@ -59,15 +61,17 @@ const socialLinkController = {
         where: { id: req.params.id }
       });
 
-      if (!existing || existing.deletedAt || existing.userId !== req.user.id) {
+      if (!existing || existing.deletedAt || !canManage(req, existing)) {
         throw new AppError('Social link not found', 404);
       }
 
       const { platform, url, icon, order, isActive } = req.body;
+      const memberId = memberIdFromBody(req);
 
       const socialLink = await prisma.socialLink.update({
         where: { id: req.params.id },
         data: {
+          ...(memberId !== undefined && { memberId }),
           ...(platform !== undefined && { platform }),
           ...(url !== undefined && { url }),
           ...(icon !== undefined && { icon: icon || null }),
@@ -89,7 +93,7 @@ const socialLinkController = {
         where: { id: req.params.id }
       });
 
-      if (!existing || existing.deletedAt || existing.userId !== req.user.id) {
+      if (!existing || existing.deletedAt || !canManage(req, existing)) {
         throw new AppError('Social link not found', 404);
       }
 

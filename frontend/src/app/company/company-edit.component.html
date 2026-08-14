@@ -1,0 +1,116 @@
+<div class="header">
+  <h2>Información Corporativa</h2>
+  <button class="btn-save" (click)="submit()" [disabled]="isSubmitting">{{ isSubmitting ? 'Guardando...' : 'Guardar' }}</button>
+</div>
+
+<div class="loading-state" *ngIf="loading">Cargando...</div>
+
+@if (!loading) {
+  <div class="glass-form">
+    <h3>Identidad</h3>
+    <div class="form-grid">
+      <div class="form-group">
+        <label>Nombre *</label>
+        <input type="text" [(ngModel)]="form.name" placeholder="ALANTEK" />
+      </div>
+      <div class="form-group">
+        <label>Razón social</label>
+        <input type="text" [(ngModel)]="form.legalName" placeholder="ALANTEK S.A.C." />
+      </div>
+      <div class="form-group">
+        <label>Slogan</label>
+        <input type="text" [(ngModel)]="form.slogan" placeholder="Tecnología que impulsa tu negocio" />
+      </div>
+      <div class="form-group">
+        <label>Año de fundación</label>
+        <input type="number" [(ngModel)]="form.foundedYear" />
+      </div>
+      <div class="form-group full-width">
+        <label>Descripción corta</label>
+        <textarea [(ngModel)]="form.shortDescription" placeholder="Propuesta de valor breve"></textarea>
+      </div>
+      <div class="form-group full-width">
+        <label>Descripción</label>
+        <textarea [(ngModel)]="form.description" placeholder="Descripción general de la empresa"></textarea>
+      </div>
+    </div>
+  </div>
+
+  <div class="glass-form">
+    <h3>Misión, Visión e Historia</h3>
+    <div class="form-grid">
+      <div class="form-group">
+        <label>Misión</label>
+        <textarea [(ngModel)]="form.mission"></textarea>
+      </div>
+      <div class="form-group">
+        <label>Visión</label>
+        <textarea [(ngModel)]="form.vision"></textarea>
+      </div>
+      <div class="form-group full-width">
+        <label>Historia</label>
+        <textarea [(ngModel)]="form.history"></textarea>
+      </div>
+    </div>
+  </div>
+
+  <div class="glass-form">
+    <h3>Marca</h3>
+    <div class="form-grid">
+      <div class="form-group">
+        <label>Color primario</label>
+        <input type="text" [(ngModel)]="form.primaryColor" placeholder="#0d47a1" />
+      </div>
+      <div class="form-group">
+        <label>Color secundario</label>
+        <input type="text" [(ngModel)]="form.secondaryColor" placeholder="#00bcd4" />
+      </div>
+      <div class="form-group">
+        <label>Color de acento</label>
+        <input type="text" [(ngModel)]="form.accentColor" placeholder="#ffc107" />
+      </div>
+      @for (field of ['logoUrl', 'logoDarkUrl', 'faviconUrl', 'heroImageUrl']; track field) {
+        <div class="form-group">
+          <label>{{ field === 'logoUrl' ? 'Logotipo' : field === 'logoDarkUrl' ? 'Logotipo (tema oscuro)' : field === 'faviconUrl' ? 'Favicon' : 'Imagen hero' }}</label>
+          <div class="upload-row">
+            <input type="text" [(ngModel)]="form[field]" placeholder="https://..." />
+            <label class="btn-upload">
+              <i class="bi bi-upload"></i>
+              <input type="file" accept="image/*" (change)="uploadImage(field, $event)" hidden />
+            </label>
+          </div>
+        </div>
+      }
+    </div>
+  </div>
+
+  <div class="glass-form">
+    <h3>Contacto</h3>
+    <div class="form-grid">
+      <div class="form-group"><label>Email</label><input type="email" [(ngModel)]="form.email" /></div>
+      <div class="form-group"><label>Teléfono</label><input type="text" [(ngModel)]="form.phone" /></div>
+      <div class="form-group"><label>WhatsApp</label><input type="text" [(ngModel)]="form.whatsapp" /></div>
+      <div class="form-group"><label>Sitio web</label><input type="text" [(ngModel)]="form.website" /></div>
+      <div class="form-group"><label>Dirección</label><input type="text" [(ngModel)]="form.address" /></div>
+      <div class="form-group"><label>Ciudad</label><input type="text" [(ngModel)]="form.city" /></div>
+      <div class="form-group"><label>País</label><input type="text" [(ngModel)]="form.country" /></div>
+    </div>
+  </div>
+
+  <div class="glass-form">
+    <h3>SEO</h3>
+    <div class="form-grid">
+      <div class="form-group"><label>Título</label><input type="text" [(ngModel)]="form.seoTitle" /></div>
+      <div class="form-group full-width"><label>Meta descripción</label><textarea [(ngModel)]="form.seoDescription"></textarea></div>
+    </div>
+    <div class="form-actions">
+      <button class="btn-submit" (click)="submit()" [disabled]="isSubmitting">{{ isSubmitting ? 'Guardando...' : 'Guardar cambios' }}</button>
+    </div>
+  </div>
+}
+
+<div class="toast-container">
+  @for (toast of toasts; track toast.id) {
+    <div class="toast" [class.error]="toast.type === 'error'">{{ toast.message }}</div>
+  }
+</div>

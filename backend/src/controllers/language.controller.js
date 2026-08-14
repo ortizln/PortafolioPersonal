@@ -1,11 +1,12 @@
 const prisma = require('../config/database');
 const { AppError } = require('../middlewares/errorHandler');
+const { buildProfileWhere, canManage, memberIdFromBody } = require('../utils/memberScope');
 
 const languageController = {
   async getAll(req, res, next) {
     try {
       const languages = await prisma.language.findMany({
-        where: { userId: req.user.id, deletedAt: null },
+        where: buildProfileWhere(req, { deletedAt: null }),
         orderBy: { percentage: 'desc' }
       });
 
@@ -21,7 +22,7 @@ const languageController = {
         where: { id: req.params.id }
       });
 
-      if (!language || language.deletedAt || language.userId !== req.user.id) {
+      if (!language || language.deletedAt || !canManage(req, language)) {
         throw new AppError('Language not found', 404);
       }
 
@@ -39,6 +40,7 @@ const languageController = {
       const language = await prisma.language.create({
         data: {
           userId: req.user.id,
+          memberId: memberIdFromBody(req),
           name,
           level,
           percentage,
@@ -58,15 +60,17 @@ const languageController = {
         where: { id: req.params.id }
       });
 
-      if (!existing || existing.deletedAt || existing.userId !== req.user.id) {
+      if (!existing || existing.deletedAt || !canManage(req, existing)) {
         throw new AppError('Language not found', 404);
       }
 
       const { name, level, percentage, certification } = req.body;
+      const memberId = memberIdFromBody(req);
 
       const language = await prisma.language.update({
         where: { id: req.params.id },
         data: {
+          ...(memberId !== undefined && { memberId }),
           ...(name !== undefined && { name }),
           ...(level !== undefined && { level }),
           ...(percentage !== undefined && { percentage }),
@@ -87,7 +91,7 @@ const languageController = {
         where: { id: req.params.id }
       });
 
-      if (!existing || existing.deletedAt || existing.userId !== req.user.id) {
+      if (!existing || existing.deletedAt || !canManage(req, existing)) {
         throw new AppError('Language not found', 404);
       }
 

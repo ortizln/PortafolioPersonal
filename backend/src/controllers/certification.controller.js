@@ -1,11 +1,12 @@
 const prisma = require('../config/database');
 const { AppError } = require('../middlewares/errorHandler');
+const { buildProfileWhere, canManage, memberIdFromBody } = require('../utils/memberScope');
 
 const certificationController = {
   async getAll(req, res, next) {
     try {
       const certifications = await prisma.certification.findMany({
-        where: { userId: req.user.id, deletedAt: null },
+        where: buildProfileWhere(req, { deletedAt: null }),
         include: { files: true },
         orderBy: { issueDate: 'desc' }
       });
@@ -23,7 +24,7 @@ const certificationController = {
         include: { files: true }
       });
 
-      if (!certification || certification.deletedAt || certification.userId !== req.user.id) {
+      if (!certification || certification.deletedAt || !canManage(req, certification)) {
         throw new AppError('Certification not found', 404);
       }
 
@@ -41,6 +42,7 @@ const certificationController = {
       const certification = await prisma.certification.create({
         data: {
           userId: req.user.id,
+          memberId: memberIdFromBody(req),
           name,
           issuingOrganization,
           description,
@@ -66,15 +68,17 @@ const certificationController = {
         where: { id: req.params.id }
       });
 
-      if (!existing || existing.deletedAt || existing.userId !== req.user.id) {
+      if (!existing || existing.deletedAt || !canManage(req, existing)) {
         throw new AppError('Certification not found', 404);
       }
 
       const { name, issuingOrganization, description, issueDate, expiryDate, credentialId, credentialUrl, category, imageUrl, educationId } = req.body;
+      const memberId = memberIdFromBody(req);
 
       const certification = await prisma.certification.update({
         where: { id: req.params.id },
         data: {
+          ...(memberId !== undefined && { memberId }),
           ...(name !== undefined && { name }),
           ...(issuingOrganization !== undefined && { issuingOrganization }),
           ...(description !== undefined && { description }),
@@ -101,7 +105,7 @@ const certificationController = {
         where: { id: req.params.id }
       });
 
-      if (!existing || existing.deletedAt || existing.userId !== req.user.id) {
+      if (!existing || existing.deletedAt || !canManage(req, existing)) {
         throw new AppError('Certification not found', 404);
       }
 
@@ -123,7 +127,7 @@ const certificationController = {
         where: { id: req.params.id }
       });
 
-      if (!certification || certification.deletedAt || certification.userId !== req.user.id) {
+      if (!certification || certification.deletedAt || !canManage(req, certification)) {
         throw new AppError('Certification not found', 404);
       }
 
@@ -156,7 +160,7 @@ const certificationController = {
         where: { id: req.params.id }
       });
 
-      if (!certification || certification.deletedAt || certification.userId !== req.user.id) {
+      if (!certification || certification.deletedAt || !canManage(req, certification)) {
         throw new AppError('Certification not found', 404);
       }
 

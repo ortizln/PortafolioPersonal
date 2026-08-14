@@ -32,6 +32,12 @@ enum SkillCategory {
   OTHER
 }
 
+enum ServiceStatus {
+  DRAFT
+  ACTIVE
+  INACTIVE
+}
+
 model User {
   id            String   @id @default(uuid())
   email         String   @unique
@@ -111,6 +117,8 @@ model Experience {
 
   userId        String
   user          User     @relation(fields: [userId], references: [id])
+  memberId      String?
+  member        TeamMember? @relation(fields: [memberId], references: [id])
 
   @@map("experiences")
 }
@@ -132,6 +140,8 @@ model Education {
 
   userId        String
   user          User     @relation(fields: [userId], references: [id])
+  memberId      String?
+  member        TeamMember? @relation(fields: [memberId], references: [id])
   certificates  Certification[]
 
   @@map("educations")
@@ -156,6 +166,8 @@ model Certification {
   education     Education? @relation(fields: [educationId], references: [id])
   userId        String
   user          User      @relation(fields: [userId], references: [id])
+  memberId      String?
+  member        TeamMember? @relation(fields: [memberId], references: [id])
   files         CertificateFile[]
 
   @@map("certifications")
@@ -236,6 +248,7 @@ model Technology {
 
   projects      ProjectTechnology[]
   skills        Skill[]
+  services      ServiceTechnology[]
 
   @@map("technologies")
 }
@@ -268,6 +281,8 @@ model Skill {
   technology    Technology?   @relation(fields: [technologyId], references: [id])
   userId        String
   user          User          @relation(fields: [userId], references: [id])
+  memberId      String?
+  member        TeamMember?   @relation(fields: [memberId], references: [id])
 
   @@map("skills")
 }
@@ -284,6 +299,8 @@ model Language {
 
   userId        String
   user          User     @relation(fields: [userId], references: [id])
+  memberId      String?
+  member        TeamMember? @relation(fields: [memberId], references: [id])
 
   @@map("languages")
 }
@@ -301,6 +318,8 @@ model SocialLink {
 
   userId        String
   user          User     @relation(fields: [userId], references: [id])
+  memberId      String?
+  member        TeamMember? @relation(fields: [memberId], references: [id])
 
   @@map("social_links")
 }
@@ -419,4 +438,170 @@ model MediaFile {
   @@index([folder])
   @@index([createdAt])
   @@map("media_files")
+}
+
+model Company {
+  id               String   @id @default(uuid())
+  name             String
+  legalName        String?
+  slug             String   @unique
+  slogan           String?
+  shortDescription String?
+  description      String?
+  mission          String?
+  vision           String?
+  history          String?
+  email            String?
+  phone            String?
+  whatsapp         String?
+  website          String?
+  address          String?
+  city             String?
+  country          String?
+  logoUrl          String?
+  logoDarkUrl      String?
+  faviconUrl       String?
+  heroImageUrl     String?
+  primaryColor     String?
+  secondaryColor   String?
+  accentColor      String?
+  foundedYear      Int?
+  seoTitle         String?
+  seoDescription   String?
+  isActive         Boolean  @default(true)
+  createdAt        DateTime @default(now())
+  updatedAt        DateTime @updatedAt
+
+  @@map("companies")
+}
+
+model Service {
+  id               String        @id @default(uuid())
+  name             String
+  slug             String        @unique
+  shortDescription String?
+  description      String?
+  icon             String?
+  coverImage       String?
+  status           ServiceStatus @default(DRAFT)
+  order            Int           @default(0)
+  isFeatured       Boolean       @default(false)
+  seoTitle         String?
+  seoDescription   String?
+  createdAt        DateTime      @default(now())
+  updatedAt        DateTime      @updatedAt
+  deletedAt        DateTime?
+
+  features        ServiceFeature[]
+  technologies    ServiceTechnology[]
+
+  @@map("services")
+}
+
+model ServiceFeature {
+  id          String   @id @default(uuid())
+  name        String
+  description String?
+  icon        String?
+  order       Int      @default(0)
+  createdAt   DateTime @default(now())
+
+  serviceId   String
+  service     Service  @relation(fields: [serviceId], references: [id], onDelete: Cascade)
+
+  @@map("service_features")
+}
+
+model ServiceTechnology {
+  id           String     @id @default(uuid())
+  serviceId    String
+  technologyId String
+  createdAt    DateTime   @default(now())
+
+  service      Service    @relation(fields: [serviceId], references: [id], onDelete: Cascade)
+  technology   Technology @relation(fields: [technologyId], references: [id], onDelete: Cascade)
+
+  @@unique([serviceId, technologyId])
+  @@map("service_technologies")
+}
+
+model Client {
+  id          String   @id @default(uuid())
+  name        String
+  slug        String   @unique
+  logoUrl     String?
+  website     String?
+  industry    String?
+  description String?
+  isPublic    Boolean  @default(true)
+  isFeatured  Boolean  @default(false)
+  order       Int      @default(0)
+  createdAt   DateTime @default(now())
+  updatedAt   DateTime @updatedAt
+  deletedAt   DateTime?
+
+  testimonials Testimonial[]
+
+  @@map("clients")
+}
+
+model Testimonial {
+  id             String   @id @default(uuid())
+  authorName     String
+  authorPosition String?
+  company        String?
+  content        String
+  rating         Int?
+  photoUrl       String?
+  isPublished    Boolean  @default(true)
+  isFeatured     Boolean  @default(false)
+  order          Int      @default(0)
+  createdAt      DateTime @default(now())
+  updatedAt      DateTime @updatedAt
+  deletedAt      DateTime?
+
+  clientId       String?
+  client         Client?  @relation(fields: [clientId], references: [id])
+
+  @@index([isPublished])
+  @@index([isFeatured])
+  @@map("testimonials")
+}
+
+model TeamMember {
+  id                 String   @id @default(uuid())
+  slug               String   @unique
+  fullName           String
+  professionalTitle  String
+  email              String?
+  phone              String?
+  location           String?
+  bio                String?
+  about              String?
+  photoUrl           String?
+  role               String?
+  department         String?
+  linkedinUrl        String?
+  githubUrl          String?
+  twitterUrl         String?
+  order              Int      @default(0)
+  isActive           Boolean  @default(true)
+  isPublic           Boolean  @default(true)
+  isFounder          Boolean  @default(false)
+  seoTitle           String?
+  seoDescription     String?
+  createdAt          DateTime @default(now())
+  updatedAt          DateTime @updatedAt
+  deletedAt          DateTime?
+
+  experiences       Experience[]
+  educations        Education[]
+  certifications   Certification[]
+  skills           Skill[]
+  languages        Language[]
+  socialLinks      SocialLink[]
+
+  @@index([isActive])
+  @@index([order])
+  @@map("team_members")
 }
