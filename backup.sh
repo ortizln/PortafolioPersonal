@@ -136,7 +136,11 @@ echo "========================================="
 echo ""
 echo "  Base de datos:  $TARGET/database.sql.gz"
 echo "  Uploads:        $TARGET/uploads_${TS}.tar.gz"
-echo "  Variables:      $TARGET/.env  (SEGRETO)"
+if [ -f "$ENV_FILE" ]; then
+  echo "  Variables:      $TARGET/.env  (SEGRETO)"
+else
+  echo "  Variables:      (no habia .env en la raiz; los secretos estan en el contenedor)"
+fi
 echo ""
 echo "  IMPORTANTE: copia el directorio $TARGET"
 echo "  a otro disco o nube. No lo dejes solo en el servidor."
