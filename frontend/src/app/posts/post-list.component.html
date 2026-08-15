@@ -1,0 +1,164 @@
+<div class="header-row">
+  <h2>Blog</h2>
+  <div class="header-actions">
+    <button class="btn-ghost" (click)="showCategoriesPanel = !showCategoriesPanel">
+      <i class="bi bi-tags"></i> Categorías y tags
+    </button>
+    <button class="btn-primary" (click)="openCreate()"><i class="bi bi-plus-lg"></i> Nuevo post</button>
+  </div>
+</div>
+
+<div class="taxonomy-panel" *ngIf="showCategoriesPanel">
+  <div class="taxo-col">
+    <h4>Categorías</h4>
+    <div class="taxo-add">
+      <input class="form-control" [(ngModel)]="newCategory" (keyup.enter)="addCategory()" placeholder="Nueva categoría..." />
+      <button class="btn-small" (click)="addCategory()">Agregar</button>
+    </div>
+    <div class="taxo-list">
+      <span class="taxo-item" *ngFor="let c of categories">
+        {{ c.name }}
+        <button (click)="removeCategory(c)"><i class="bi bi-x-lg"></i></button>
+      </span>
+    </div>
+  </div>
+  <div class="taxo-col">
+    <h4>Tags</h4>
+    <div class="taxo-add">
+      <input class="form-control" [(ngModel)]="newTag" (keyup.enter)="addTag()" placeholder="Nuevo tag..." />
+      <button class="btn-small" (click)="addTag()">Agregar</button>
+    </div>
+    <div class="taxo-list">
+      <span class="taxo-item" *ngFor="let t of tags">
+        {{ t.name }}
+        <button (click)="removeTag(t)"><i class="bi bi-x-lg"></i></button>
+      </span>
+    </div>
+  </div>
+</div>
+
+<div class="status-bar">
+  <button class="status-chip" [class.active]="statusFilter === ''" (click)="filterStatus('')">Todos <span class="count">{{ total }}</span></button>
+  <button class="status-chip" *ngFor="let s of ['DRAFT', 'REVIEW', 'PUBLISHED', 'ARCHIVED']" [class.active]="statusFilter === s" (click)="filterStatus(s)">
+    {{ statusLabels[s] }} <span class="count">{{ countByStatus(s) }}</span>
+  </button>
+</div>
+
+<div class="toolbar">
+  <div class="search-box">
+    <i class="bi bi-search"></i>
+    <input type="text" [(ngModel)]="search" (keyup.enter)="applyFilters()" placeholder="Buscar por título o extracto..." />
+    <button *ngIf="search" (click)="search = ''; applyFilters()"><i class="bi bi-x-lg"></i></button>
+  </div>
+</div>
+
+<div class="toast-stack">
+  <div class="toast" *ngFor="let t of toasts" [class.error]="t.type === 'error'">
+    <i class="bi" [ngClass]="t.type === 'success' ? 'bi-check-circle' : 'bi-exclamation-circle'"></i>
+    {{ t.message }}
+  </div>
+</div>
+
+<div class="posts-grid" *ngIf="!loading">
+  <div class="post-card" *ngFor="let p of posts">
+    <div class="post-thumb">
+      <img *ngIf="coverUrl(p)" [src]="coverUrl(p)" [alt]="p.title" loading="lazy" />
+      <i *ngIf="!coverUrl(p)" class="bi bi-journal-text"></i>
+    </div>
+    <div class="post-body">
+      <div class="post-top">
+        <span class="status-badge" [class]="statusClass(p.status)">{{ statusLabels[p.status] }}</span>
+        <span class="post-views"><i class="bi bi-eye"></i> {{ p.views }}</span>
+      </div>
+      <a class="post-title" [routerLink]="['/blog', p.slug]" target="_blank">{{ p.title }}</a>
+      <p class="post-excerpt">{{ p.excerpt || 'Sin extracto' }}</p>
+      <div class="post-meta">
+        <span class="post-date"><i class="bi bi-calendar3"></i> {{ (p.publishedAt || p.createdAt) | date: 'dd/MM/yyyy' }}</span>
+        <span class="post-author" *ngIf="p.author"><i class="bi bi-person"></i> {{ p.author.name }}</span>
+      </div>
+      <div class="post-cats">
+        <span class="mini-chip" *ngFor="let c of p.categories">{{ c.name }}</span>
+        <span class="mini-chip" *ngFor="let t of p.tags">#{{ t.name }}</span>
+      </div>
+      <div class="post-actions">
+        <button class="btn-small" (click)="openEdit(p)"><i class="bi bi-pencil"></i> Editar</button>
+        <button class="btn-small success" *ngIf="p.status !== 'PUBLISHED'" (click)="publish(p)"><i class="bi bi-send"></i> Publicar</button>
+        <button class="btn-small" *ngIf="p.status === 'PUBLISHED'" (click)="archive(p)"><i class="bi bi-archive"></i> Archivar</button>
+        <button class="btn-small danger" (click)="remove(p)"><i class="bi bi-trash"></i></button>
+      </div>
+    </div>
+  </div>
+  <div class="empty-state" *ngIf="posts.length === 0">
+    <i class="bi bi-journal-text"></i>
+    <p>No hay posts{{ search ? ' que coincidan' : '' }}.</p>
+  </div>
+</div>
+
+<div class="pagination" *ngIf="totalPages() > 1">
+  <button [disabled]="page === 1" (click)="goPage(page - 1)"><i class="bi bi-chevron-left"></i></button>
+  <span>Página {{ page }} de {{ totalPages() }} · {{ total }} posts</span>
+  <button [disabled]="page === totalPages()" (click)="goPage(page + 1)"><i class="bi bi-chevron-right"></i></button>
+</div>
+
+<!-- Form modal -->
+<div class="modal-overlay" *ngIf="showForm" (click)="showForm = false">
+  <div class="modal-content wide" (click)="$event.stopPropagation()">
+    <button class="modal-close" (click)="showForm = false"><i class="bi bi-x-lg"></i></button>
+    <h3>{{ editing ? 'Editar post' : 'Nuevo post' }}</h3>
+    <div class="form-grid">
+      <div class="form-group">
+        <label>Título *</label>
+        <input class="form-control" [(ngModel)]="form.title" (ngModelChange)="onTitleChange()" placeholder="Título del artículo" />
+      </div>
+      <div class="form-group">
+        <label>Slug</label>
+        <input class="form-control" [(ngModel)]="form.slug" placeholder="titulo-del-articulo" />
+      </div>
+      <div class="form-group full">
+        <label>Extracto</label>
+        <textarea class="form-control" [(ngModel)]="form.excerpt" rows="2" placeholder="Resumen breve para tarjetas y SEO"></textarea>
+      </div>
+      <div class="form-group full">
+        <label>Contenido (HTML)</label>
+        <textarea class="form-control content-editor" [(ngModel)]="form.content" rows="10" placeholder="<p>Contenido del artículo...</p>"></textarea>
+      </div>
+      <div class="form-group">
+        <label>Imagen de portada (URL)</label>
+        <input class="form-control" [(ngModel)]="form.coverImage" placeholder="https://... o /uploads/..." />
+      </div>
+      <div class="form-group">
+        <label>Estado</label>
+        <select class="form-control" [(ngModel)]="form.status">
+          <option *ngFor="let s of ['DRAFT', 'REVIEW', 'PUBLISHED', 'ARCHIVED']" [value]="s">{{ statusLabels[s] }}</option>
+        </select>
+      </div>
+      <div class="form-group">
+        <label>Categorías</label>
+        <div class="check-list">
+          <label *ngFor="let c of categories" class="check-item">
+            <input type="checkbox" [checked]="form.categoryIds.includes(c.id)" (change)="toggleSelected(form.categoryIds, c.id)" />
+            {{ c.name }}
+          </label>
+        </div>
+      </div>
+      <div class="form-group">
+        <label>Tags</label>
+        <div class="check-list">
+          <label *ngFor="let t of tags" class="check-item">
+            <input type="checkbox" [checked]="form.tagIds.includes(t.id)" (change)="toggleSelected(form.tagIds, t.id)" />
+            {{ t.name }}
+          </label>
+        </div>
+      </div>
+      <div class="form-group full seo-box">
+        <label>SEO</label>
+        <input class="form-control" [(ngModel)]="form.seoTitle" placeholder="Título SEO" />
+        <textarea class="form-control" [(ngModel)]="form.seoDescription" rows="2" placeholder="Meta descripción"></textarea>
+      </div>
+    </div>
+    <div class="modal-actions">
+      <button class="btn-secondary" (click)="showForm = false">Cancelar</button>
+      <button class="btn-primary" (click)="save()" [disabled]="!form.title.trim()">Guardar</button>
+    </div>
+  </div>
+</div>

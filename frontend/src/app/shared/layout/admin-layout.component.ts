@@ -188,6 +188,7 @@ export class AdminLayoutComponent implements OnInit, OnDestroy {
     {
       title: 'CONTENIDO',
       items: [
+        { label: 'Blog', route: '/admin/posts', icon: 'bi-journal-text', permission: 'posts.manage' },
         { label: 'Multimedia', route: '/admin/media', icon: 'bi-images', permissions: ['media.manage', 'media.upload'] },
         { label: 'SEO', route: '/admin/settings', icon: 'bi-search', permission: 'settings.manage' },
       ],

@@ -507,6 +507,130 @@ const options = {
           summary: 'Corporate dashboard KPIs',
           responses: { 200: { description: 'Corporate stats' } }
         }
+      },
+      '/api/posts': {
+        get: {
+          tags: ['Posts'],
+          summary: 'List posts (admin)',
+          parameters: [
+            { in: 'query', name: 'page', schema: { type: 'integer' } },
+            { in: 'query', name: 'limit', schema: { type: 'integer' } },
+            { in: 'query', name: 'search', schema: { type: 'string' } },
+            { in: 'query', name: 'status', schema: { type: 'string' } },
+            { in: 'query', name: 'category', schema: { type: 'string' } },
+            { in: 'query', name: 'tag', schema: { type: 'string' } }
+          ],
+          responses: { 200: { description: 'Posts list' } }
+        },
+        post: {
+          tags: ['Posts'],
+          summary: 'Create post',
+          responses: { 201: { description: 'Post created' } }
+        }
+      },
+      '/api/posts/slug/{slug}': {
+        get: {
+          tags: ['Posts'],
+          summary: 'Get post by slug',
+          parameters: [{ in: 'path', name: 'slug', required: true, schema: { type: 'string' } }],
+          responses: { 200: { description: 'Post' } }
+        }
+      },
+      '/api/posts/{id}': {
+        get: {
+          tags: ['Posts'],
+          summary: 'Get post by id',
+          parameters: [{ in: 'path', name: 'id', required: true, schema: { type: 'string' } }],
+          responses: { 200: { description: 'Post' } }
+        },
+        put: {
+          tags: ['Posts'],
+          summary: 'Update post',
+          parameters: [{ in: 'path', name: 'id', required: true, schema: { type: 'string' } }],
+          responses: { 200: { description: 'Post updated' } }
+        },
+        delete: {
+          tags: ['Posts'],
+          summary: 'Soft delete post',
+          parameters: [{ in: 'path', name: 'id', required: true, schema: { type: 'string' } }],
+          responses: { 200: { description: 'Post deleted' } }
+        }
+      },
+      '/api/posts/{id}/publish': {
+        put: {
+          tags: ['Posts'],
+          summary: 'Publish post',
+          parameters: [{ in: 'path', name: 'id', required: true, schema: { type: 'string' } }],
+          responses: { 200: { description: 'Post published' } }
+        }
+      },
+      '/api/posts/categories': {
+        get: {
+          tags: ['Posts'],
+          summary: 'List post categories',
+          responses: { 200: { description: 'Categories' } }
+        },
+        post: {
+          tags: ['Posts'],
+          summary: 'Create category',
+          responses: { 201: { description: 'Category created' } }
+        }
+      },
+      '/api/posts/tags': {
+        get: {
+          tags: ['Posts'],
+          summary: 'List post tags',
+          responses: { 200: { description: 'Tags' } }
+        },
+        post: {
+          tags: ['Posts'],
+          summary: 'Create tag',
+          responses: { 201: { description: 'Tag created' } }
+        }
+      },
+      '/api/public/blog': {
+        get: {
+          tags: ['Public'],
+          summary: 'Public blog posts (published)',
+          parameters: [
+            { in: 'query', name: 'page', schema: { type: 'integer' } },
+            { in: 'query', name: 'limit', schema: { type: 'integer' } },
+            { in: 'query', name: 'search', schema: { type: 'string' } },
+            { in: 'query', name: 'category', schema: { type: 'string' } },
+            { in: 'query', name: 'tag', schema: { type: 'string' } }
+          ],
+          responses: { 200: { description: 'Published posts' } }
+        }
+      },
+      '/api/public/blog/slug/{slug}': {
+        get: {
+          tags: ['Public'],
+          summary: 'Public post detail + related',
+          parameters: [{ in: 'path', name: 'slug', required: true, schema: { type: 'string' } }],
+          responses: { 200: { description: 'Post + related' } }
+        }
+      },
+      '/api/public/seo': {
+        get: {
+          tags: ['Public'],
+          summary: 'SEO metadata for a page path',
+          parameters: [{ in: 'query', name: 'path', schema: { type: 'string' } }],
+          responses: { 200: { description: 'SEO info' } }
+        }
+      },
+      '/api/public/sitemap': {
+        get: {
+          tags: ['Public'],
+          summary: 'XML sitemap',
+          responses: { 200: { description: 'sitemap.xml' } }
+        }
+      },
+      '/api/public/robots': {
+        get: {
+          tags: ['Public'],
+          summary: 'robots.txt content',
+          responses: { 200: { description: 'robots.txt' } }
+        }
       }
     }
   },

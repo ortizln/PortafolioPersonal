@@ -7,7 +7,7 @@ import {
   Project, ProjectImage, Technology, Skill, Language,
   SocialLink, Repository, ContactMessage, Category,
   Setting, CertificateFile, Company, Service, Client, Testimonial, TeamMember,
-  Role, Permission, MediaFile, Notification, AuditLog,
+  Role, Permission, MediaFile, Notification, AuditLog, Post, PostCategory, PostTag,
 } from '../models';
 
 @Injectable({ providedIn: 'root' })
@@ -803,5 +803,98 @@ export class ApiService {
     return this.http.get<{ stats: Record<string, any> }>(`${this.apiUrl}/stats/corporate`).pipe(
       map((res) => res.stats)
     );
+  }
+
+  // ===== FASE 6 — Blog =====
+  getPosts(params?: { page?: number; limit?: number; search?: string; status?: string; category?: string; tag?: string }): Observable<{
+    posts: Post[];
+    total: number;
+    page: number;
+    limit: number;
+  }> {
+    let httpParams = new HttpParams();
+    if (params?.page) httpParams = httpParams.set('page', String(params.page));
+    if (params?.limit) httpParams = httpParams.set('limit', String(params.limit));
+    if (params?.search) httpParams = httpParams.set('search', params.search);
+    if (params?.status) httpParams = httpParams.set('status', params.status);
+    if (params?.category) httpParams = httpParams.set('category', params.category);
+    if (params?.tag) httpParams = httpParams.set('tag', params.tag);
+    return this.http.get<any>(`${this.apiUrl}/posts`, { params: httpParams });
+  }
+
+  getPostById(id: string): Observable<Post> {
+    return this.http.get<{ post: Post }>(`${this.apiUrl}/posts/${id}`).pipe(map((res) => res.post));
+  }
+
+  getPostBySlug(slug: string): Observable<Post> {
+    return this.http.get<{ post: Post }>(`${this.apiUrl}/posts/slug/${slug}`).pipe(map((res) => res.post));
+  }
+
+  createPost(data: Partial<Post> & { categoryIds?: string[]; tagIds?: string[] }): Observable<Post> {
+    return this.http.post<{ post: Post }>(`${this.apiUrl}/posts`, data).pipe(map((res) => res.post));
+  }
+
+  updatePost(id: string, data: Partial<Post> & { categoryIds?: string[]; tagIds?: string[] }): Observable<Post> {
+    return this.http.put<{ post: Post }>(`${this.apiUrl}/posts/${id}`, data).pipe(map((res) => res.post));
+  }
+
+  publishPost(id: string): Observable<Post> {
+    return this.http.put<{ post: Post }>(`${this.apiUrl}/posts/${id}/publish`, {}).pipe(map((res) => res.post));
+  }
+
+  archivePost(id: string): Observable<Post> {
+    return this.http.put<{ post: Post }>(`${this.apiUrl}/posts/${id}/archive`, {}).pipe(map((res) => res.post));
+  }
+
+  deletePost(id: string): Observable<void> {
+    return this.http.delete<void>(`${this.apiUrl}/posts/${id}`);
+  }
+
+  getPostCategories(): Observable<PostCategory[]> {
+    return this.http.get<PostCategory[]>(`${this.apiUrl}/posts/categories`);
+  }
+
+  createPostCategory(data: { name: string; description?: string }): Observable<PostCategory> {
+    return this.http.post<PostCategory>(`${this.apiUrl}/posts/categories`, data);
+  }
+
+  deletePostCategory(id: string): Observable<void> {
+    return this.http.delete<void>(`${this.apiUrl}/posts/categories/${id}`);
+  }
+
+  getPostTags(): Observable<PostTag[]> {
+    return this.http.get<PostTag[]>(`${this.apiUrl}/posts/tags`);
+  }
+
+  createPostTag(data: { name: string }): Observable<PostTag> {
+    return this.http.post<PostTag>(`${this.apiUrl}/posts/tags`, data);
+  }
+
+  deletePostTag(id: string): Observable<void> {
+    return this.http.delete<void>(`${this.apiUrl}/posts/tags/${id}`);
+  }
+
+  getPublicBlog(params?: { page?: number; limit?: number; search?: string; category?: string; tag?: string }): Observable<{
+    posts: Post[];
+    categories: PostCategory[];
+    total: number;
+    page: number;
+    limit: number;
+  }> {
+    let httpParams = new HttpParams();
+    if (params?.page) httpParams = httpParams.set('page', String(params.page));
+    if (params?.limit) httpParams = httpParams.set('limit', String(params.limit));
+    if (params?.search) httpParams = httpParams.set('search', params.search);
+    if (params?.category) httpParams = httpParams.set('category', params.category);
+    if (params?.tag) httpParams = httpParams.set('tag', params.tag);
+    return this.http.get<any>(`${this.apiUrl}/public/blog`, { params: httpParams });
+  }
+
+  getPublicPostBySlug(slug: string): Observable<{ post: Post; related: Post[] }> {
+    return this.http.get<{ post: Post; related: Post[] }>(`${this.apiUrl}/public/blog/slug/${slug}`);
+  }
+
+  getSeoInfo(path: string): Observable<{ seo: Record<string, any> }> {
+    return this.http.get<{ seo: Record<string, any> }>(`${this.apiUrl}/public/seo`, { params: new HttpParams().set('path', path) });
   }
 }

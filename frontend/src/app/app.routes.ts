@@ -25,7 +25,9 @@ export const routes: Routes = [
       { path: 'contact', redirectTo: 'contacto', pathMatch: 'full' },
     ],
   },
-  { path: 'portfolio', redirectTo: '', pathMatch: 'full' },
+      { path: 'portfolio', redirectTo: '', pathMatch: 'full' },
+      { path: 'blog', loadComponent: () => import('./pages/blog-page.component').then((m) => m.BlogPageComponent) },
+      { path: 'blog/:slug', loadComponent: () => import('./pages/blog-detail-page.component').then((m) => m.BlogDetailPageComponent) },
   {
     path: 'admin',
     loadComponent: () =>
@@ -41,6 +43,7 @@ export const routes: Routes = [
       { path: 'users', loadComponent: () => import('./users/user-list.component').then((m) => m.UserListComponent) },
       { path: 'roles', loadComponent: () => import('./roles/role-list.component').then((m) => m.RoleListComponent) },
       { path: 'audit', loadComponent: () => import('./audit/audit-log.component').then((m) => m.AuditLogComponent) },
+      { path: 'posts', loadComponent: () => import('./posts/post-list.component').then((m) => m.PostListComponent) },
       { path: 'technologies', loadComponent: () => import('./technologies/technology-list.component').then((m) => m.TechnologyListComponent) },
       { path: 'profile', loadComponent: () => import('./profile/profile-edit.component').then((m) => m.ProfileEditComponent) },
       { path: 'experiences', loadComponent: () => import('./experiences/experience-list.component').then((m) => m.ExperienceListComponent) },

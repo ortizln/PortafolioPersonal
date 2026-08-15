@@ -1275,16 +1275,17 @@ tar xzf uploads_*.tar.gz   # en el volumen backend_uploads
 
 ## FASE 6 — Contenido y posicionamiento
 
-- [ ] Blog.
-- [ ] SEO dinámico.
-- [ ] Sitemap.
-- [ ] Robots.
-- [ ] Open Graph.
-- [ ] Structured Data.
-- [ ] Analytics.
-- [ ] Consentimiento/cookies si corresponde.
+- [x] Blog (CRUD posts/categorías/tags, estados, soft delete, panel admin `/admin/posts`, páginas públicas `/blog` y `/blog/:slug`).
+- [x] SEO dinámico (campo SEO por post + metadatos genéricos `SeoMetadata` + `SeoService` frontend).
+- [x] Sitemap (`/sitemap.xml` + `/api/public/sitemap`, incluye proyectos, posts, equipo y páginas estáticas).
+- [x] Robots (`/robots.txt` + `/api/public/robots`).
+- [x] Open Graph (meta OG/Twitter por página vía `SeoService`).
+- [x] Structured Data (JSON-LD: Organization, Article, BreadcrumbList, WebSite).
+- [ ] Analytics (pendiente de decidir plataforma y conectar el script vía Setting).
+- [ ] Consentimiento/cookies si corresponde (pendiente).
 
 **Resultado:** plataforma preparada para posicionamiento y marketing.
+*(Pendiente de aplicar: `npx prisma migrate deploy` (migración `20260814120000_posts_seo`) en Postgres local/servidor; build frontend OK.)*
 
 ---
 

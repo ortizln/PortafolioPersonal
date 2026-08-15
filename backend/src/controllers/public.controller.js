@@ -416,6 +416,198 @@ const publicController = {
     } catch (error) {
       next(error);
     }
+  },
+
+  // ===== Blog público =====
+  async getPosts(req, res, next) {
+    try {
+      const page = Math.max(1, parseInt(req.query.page, 10) || 1);
+      const limit = Math.min(50, Math.max(1, parseInt(req.query.limit, 10) || 9));
+      const { search, category, tag } = req.query;
+
+      const where = { deletedAt: null, status: 'PUBLISHED', publishedAt: { lte: new Date() } };
+      if (search) {
+        where.OR = [
+          { title: { contains: search, mode: 'insensitive' } },
+          { excerpt: { contains: search, mode: 'insensitive' } },
+          { content: { contains: search, mode: 'insensitive' } }
+        ];
+      }
+      if (category) where.categories = { some: { category: { slug: category } } };
+      if (tag) where.tags = { some: { tag: { slug: tag } } };
+
+      const [posts, total] = await Promise.all([
+        prisma.post.findMany({
+          where,
+          include: {
+            author: { select: { id: true, name: true } },
+            categories: { include: { category: true } },
+            tags: { include: { tag: true } }
+          },
+          orderBy: { publishedAt: 'desc' },
+          skip: (page - 1) * limit,
+          take: limit
+        }),
+        prisma.post.count({ where })
+      ]);
+
+      const categories = await prisma.postCategory.findMany({
+        orderBy: { name: 'asc' },
+        include: { _count: { select: { posts: true } } }
+      });
+
+      res.json({
+        posts: posts.map((p) => ({
+          ...p,
+          categories: p.categories.map((c) => c.category),
+          tags: p.tags.map((t) => t.tag)
+        })),
+        categories,
+        total,
+        page,
+        limit
+      });
+    } catch (error) {
+      next(error);
+    }
+  },
+
+  async getPostBySlug(req, res, next) {
+    try {
+      const post = await prisma.post.findFirst({
+        where: { slug: req.params.slug, deletedAt: null, status: 'PUBLISHED', publishedAt: { lte: new Date() } },
+        include: {
+          author: { select: { id: true, name: true, email: true } },
+          categories: { include: { category: true } },
+          tags: { include: { tag: true } }
+        }
+      });
+
+      if (!post) {
+        throw new AppError('Post no encontrado', 404);
+      }
+
+      await prisma.post.update({
+        where: { id: post.id },
+        data: { views: { increment: 1 } }
+      });
+      await trackPageView(req, `/blog/${post.slug}`);
+
+      const related = await prisma.post.findMany({
+        where: {
+          deletedAt: null,
+          status: 'PUBLISHED',
+          publishedAt: { lte: new Date() },
+          id: { not: post.id },
+          OR: [
+            { categories: { some: { categoryId: { in: post.categories.map((c) => c.categoryId) } } } },
+            { tags: { some: { tagId: { in: post.tags.map((t) => t.tagId) } } } }
+          ]
+        },
+        include: {
+          categories: { include: { category: true } },
+          tags: { include: { tag: true } }
+        },
+        orderBy: { publishedAt: 'desc' },
+        take: 3
+      });
+
+      res.json({
+        post: {
+          ...post,
+          categories: post.categories.map((c) => c.category),
+          tags: post.tags.map((t) => t.tag)
+        },
+        related: related.map((p) => ({
+          ...p,
+          categories: p.categories.map((c) => c.category),
+          tags: p.tags.map((t) => t.tag)
+        }))
+      });
+    } catch (error) {
+      next(error);
+    }
+  },
+
+  // ===== SEO =====
+  async getSeoInfo(req, res, next) {
+    try {
+      const path = req.query.path || '/';
+      const [company, settings, meta] = await Promise.all([
+        prisma.company.findFirst({ where: { deletedAt: null } }),
+        prisma.setting.findMany({ where: { key: { in: ['seo_title', 'seo_description', 'seo_image', 'seo_default_robots'] } } }),
+        prisma.seoMetadata.findFirst({ where: { entityType: 'PAGE', entityId: path } })
+      ]);
+
+      const settingMap = {};
+      settings.forEach((s) => (settingMap[s.key] = s.value));
+
+      res.json({
+        seo: {
+          title: meta?.title || settingMap.seo_title || (company?.slogan ? `${company.name} — ${company.slogan}` : company?.name || 'ALANTEK'),
+          description: meta?.description || settingMap.seo_description || company?.shortDescription || company?.description || '',
+          image: meta?.ogImage || settingMap.seo_image || company?.logoUrl || null,
+          ogTitle: meta?.ogTitle || meta?.title || null,
+          ogDescription: meta?.ogDescription || meta?.description || null,
+          twitterTitle: meta?.twitterTitle || meta?.title || null,
+          twitterDescription: meta?.twitterDescription || meta?.description || null,
+          twitterImage: meta?.twitterImage || meta?.ogImage || null,
+          canonical: meta?.canonical || null,
+          robots: meta?.robots || settingMap.seo_default_robots || 'index,follow'
+        }
+      });
+    } catch (error) {
+      next(error);
+    }
+  },
+
+  async getSitemap(req, res, next) {
+    try {
+      const company = await prisma.company.findFirst({ where: { deletedAt: null } });
+      const baseUrl = company?.website || `${req.protocol}://${req.get('host')}`;
+
+      const [projects, posts, team, pages] = await Promise.all([
+        prisma.project.findMany({ where: { deletedAt: null, isPublished: true, visibility: 'PUBLIC' }, select: { slug: true, updatedAt: true } }),
+        prisma.post.findMany({ where: { deletedAt: null, status: 'PUBLISHED', publishedAt: { lte: new Date() } }, select: { slug: true, updatedAt: true } }),
+        prisma.teamMember.findMany({ where: { deletedAt: null, isActive: true, isPublic: true }, select: { slug: true, updatedAt: true } }),
+        ['', 'nosotros', 'servicios', 'equipo', 'clientes', 'portafolio', 'contacto', 'blog', 'skills']
+      ]);
+
+      const url = (loc, lastmod) =>
+        `  <url>\n    <loc>${baseUrl}${loc}</loc>\n${lastmod ? `    <lastmod>${lastmod}</lastmod>\n` : ''}  </url>`;
+
+      const xml = [
+        '<?xml version="1.0" encoding="UTF-8"?>',
+        '<urlset xmlns="http://www.sitemaps.org/schemas/sitemap/0.9">',
+        ...pages.map((p) => url(p === '' ? '/' : `/${p}`)),
+        ...projects.map((p) => url(`/proyectos/${p.slug}`, p.updatedAt.toISOString())),
+        ...posts.map((p) => url(`/blog/${p.slug}`, p.updatedAt.toISOString())),
+        ...team.map((m) => url(`/equipo/${m.slug}`, m.updatedAt.toISOString())),
+        '</urlset>'
+      ].join('\n');
+
+      res.type('application/xml').send(xml);
+    } catch (error) {
+      next(error);
+    }
+  },
+
+  async getRobots(req, res, next) {
+    try {
+      const company = await prisma.company.findFirst({ where: { deletedAt: null } });
+      const baseUrl = company?.website || `${req.protocol}://${req.get('host')}`;
+      const robots = [
+        'User-agent: *',
+        'Allow: /',
+        `Disallow: /admin`,
+        `Disallow: /api`,
+        '',
+        `Sitemap: ${baseUrl}/sitemap.xml`
+      ].join('\n');
+      res.type('text/plain').send(robots);
+    } catch (error) {
+      next(error);
+    }
   }
 };
 

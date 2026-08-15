@@ -41,5 +41,10 @@ router.get('/clients', pageTracker(() => '/clientes'), publicController.getClien
 router.get('/testimonials', pageTracker(() => '/'), publicController.getTestimonials);
 router.get('/team', pageTracker(() => '/equipo'), publicController.getTeam);
 router.get('/team/:slug', publicController.getTeamMember);
+router.get('/blog', pageTracker(() => '/blog'), publicController.getPosts);
+router.get('/blog/slug/:slug', publicController.getPostBySlug);
+router.get('/seo', publicController.getSeoInfo);
+router.get('/sitemap', publicController.getSitemap);
+router.get('/robots', publicController.getRobots);
 
 module.exports = router;

@@ -85,6 +85,7 @@ const contactRoutes = require('./routes/contact.routes');
 const uploadRoutes = require('./routes/upload.routes');
 const settingRoutes = require('./routes/setting.routes');
 const publicRoutes = require('./routes/public.routes');
+const publicController = require('./controllers/public.controller');
 const statsRoutes = require('./routes/stats.routes');
 const technologyRoutes = require('./routes/technology.routes');
 const companyRoutes = require('./routes/company.routes');
@@ -96,6 +97,7 @@ const roleRoutes = require('./routes/role.routes');
 const mediaRoutes = require('./routes/media.routes');
 const auditRoutes = require('./routes/audit.routes');
 const notificationRoutes = require('./routes/notification.routes');
+const postRoutes = require('./routes/post.routes');
 
 app.use('/api/auth', authRoutes);
 app.use('/api/users', userRoutes);
@@ -124,6 +126,11 @@ app.use('/api/team', teamRoutes);
 app.use('/api/roles', roleRoutes);
 app.use('/api/audit', auditRoutes);
 app.use('/api/notifications', notificationRoutes);
+app.use('/api/posts', postRoutes);
+
+// SEO: sitemap.xml y robots.txt a nivel raíz (para proxy en nginx si se desea)
+app.get('/sitemap.xml', publicController.getSitemap);
+app.get('/robots.txt', publicController.getRobots);
 
 app.get('/api/health', (req, res) => {
   res.json({ status: 'ok', timestamp: new Date().toISOString() });

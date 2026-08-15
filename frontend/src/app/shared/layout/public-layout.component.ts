@@ -2,6 +2,7 @@ import { Component, HostListener, inject, OnInit } from '@angular/core';
 import { RouterOutlet, RouterLink, RouterLinkActive } from '@angular/router';
 import { NgIf, NgFor } from '@angular/common';
 import { ApiService } from '../../core/services/api.service';
+import { SeoService } from '../../core/services/seo.service';
 import { Company, Service } from '../../core/models';
 import { applyCompanyBrand } from '../../core/utils/brand.util';
 import { environment } from '../../../environments/environment';
@@ -72,6 +73,7 @@ import { environment } from '../../../environments/environment';
               <li><a routerLink="/servicios">Servicios</a></li>
               <li><a routerLink="/equipo">Equipo</a></li>
               <li><a routerLink="/portafolio">Portafolio</a></li>
+              <li><a routerLink="/blog">Blog</a></li>
               <li><a routerLink="/contacto">Contacto</a></li>
             </ul>
           </div>
@@ -107,6 +109,7 @@ import { environment } from '../../../environments/environment';
 })
 export class PublicLayoutComponent implements OnInit {
   private api = inject(ApiService);
+  private seoService = inject(SeoService);
 
   isScrolled = false;
   isMobileMenuOpen = false;
@@ -125,6 +128,7 @@ export class PublicLayoutComponent implements OnInit {
     { label: 'Equipo', href: '/equipo' },
     { label: 'Clientes', href: '/clientes' },
     { label: 'Portafolio', href: '/portafolio' },
+    { label: 'Blog', href: '/blog' },
     { label: 'Contacto', href: '/contacto' },
   ];
 
@@ -140,8 +144,42 @@ export class PublicLayoutComponent implements OnInit {
         if (c?.name) this.companyName = c.name;
         this.companyLogo = this.resolveAsset(c?.logoUrl);
         applyCompanyBrand(c);
+        this.applyDefaultSeo(c);
       },
-      error: () => applyCompanyBrand(null),
+      error: () => {
+        applyCompanyBrand(null);
+        this.applyDefaultSeo(null);
+      },
+    });
+  }
+
+  private applyDefaultSeo(c: Company | null): void {
+    const name = c?.name || 'ALANTEK';
+    const slogan = c?.slogan || '';
+    const desc = c?.shortDescription || c?.description || '';
+    const logo = this.resolveAsset(c?.logoUrl);
+    const jsonLd: object[] = [
+      {
+        '@context': 'https://schema.org',
+        '@type': 'Organization',
+        name,
+        url: this.seoService.canonicalUrl('/'),
+        logo: logo ? { '@type': 'ImageObject', url: logo } : undefined,
+        description: desc,
+        email: c?.email || undefined,
+        telephone: c?.phone || undefined,
+        address: c?.address
+          ? { '@type': 'PostalAddress', streetAddress: c.address, addressLocality: c.city || undefined, addressCountry: c.country || undefined }
+          : undefined,
+      },
+    ];
+    this.seoService.setSeo({
+      title: slogan ? `${name} — ${slogan}` : name,
+      description: desc,
+      image: logo || undefined,
+      canonical: this.seoService.canonicalUrl('/'),
+      robots: 'index,follow',
+      jsonLd,
     });
   }
 

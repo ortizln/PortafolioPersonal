@@ -62,6 +62,65 @@ export interface Notification {
 
 export type LeadStatus = 'NEW' | 'CONTACTED' | 'QUALIFIED' | 'PROPOSAL' | 'WON' | 'LOST' | 'CLOSED';
 
+export type PostStatus = 'DRAFT' | 'REVIEW' | 'PUBLISHED' | 'ARCHIVED';
+
+export interface PostCategory {
+  id: string;
+  name: string;
+  slug: string;
+  description?: string;
+  createdAt: string;
+  updatedAt: string;
+  _count?: { posts?: number };
+}
+
+export interface PostTag {
+  id: string;
+  name: string;
+  slug: string;
+  createdAt: string;
+  updatedAt: string;
+  _count?: { posts?: number };
+}
+
+export interface Post {
+  id: string;
+  title: string;
+  slug: string;
+  excerpt?: string;
+  content?: string;
+  coverImage?: string;
+  status: PostStatus;
+  authorId?: string;
+  author?: { id: string; name: string; email: string };
+  publishedAt?: string;
+  seoTitle?: string;
+  seoDescription?: string;
+  views: number;
+  categories?: PostCategory[];
+  tags?: PostTag[];
+  createdAt: string;
+  updatedAt: string;
+}
+
+export interface SeoMetadata {
+  id: string;
+  entityType: string;
+  entityId: string;
+  title?: string;
+  description?: string;
+  ogTitle?: string;
+  ogDescription?: string;
+  ogImage?: string;
+  twitterTitle?: string;
+  twitterDescription?: string;
+  twitterImage?: string;
+  canonical?: string;
+  robots?: string;
+  createdAt: string;
+  updatedAt: string;
+}
+
 export interface AuditLog {
   id: string;
   action: string;
