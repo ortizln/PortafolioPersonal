@@ -146,7 +146,7 @@ import { Profile, SocialLink } from '../core/models';
     .form-textarea { resize: vertical; min-height: 120px; }
     .form-error { font-size: 0.78rem; color: var(--error); }
     .btn-primary { background: linear-gradient(135deg, var(--accent), var(--accent-secondary)); color: var(--bg-primary); border: none; padding: 14px 28px; border-radius: 12px; font-weight: 600; cursor: pointer; transition: var(--transition); display: flex; align-items: center; justify-content: center; gap: 8px; }
-    .btn-primary:hover:not(:disabled) { transform: translateY(-2px); box-shadow: 0 8px 25px rgba(100, 255, 218, 0.3); }
+    .btn-primary:hover:not(:disabled) { transform: translateY(-2px); box-shadow: 0 8px 25px rgba(var(--accent-rgb), 0.3); }
     .btn-primary:disabled { opacity: 0.5; cursor: not-allowed; }
   `]
 })

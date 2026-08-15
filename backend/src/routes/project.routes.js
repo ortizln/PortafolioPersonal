@@ -9,6 +9,7 @@ const router = Router();
 router.use(authenticate);
 
 router.get('/', projectController.getAll);
+router.get('/slug/:slug', projectController.getBySlug);
 router.get('/:id', idParam, projectController.getById);
 router.post('/', projectValidation, projectController.create);
 router.put('/:id', idParam, projectController.update);

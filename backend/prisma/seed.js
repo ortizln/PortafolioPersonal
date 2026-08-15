@@ -3,12 +3,97 @@ const bcrypt = require('bcryptjs');
 
 const prisma = new PrismaClient();
 
+const PERMISSIONS = [
+  { name: 'company.read', module: 'company', description: 'Ver información corporativa' },
+  { name: 'company.update', module: 'company', description: 'Editar información corporativa' },
+  { name: 'team.read', module: 'team', description: 'Ver equipo' },
+  { name: 'team.create', module: 'team', description: 'Crear miembros de equipo' },
+  { name: 'team.update', module: 'team', description: 'Editar miembros de equipo' },
+  { name: 'team.delete', module: 'team', description: 'Eliminar miembros de equipo' },
+  { name: 'projects.read', module: 'projects', description: 'Ver proyectos' },
+  { name: 'projects.create', module: 'projects', description: 'Crear proyectos' },
+  { name: 'projects.update', module: 'projects', description: 'Editar proyectos' },
+  { name: 'projects.delete', module: 'projects', description: 'Eliminar proyectos' },
+  { name: 'projects.publish', module: 'projects', description: 'Publicar proyectos' },
+  { name: 'services.manage', module: 'services', description: 'Gestionar servicios' },
+  { name: 'clients.manage', module: 'clients', description: 'Gestionar clientes' },
+  { name: 'testimonials.manage', module: 'testimonials', description: 'Gestionar testimonios' },
+  { name: 'categories.manage', module: 'projects', description: 'Gestionar categorías' },
+  { name: 'technologies.manage', module: 'projects', description: 'Gestionar tecnologías' },
+  { name: 'posts.manage', module: 'posts', description: 'Gestionar publicaciones' },
+  { name: 'posts.publish', module: 'posts', description: 'Publicar contenido' },
+  { name: 'media.upload', module: 'media', description: 'Subir archivos' },
+  { name: 'media.manage', module: 'media', description: 'Gestionar biblioteca multimedia' },
+  { name: 'messages.read', module: 'commercial', description: 'Ver mensajes y leads' },
+  { name: 'messages.update', module: 'commercial', description: 'Actualizar mensajes y leads' },
+  { name: 'users.manage', module: 'system', description: 'Gestionar usuarios' },
+  { name: 'roles.manage', module: 'system', description: 'Gestionar roles y permisos' },
+  { name: 'settings.manage', module: 'system', description: 'Gestionar configuración' },
+  { name: 'audit.read', module: 'system', description: 'Ver registros de auditoría' },
+  { name: 'notifications.read', module: 'system', description: 'Ver notificaciones' }
+];
+
+const ROLES = [
+  { name: 'SUPER_ADMIN', description: 'Acceso total al sistema', permissions: PERMISSIONS.map((p) => p.name) },
+  { name: 'ADMIN', description: 'Administra contenido y operación del sitio', permissions: PERMISSIONS.filter((p) => !['users.manage', 'roles.manage', 'settings.manage', 'audit.read'].includes(p.name)).map((p) => p.name) },
+  { name: 'CONTENT_MANAGER', description: 'Gestiona contenido corporativo y del blog', permissions: ['company.read', 'company.update', 'team.read', 'team.update', 'services.manage', 'clients.manage', 'testimonials.manage', 'categories.manage', 'technologies.manage', 'posts.manage', 'posts.publish', 'media.upload', 'media.manage', 'projects.read', 'projects.update', 'messages.read'] },
+  { name: 'PROJECT_MANAGER', description: 'Gestiona proyectos y portafolio', permissions: ['projects.read', 'projects.create', 'projects.update', 'projects.delete', 'projects.publish', 'categories.manage', 'technologies.manage', 'media.upload', 'team.read', 'messages.read'] },
+  { name: 'TEAM_MEMBER', description: 'Colaborador del equipo', permissions: ['projects.read', 'team.read', 'company.read', 'messages.read', 'media.upload'] },
+  { name: 'VIEWER', description: 'Solo lectura', permissions: ['company.read', 'team.read', 'projects.read', 'messages.read'] }
+];
+
+async function seedRbac() {
+  const permissionMap = {};
+  for (const p of PERMISSIONS) {
+    const perm = await prisma.permission.upsert({
+      where: { name: p.name },
+      update: { module: p.module, description: p.description },
+      create: { name: p.name, module: p.module, description: p.description }
+    });
+    permissionMap[p.name] = perm.id;
+  }
+
+  for (const r of ROLES) {
+    const role = await prisma.role.upsert({
+      where: { name: r.name },
+      update: { description: r.description, isSystem: true },
+      create: { name: r.name, description: r.description, isSystem: true }
+    });
+    const current = await prisma.rolePermission.findMany({ where: { roleId: role.id }, select: { permissionId: true } });
+    const currentIds = new Set(current.map((c) => c.permissionId));
+    for (const permName of r.permissions) {
+      const permId = permissionMap[permName];
+      if (permId && !currentIds.has(permId)) {
+        await prisma.rolePermission.create({ data: { roleId: role.id, permissionId: permId } });
+      }
+    }
+  }
+}
+
+async function assignAdminRole() {
+  const admin = await prisma.user.findFirst({ where: { deletedAt: null }, orderBy: { createdAt: 'asc' } });
+  if (!admin) return;
+  const role = await prisma.role.findUnique({ where: { name: 'SUPER_ADMIN' } });
+  if (!role) return;
+  const existing = await prisma.userRole.findUnique({
+    where: { userId_roleId: { userId: admin.id, roleId: role.id } }
+  });
+  if (!existing) {
+    await prisma.userRole.create({ data: { userId: admin.id, roleId: role.id } });
+    await prisma.user.update({ where: { id: admin.id }, data: { roleId: role.id } });
+    console.log(`Assigned SUPER_ADMIN to ${admin.email}`);
+  }
+}
+
 async function main() {
   const adminEmail = process.env.SEED_ADMIN_EMAIL || 'admin@portfolio.com';
   const adminPassword = process.env.SEED_ADMIN_PASSWORD || 'Admin123!';
   const existing = await prisma.user.findUnique({ where: { email: adminEmail } });
   if (existing) {
     console.log('Admin user already exists, skipping seed.');
+    await seedRbac();
+    await assignAdminRole();
+    console.log('RBAC roles seeded.');
     return;
   }
 
@@ -106,6 +191,9 @@ async function main() {
       data: { ...link, userId: user.id }
     });
   }
+
+  await seedRbac();
+  await assignAdminRole();
 
   console.log('Seed completed successfully!');
   console.log(`Admin user: ${adminEmail}`);

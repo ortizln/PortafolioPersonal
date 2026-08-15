@@ -7,7 +7,7 @@ datasource db {
   url      = env("DATABASE_URL")
 }
 
-enum Role {
+enum LegacyRole {
   ADMIN
   USER
 }
@@ -38,15 +38,38 @@ enum ServiceStatus {
   INACTIVE
 }
 
+enum LeadStatus {
+  NEW
+  CONTACTED
+  QUALIFIED
+  PROPOSAL
+  WON
+  LOST
+  CLOSED
+}
+
+enum NotificationType {
+  INFO
+  SUCCESS
+  WARNING
+  MESSAGE
+  LEAD
+}
+
 model User {
   id            String   @id @default(uuid())
   email         String   @unique
   password      String
   name          String
-  role          Role     @default(USER)
+  role          LegacyRole @default(USER)
+  roleId        String?
   isActive      Boolean  @default(true)
   refreshToken  String?
   lastLogin     DateTime?
+  failedAttempts Int     @default(0)
+  lockoutUntil  DateTime?
+  resetToken    String?
+  resetTokenExpiry DateTime?
   createdAt     DateTime @default(now())
   updatedAt     DateTime @updatedAt
   deletedAt     DateTime?
@@ -63,8 +86,93 @@ model User {
   auditLogs     AuditLog[]
   contactMessages ContactMessage[]
   mediaFiles    MediaFile[]
+  notifications Notification[]
+  userRoles     UserRole[]
+  rbacRole      Role?    @relation("UserRbacRole", fields: [roleId], references: [id])
+  assignedContacts ContactMessage[] @relation("ContactAssignedUser")
 
   @@map("users")
+}
+
+model Role {
+  id            String   @id @default(uuid())
+  name          String   @unique
+  description   String?
+  isSystem      Boolean  @default(false)
+  createdAt     DateTime @default(now())
+  updatedAt     DateTime @updatedAt
+
+  permissions   RolePermission[]
+  users         UserRole[]
+  directUsers   User[]    @relation("UserRbacRole")
+
+  @@map("roles")
+}
+
+model Permission {
+  id            String   @id @default(uuid())
+  name          String   @unique
+  description   String?
+  module        String?
+  createdAt     DateTime @default(now())
+
+  roles         RolePermission[]
+
+  @@map("permissions")
+}
+
+model RolePermission {
+  id            String   @id @default(uuid())
+  roleId        String
+  permissionId  String
+  createdAt     DateTime @default(now())
+
+  role         Role       @relation(fields: [roleId], references: [id], onDelete: Cascade)
+  permission   Permission @relation(fields: [permissionId], references: [id], onDelete: Cascade)
+
+  @@unique([roleId, permissionId])
+  @@map("role_permissions")
+}
+
+model UserRole {
+  id            String   @id @default(uuid())
+  userId        String
+  roleId        String
+  createdAt     DateTime @default(now())
+
+  user         User     @relation(fields: [userId], references: [id], onDelete: Cascade)
+  role         Role     @relation(fields: [roleId], references: [id], onDelete: Cascade)
+
+  @@unique([userId, roleId])
+  @@map("user_roles")
+}
+
+model Notification {
+  id            String           @id @default(uuid())
+  title         String
+  message       String?
+  type          NotificationType @default(INFO)
+  link          String?
+  readAt        DateTime?
+  createdAt     DateTime         @default(now())
+
+  userId        String
+  user          User             @relation(fields: [userId], references: [id], onDelete: Cascade)
+
+  @@index([userId])
+  @@index([readAt])
+  @@map("notifications")
+}
+
+model PageView {
+  id            String   @id @default(uuid())
+  path          String   @unique
+  count         Int      @default(1)
+  createdAt     DateTime @default(now())
+  updatedAt     DateTime @updatedAt
+
+  @@index([count])
+  @@map("page_views")
 }
 
 model Profile {
@@ -192,10 +300,17 @@ model CertificateFile {
 model Project {
   id            String   @id @default(uuid())
   title         String
+  slug          String   @unique
   description   String?
   summary       String?
   client        String?
+  clientId      String?
+  clientRel     Client?  @relation("ProjectClient", fields: [clientId], references: [id])
+  serviceId     String?
+  service       Service? @relation(fields: [serviceId], references: [id])
   status        ProjectStatus @default(IN_PROGRESS)
+  projectType   String?
+  visibility    String   @default("PUBLIC")
   startDate     DateTime?
   endDate       DateTime?
   demoUrl       String?
@@ -204,9 +319,17 @@ model Project {
   videoUrl      String?
   bannerImage   String?
   architecture  String?
+  challenge     String?
+  solution      String?
+  results       String?
+  metrics       Json?
   features      Json?
   isFeatured    Boolean  @default(false)
+  isCaseStudy   Boolean  @default(false)
+  views         Int      @default(0)
   order         Int      @default(0)
+  seoTitle      String?
+  seoDescription String?
   createdAt     DateTime @default(now())
   updatedAt     DateTime @updatedAt
   deletedAt     DateTime?
@@ -216,6 +339,7 @@ model Project {
   images        ProjectImage[]
   technologies  ProjectTechnology[]
   categories    ProjectCategory[]
+  members       ProjectMember[]
 
   @@map("projects")
 }
@@ -348,17 +472,25 @@ model Repository {
 }
 
 model ContactMessage {
-  id            String   @id @default(uuid())
+  id            String     @id @default(uuid())
   name          String
   email         String
   subject       String?
   message       String
-  isRead        Boolean  @default(false)
-  createdAt     DateTime @default(now())
+  isRead        Boolean    @default(false)
+  status        LeadStatus @default(NEW)
+  source        String?
+  notes         String?
+  assignedToId  String?
+  createdAt     DateTime   @default(now())
+  updatedAt     DateTime   @updatedAt
 
   userId        String?
   user          User?    @relation(fields: [userId], references: [id])
+  assignedUser  User?    @relation("ContactAssignedUser", fields: [assignedToId], references: [id])
 
+  @@index([status])
+  @@index([createdAt])
   @@map("contact_messages")
 }
 
@@ -494,6 +626,7 @@ model Service {
 
   features        ServiceFeature[]
   technologies    ServiceTechnology[]
+  projects        Project[]
 
   @@map("services")
 }
@@ -541,6 +674,7 @@ model Client {
   deletedAt   DateTime?
 
   testimonials Testimonial[]
+  projects     Project[]    @relation("ProjectClient")
 
   @@map("clients")
 }
@@ -600,8 +734,26 @@ model TeamMember {
   skills           Skill[]
   languages        Language[]
   socialLinks      SocialLink[]
+  projects         ProjectMember[]
 
   @@index([isActive])
   @@index([order])
   @@map("team_members")
+}
+
+model ProjectMember {
+  id            String   @id @default(uuid())
+  projectId     String
+  teamMemberId  String
+  role          String?
+  description   String?
+  isLead        Boolean  @default(false)
+  createdAt     DateTime @default(now())
+
+  project       Project     @relation(fields: [projectId], references: [id], onDelete: Cascade)
+  teamMember    TeamMember  @relation(fields: [teamMemberId], references: [id], onDelete: Cascade)
+
+  @@unique([projectId, teamMemberId])
+  @@index([teamMemberId])
+  @@map("project_members")
 }

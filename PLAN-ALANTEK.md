@@ -1214,8 +1214,8 @@ tar xzf uploads_*.tar.gz   # en el volumen backend_uploads
 - [x] Adaptar Skill.
 - [x] Adaptar Language.
 - [x] Adaptar SocialLink.
-- [ ] Crear `/equipo`.
-- [ ] Crear `/equipo/:slug`.
+- [x] Crear `/equipo`.
+- [x] Crear `/equipo/:slug`.
 - [x] CRUD de miembros.
 
 **Resultado:** múltiples integrantes con perfiles completos.
@@ -1224,14 +1224,14 @@ tar xzf uploads_*.tar.gz   # en el volumen backend_uploads
 
 ## FASE 3 — Portafolio empresarial
 
-- [ ] Ampliar `Project`.
-- [ ] Crear `ProjectMember`.
-- [ ] Relacionar cliente.
-- [ ] Relacionar servicio.
-- [ ] Crear case studies.
-- [ ] Crear página individual de proyecto.
-- [ ] Búsqueda y filtros.
-- [ ] Proyectos relacionados.
+- [x] Ampliar `Project` (slug, clientId, serviceId, projectType, visibility, seo, case study).
+- [x] Crear `ProjectMember`.
+- [x] Relacionar cliente.
+- [x] Relacionar servicio.
+- [x] Crear case studies (challenge/solution/results/metrics + `isCaseStudy`).
+- [x] Crear página individual de proyecto (`/proyectos/:slug`).
+- [x] Búsqueda y filtros (search/category/technology/status en API pública).
+- [x] Proyectos relacionados.
 
 **Resultado:** portafolio corporativo escalable.
 
@@ -1239,18 +1239,18 @@ tar xzf uploads_*.tar.gz   # en el volumen backend_uploads
 
 ## FASE 4 — Nuevo frontend ALANTEK
 
-- [ ] Rediseñar navbar.
-- [ ] Rediseñar home.
-- [ ] Crear Nosotros.
-- [ ] Crear Servicios.
-- [ ] Crear Equipo.
-- [ ] Crear Clientes.
-- [ ] Crear Portafolio.
-- [ ] Crear Contacto.
-- [ ] Aplicar identidad visual.
-- [ ] Responsive.
-- [ ] Accesibilidad.
-- [ ] Animaciones moderadas.
+- [x] Rediseñar navbar (logo empresa, nav corporativo, CTA Cotizar).
+- [x] Rediseñar home (hero empresa, servicios destacados, proyectos, clientes, testimonios, CTA).
+- [x] Crear Nosotros (`/nosotros`).
+- [x] Crear Servicios (`/servicios`).
+- [x] Crear Equipo (`/equipo` y `/equipo/:slug`).
+- [x] Crear Clientes (`/clientes`).
+- [x] Crear Portafolio (`/portafolio` con búsqueda y filtros + `/proyectos/:slug`).
+- [x] Crear Contacto (`/contacto`).
+- [x] Aplicar identidad visual (variables `--alantek-*` + colores dinámicos desde Company).
+- [x] Responsive.
+- [x] Accesibilidad (skip-link, aria, focus, roles).
+- [x] Animaciones moderadas (AOS).
 
 **Resultado:** sitio público completamente corporativo.
 
@@ -1258,17 +1258,18 @@ tar xzf uploads_*.tar.gz   # en el volumen backend_uploads
 
 ## FASE 5 — Administración avanzada
 
-- [ ] RBAC.
-- [ ] Roles.
-- [ ] Permisos.
-- [ ] Media library.
-- [ ] Leads.
-- [ ] Dashboard empresarial.
-- [ ] Auditoría ampliada.
-- [ ] Recuperación de contraseña.
-- [ ] Notificaciones.
+- [x] RBAC.
+- [x] Roles.
+- [x] Permisos.
+- [x] Media library.
+- [x] Leads.
+- [x] Dashboard empresarial.
+- [x] Auditoría ampliada.
+- [x] Recuperación de contraseña.
+- [x] Notificaciones.
 
 **Resultado:** CMS corporativo administrable por varios usuarios.
+*(Pendiente de aplicar: `npx prisma migrate deploy` + seed en el servidor / Postgres local; build frontend OK.)*
 
 ---
 

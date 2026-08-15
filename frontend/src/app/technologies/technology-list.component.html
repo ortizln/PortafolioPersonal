@@ -1,0 +1,85 @@
+<div class="header-row">
+  <h2>Tecnologías</h2>
+  <button class="btn-primary" (click)="openCreate()"><i class="bi bi-plus-lg"></i> Nueva tecnología</button>
+</div>
+
+<div class="toolbar">
+  <div class="search-box">
+    <i class="bi bi-search"></i>
+    <input type="text" [(ngModel)]="search" placeholder="Buscar tecnología o categoría..." />
+  </div>
+</div>
+
+<div class="toast-stack">
+  <div class="toast" *ngFor="let t of toasts" [class.error]="t.type === 'error'">
+    <i class="bi" [ngClass]="t.type === 'success' ? 'bi-check-circle' : 'bi-exclamation-circle'"></i>
+    {{ t.message }}
+  </div>
+</div>
+
+<div class="tech-grid" *ngIf="!loading">
+  <div class="tech-card" *ngFor="let t of filtered">
+    <div class="tech-icon" [style.background]="t.color ? t.color + '1f' : 'rgba(255,255,255,0.06)'" [style.color]="t.color || 'var(--text-secondary)'">
+      <i *ngIf="t.icon" class="bi" [ngClass]="t.icon"></i>
+      <span *ngIf="!t.icon">{{ t.name.charAt(0) }}</span>
+    </div>
+    <div class="tech-info">
+      <span class="tech-name">{{ t.name }}</span>
+      <span class="tech-category">{{ t.category || 'Sin categoría' }}</span>
+      <span class="tech-count">{{ t._count?.projects || 0 }} proyectos · {{ t._count?.skills || 0 }} skills</span>
+    </div>
+    <div class="tech-actions">
+      <button (click)="openEdit(t)" title="Editar"><i class="bi bi-pencil"></i></button>
+      <button (click)="deleteTechnology(t)" title="Eliminar"><i class="bi bi-trash"></i></button>
+    </div>
+  </div>
+  <div class="empty-state" *ngIf="filtered.length === 0">
+    <i class="bi bi-cpu"></i>
+    <p>No hay tecnologías{{ search ? ' que coincidan' : '' }}.</p>
+  </div>
+</div>
+
+<!-- Form modal -->
+<div class="modal-overlay" *ngIf="showForm" (click)="showForm = false">
+  <div class="modal-content" (click)="$event.stopPropagation()">
+    <button class="modal-close" (click)="showForm = false"><i class="bi bi-x-lg"></i></button>
+    <h3>{{ editing ? 'Editar tecnología' : 'Nueva tecnología' }}</h3>
+    <div class="form-grid">
+      <div class="form-group">
+        <label>Nombre *</label>
+        <input class="form-control" [(ngModel)]="form.name" (ngModelChange)="onNameChange()" placeholder="React" />
+      </div>
+      <div class="form-group">
+        <label>Slug</label>
+        <input class="form-control" [(ngModel)]="form.slug" placeholder="react" />
+      </div>
+      <div class="form-group">
+        <label>Categoría</label>
+        <input class="form-control" [(ngModel)]="form.category" placeholder="Frontend" list="cat-list" />
+        <datalist id="cat-list">
+          <option *ngFor="let c of categories()" [value]="c"></option>
+        </datalist>
+      </div>
+      <div class="form-group">
+        <label>Icono (bootstrap icon)</label>
+        <input class="form-control" [(ngModel)]="form.icon" placeholder="bi-braces" />
+      </div>
+      <div class="form-group">
+        <label>Color</label>
+        <input type="color" class="form-control color-input" [(ngModel)]="form.color" />
+      </div>
+      <div class="form-group">
+        <label>Sitio web</label>
+        <input class="form-control" [(ngModel)]="form.website" placeholder="https://react.dev" />
+      </div>
+      <div class="form-group full">
+        <label>Descripción</label>
+        <textarea class="form-control" [(ngModel)]="form.description" rows="2"></textarea>
+      </div>
+    </div>
+    <div class="modal-actions">
+      <button class="btn-secondary" (click)="showForm = false">Cancelar</button>
+      <button class="btn-primary" (click)="save()" [disabled]="!form.name.trim()">Guardar</button>
+    </div>
+  </div>
+</div>

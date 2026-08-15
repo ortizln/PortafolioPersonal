@@ -23,8 +23,22 @@
             <input id="title" class="form-control" formControlName="title" placeholder="Título del proyecto" />
           </div>
           <div class="form-group">
-            <label for="client">Cliente</label>
+            <label for="client">Cliente (texto libre)</label>
             <input id="client" class="form-control" formControlName="client" placeholder="Nombre del cliente (opcional)" />
+          </div>
+          <div class="form-group">
+            <label for="clientId">Cliente (empresa)</label>
+            <select id="clientId" class="form-control" formControlName="clientId">
+              <option value="">Sin cliente corporativo</option>
+              <option *ngFor="let c of clients" [value]="c.id">{{ c.name }}</option>
+            </select>
+          </div>
+          <div class="form-group">
+            <label for="serviceId">Servicio</label>
+            <select id="serviceId" class="form-control" formControlName="serviceId">
+              <option value="">Sin servicio</option>
+              <option *ngFor="let s of services" [value]="s.id">{{ s.name }}</option>
+            </select>
           </div>
           <div class="form-group">
             <label for="status">Estado</label>
@@ -33,6 +47,17 @@
               <option value="in_progress">En Progreso</option>
               <option value="completed">Completado</option>
               <option value="archived">Archivado</option>
+            </select>
+          </div>
+          <div class="form-group">
+            <label for="projectType">Tipo de proyecto</label>
+            <input id="projectType" class="form-control" formControlName="projectType" placeholder="Ej. Web App, Mobile, API" />
+          </div>
+          <div class="form-group">
+            <label for="visibility">Visibilidad</label>
+            <select id="visibility" class="form-control" formControlName="visibility">
+              <option value="PUBLIC">Público</option>
+              <option value="PRIVATE">Privado</option>
             </select>
           </div>
           <div class="form-group">
@@ -67,9 +92,21 @@
             <input id="isFeatured" formControlName="isFeatured" type="checkbox" class="checkbox-control" />
             <label for="isFeatured">Proyecto destacado</label>
           </div>
+          <div class="form-group checkbox-group">
+            <input id="isCaseStudy" formControlName="isCaseStudy" type="checkbox" class="checkbox-control" />
+            <label for="isCaseStudy">Caso de éxito</label>
+          </div>
           <div class="form-group">
             <label for="architecture">Arquitectura</label>
             <input id="architecture" class="form-control" formControlName="architecture" placeholder="Ej. Microservicios, Monolito" />
+          </div>
+          <div class="form-group">
+            <label for="seoTitle">SEO Título</label>
+            <input id="seoTitle" class="form-control" formControlName="seoTitle" placeholder="Título para buscadores" />
+          </div>
+          <div class="form-group">
+            <label for="seoDescription">SEO Descripción</label>
+            <input id="seoDescription" class="form-control" formControlName="seoDescription" placeholder="Descripción para buscadores" />
           </div>
           <div class="form-group full-width">
             <label>Categoría</label>
@@ -85,12 +122,37 @@
             </div>
           </div>
           <div class="form-group full-width">
+            <label>Equipo participante</label>
+            <div class="chip-group">
+              <button type="button" *ngFor="let m of teamMembers" class="chip" [class.active]="isMemberSelected(m.id)" (click)="toggleMember(m.id)">
+                {{ m.fullName }}
+              </button>
+              <span *ngIf="teamMembers.length === 0" class="chip-empty">Sin miembros de equipo (crea el equipo primero)</span>
+            </div>
+          </div>
+          <div class="form-group full-width">
             <label for="description">Descripción</label>
             <textarea id="description" class="form-control" formControlName="description" rows="4" placeholder="Descripción completa del proyecto"></textarea>
           </div>
           <div class="form-group full-width">
             <label for="summary">Resumen</label>
             <textarea id="summary" class="form-control" formControlName="summary" rows="2" placeholder="Resumen corto para las tarjetas"></textarea>
+          </div>
+          <div class="form-group full-width" *ngIf="projectForm.get('isCaseStudy')?.value">
+            <label for="challenge">Problema (case study)</label>
+            <textarea id="challenge" class="form-control" formControlName="challenge" rows="3" placeholder="¿Qué problema resolviste?"></textarea>
+          </div>
+          <div class="form-group full-width" *ngIf="projectForm.get('isCaseStudy')?.value">
+            <label for="solution">Solución (case study)</label>
+            <textarea id="solution" class="form-control" formControlName="solution" rows="3" placeholder="¿Cómo lo resolviste?"></textarea>
+          </div>
+          <div class="form-group full-width" *ngIf="projectForm.get('isCaseStudy')?.value">
+            <label for="results">Resultados (case study)</label>
+            <textarea id="results" class="form-control" formControlName="results" rows="3" placeholder="¿Qué resultados obtuviste?"></textarea>
+          </div>
+          <div class="form-group full-width" *ngIf="projectForm.get('isCaseStudy')?.value">
+            <label for="metrics">Métricas (JSON)</label>
+            <textarea id="metrics" class="form-control form-control--mono" formControlName="metrics" rows="3" placeholder='[{"label":"ROI","value":"+120%"}]'></textarea>
           </div>
           <div class="form-group full-width">
             <label for="features">Características (JSON)</label>
@@ -184,6 +246,7 @@
           <span class="tech-badge" *ngFor="let tech of project.technologies" [ngStyle]="{'--tech-color': tech.color || 'var(--accent)'}">{{ tech.name }}</span>
         </div>
         <div class="project-meta">
+          <span *ngIf="project.clientRel?.name || project.client">{{ project.clientRel?.name || project.client }}</span>
           <span *ngIf="project.startDate">{{ project.startDate | date:'MMM yyyy' }}</span>
           <span *ngIf="project.githubUrl" class="meta-link">
             <a [href]="project.githubUrl" target="_blank" title="GitHub">GH</a>
@@ -191,6 +254,7 @@
           <span *ngIf="project.demoUrl" class="meta-link">
             <a [href]="project.demoUrl" target="_blank" title="Demo">🔗</a>
           </span>
+          <span class="featured-star" *ngIf="project.isCaseStudy">📊 Caso</span>
           <span class="featured-star" *ngIf="project.isFeatured">★ Destacado</span>
         </div>
       </div>

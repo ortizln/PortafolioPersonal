@@ -1,7 +1,8 @@
 import { Component, OnInit, inject, HostListener } from '@angular/core';
 import { NgFor, NgIf, NgClass } from '@angular/common';
 import { DomSanitizer, SafeResourceUrl } from '@angular/platform-browser';
-import { RouterLink } from '@angular/router';
+import { Router, RouterLink } from '@angular/router';
+import { FormsModule } from '@angular/forms';
 import { ApiService } from '../core/services/api.service';
 import { Project } from '../core/models';
 import { environment } from '../../environments/environment';
@@ -9,13 +10,43 @@ import { environment } from '../../environments/environment';
 @Component({
   selector: 'app-projects-page',
   standalone: true,
-  imports: [NgIf, NgFor, NgClass, RouterLink],
+  imports: [NgIf, NgFor, NgClass, RouterLink, FormsModule],
   template: `
     <div class="page-wrapper">
       <div class="page-header">
         <div class="container">
-          <a routerLink="/portfolio" class="back-link">&larr; Volver al Portafolio</a>
-          <h1>Proyectos</h1>
+          <a routerLink="/" class="back-link">&larr; Volver al Inicio</a>
+          <h1>Portafolio</h1>
+          <div class="filters">
+            <div class="search-box">
+              <i class="bi bi-search" aria-hidden="true"></i>
+              <input
+                type="search"
+                placeholder="Buscar proyecto..."
+                [(ngModel)]="searchTerm"
+                (ngModelChange)="onSearchInput()"
+                [attr.aria-label]="'Buscar proyecto'"
+              />
+              <button *ngIf="searchTerm" type="button" class="clear-btn" (click)="clearSearch()" aria-label="Limpiar búsqueda">
+                <i class="bi bi-x-lg" aria-hidden="true"></i>
+              </button>
+            </div>
+            <div class="category-filters" *ngIf="filterCategories.length">
+              <button
+                type="button"
+                class="category-chip"
+                [class.active]="activeCategory === ''"
+                (click)="selectCategory('')"
+              >Todos</button>
+              <button
+                type="button"
+                class="category-chip"
+                *ngFor="let c of filterCategories"
+                [class.active]="activeCategory === c.slug"
+                (click)="selectCategory(c.slug)"
+              >{{ c.name }}</button>
+            </div>
+          </div>
         </div>
       </div>
 
@@ -59,7 +90,7 @@ import { environment } from '../../environments/environment';
               </div>
               <div class="project-body">
                 <div class="project-techs">
-                  <span class="project-tech" *ngFor="let tech of project.technologies" [style.--tech-color]="tech.color || '#64ffda'">{{ tech.name }}</span>
+                  <span class="project-tech" *ngFor="let tech of project.technologies" [style.--tech-color]="tech.color || 'var(--accent)'">{{ tech.name }}</span>
                 </div>
                 <h3 class="project-title">{{ project.title }}</h3>
                 <p class="project-description">{{ project.description }}</p>
@@ -165,6 +196,17 @@ import { environment } from '../../environments/environment';
     .page-header h1 { font-size: 1.5rem; color: var(--white); margin: 8px 0 0; }
     .back-link { color: var(--accent); font-size: 0.85rem; text-decoration: none; display: inline-flex; align-items: center; gap: 4px; transition: var(--transition); }
     .back-link:hover { opacity: 0.8; }
+    .filters { margin-top: 20px; display: flex; flex-direction: column; gap: 12px; }
+    .search-box { position: relative; max-width: 420px; }
+    .search-box i { position: absolute; left: 14px; top: 50%; transform: translateY(-50%); color: var(--text-muted); }
+    .search-box input { width: 100%; background: var(--bg-card); border: 1px solid var(--border); color: var(--text-primary); border-radius: 10px; padding: 10px 40px 10px 38px; font-size: 0.88rem; outline: none; transition: var(--transition); }
+    .search-box input:focus { border-color: var(--accent); }
+    .clear-btn { position: absolute; right: 8px; top: 50%; transform: translateY(-50%); background: none; border: none; color: var(--text-muted); cursor: pointer; font-size: 0.9rem; }
+    .clear-btn:hover { color: var(--accent); }
+    .category-filters { display: flex; flex-wrap: wrap; gap: 8px; }
+    .category-chip { background: var(--bg-card); border: 1px solid var(--border); color: var(--text-secondary); padding: 6px 14px; border-radius: 20px; font-size: 0.8rem; cursor: pointer; transition: var(--transition); }
+    .category-chip:hover { border-color: var(--accent); color: var(--accent); }
+    .category-chip.active { background: linear-gradient(135deg, var(--accent), var(--accent-secondary)); color: var(--bg-primary); border-color: transparent; font-weight: 600; }
     .container { max-width: 1200px; margin: 0 auto; padding: 0 24px; }
     .page-loading { display: flex; justify-content: center; padding: 120px 0; }
     .page-error { text-align: center; padding: 120px 24px; color: var(--text-muted); }
@@ -235,6 +277,7 @@ import { environment } from '../../environments/environment';
 export class ProjectsPageComponent implements OnInit {
   private api = inject(ApiService);
   private sanitizer = inject(DomSanitizer);
+  private router = inject(Router);
   projects: Project[] = [];
   selectedProject: Project | null = null;
   currentSlide = 0;
@@ -242,6 +285,10 @@ export class ProjectsPageComponent implements OnInit {
   imageOrientation: 'portrait' | 'landscape' | 'square' = 'landscape';
   loading = true;
   error = false;
+
+  searchTerm = '';
+  filterCategories: { name: string; slug: string }[] = [];
+  activeCategory = '';
 
   ngOnInit(): void {
     this.loadData();
@@ -254,10 +301,28 @@ export class ProjectsPageComponent implements OnInit {
     if (event.key === 'ArrowRight') this.nextSlide();
   }
 
+  onSearchInput(): void {
+    clearTimeout(this.searchTimer);
+    this.searchTimer = window.setTimeout(() => this.loadData(), 350);
+  }
+
+  clearSearch(): void {
+    this.searchTerm = '';
+    this.loadData();
+  }
+
+  selectCategory(slug: string): void {
+    this.activeCategory = this.activeCategory === slug ? '' : slug;
+    this.loadData();
+  }
+
   private loadData(): void {
     this.loading = true;
     this.error = false;
-    this.api.getPublicProjects().subscribe({
+    const filters: any = {};
+    if (this.searchTerm.trim()) filters.search = this.searchTerm.trim();
+    if (this.activeCategory) filters.category = this.activeCategory;
+    this.api.getPublicProjects(filters).subscribe({
       next: (projects) => {
         this.projects = (projects || []).map((p) => ({
           ...p,
@@ -265,12 +330,28 @@ export class ProjectsPageComponent implements OnInit {
             t.technology ? { ...t.technology, id: t.technology.id } : t
           ) || [],
         }));
+        this.buildCategoryFilters(projects || []);
         this.loading = false;
         setTimeout(() => this.initAOS(), 100);
       },
       error: () => { this.loading = false; this.error = true; },
     });
   }
+
+  private buildCategoryFilters(projects: any[]): void {
+    const map = new Map<string, { name: string; slug: string }>();
+    projects.forEach((p) => {
+      (p.categories || []).forEach((c: any) => {
+        const cat = c.category || c;
+        if (cat?.slug && cat?.name && !map.has(cat.slug)) {
+          map.set(cat.slug, { name: cat.name, slug: cat.slug });
+        }
+      });
+    });
+    this.filterCategories = Array.from(map.values());
+  }
+
+  private searchTimer: number | undefined;
 
   private initAOS(): void {
     const aos = (window as any).AOS;
@@ -305,6 +386,10 @@ export class ProjectsPageComponent implements OnInit {
   }
 
   openProject(project: Project): void {
+    if (project.slug) {
+      this.router.navigate(['/proyectos', project.slug]);
+      return;
+    }
     this.selectedProject = project;
     this.imageOrientation = 'landscape';
     this.buildCarousel(project);

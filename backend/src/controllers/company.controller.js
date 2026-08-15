@@ -1,6 +1,7 @@
 const prisma = require('../config/database');
 const { AppError } = require('../middlewares/errorHandler');
 const slugify = require('slugify');
+const { audit } = require('../helpers/audit');
 
 const companyController = {
   async get(req, res, next) {
@@ -41,6 +42,15 @@ const companyController = {
         : await prisma.company.create({
             data: { ...data, slug: slugify(name, { lower: true, strict: true }) }
           });
+
+      await audit({
+        userId: req.user?.id,
+        action: existing ? 'UPDATE' : 'CREATE',
+        entity: 'Company',
+        entityId: company.id,
+        description: existing ? 'Información corporativa actualizada' : 'Empresa creada',
+        req
+      });
 
       res.json({ company });
     } catch (error) {

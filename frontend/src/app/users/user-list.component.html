@@ -1,0 +1,73 @@
+<div class="header-row">
+  <h2>Usuarios</h2>
+</div>
+
+<div class="toolbar">
+  <div class="search-box">
+    <i class="bi bi-search"></i>
+    <input type="text" [(ngModel)]="search" (keyup.enter)="applyFilters()" placeholder="Buscar por nombre o email..." />
+    <button *ngIf="search" (click)="search = ''; applyFilters()"><i class="bi bi-x-lg"></i></button>
+  </div>
+  <select class="role-filter" [(ngModel)]="roleFilter" (change)="applyFilters()">
+    <option value="">Todos los roles</option>
+    <option *ngFor="let r of roles" [value]="r.id">{{ r.name }}</option>
+  </select>
+</div>
+
+<div class="toast-stack">
+  <div class="toast" *ngFor="let t of toasts" [class.error]="t.type === 'error'">
+    <i class="bi" [ngClass]="t.type === 'success' ? 'bi-check-circle' : 'bi-exclamation-circle'"></i>
+    {{ t.message }}
+  </div>
+</div>
+
+<div class="table-wrap" *ngIf="!loading">
+  <table class="users-table">
+    <thead>
+      <tr>
+        <th>Usuario</th>
+        <th>Rol</th>
+        <th>Estado</th>
+        <th>Último acceso</th>
+        <th>Acciones</th>
+      </tr>
+    </thead>
+    <tbody>
+      <tr *ngFor="let user of users">
+        <td>
+          <div class="user-cell">
+            <i class="bi bi-person-circle avatar"></i>
+            <div>
+              <span class="user-name">{{ user.name }}</span>
+              <span class="user-email">{{ user.email }}</span>
+            </div>
+          </div>
+        </td>
+        <td>
+          <select class="role-select" [value]="user.roleId || ''" (change)="changeRole(user, $any($event.target).value)">
+            <option value="" disabled>Seleccionar...</option>
+            <option *ngFor="let r of roles" [value]="r.id">{{ r.name }}</option>
+          </select>
+        </td>
+        <td>
+          <button class="active-toggle" [class.active]="user.isActive" (click)="toggleActive(user)">
+            {{ user.isActive ? 'Activo' : 'Inactivo' }}
+          </button>
+        </td>
+        <td class="last-login">{{ user.lastLogin ? (user.lastLogin | date: 'dd/MM/yyyy HH:mm') : 'Nunca' }}</td>
+        <td>
+          <button class="delete-btn" (click)="deleteUser(user)"><i class="bi bi-trash"></i></button>
+        </td>
+      </tr>
+      <tr *ngIf="users.length === 0">
+        <td colspan="5" class="empty-row">No hay usuarios.</td>
+      </tr>
+    </tbody>
+  </table>
+</div>
+
+<div class="pagination" *ngIf="totalPages() > 1">
+  <button [disabled]="page === 1" (click)="goPage(page - 1)"><i class="bi bi-chevron-left"></i></button>
+  <span>Página {{ page }} de {{ totalPages() }} · {{ total }} usuarios</span>
+  <button [disabled]="page === totalPages()" (click)="goPage(page + 1)"><i class="bi bi-chevron-right"></i></button>
+</div>

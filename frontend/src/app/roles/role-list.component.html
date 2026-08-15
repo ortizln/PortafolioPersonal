@@ -1,0 +1,78 @@
+<div class="header-row">
+  <h2>Roles y permisos</h2>
+  <button class="btn-primary" (click)="openCreate()"><i class="bi bi-plus-lg"></i> Nuevo rol</button>
+</div>
+
+<div class="toast-stack">
+  <div class="toast" *ngFor="let t of toasts" [class.error]="t.type === 'error'">
+    <i class="bi" [ngClass]="t.type === 'success' ? 'bi-check-circle' : 'bi-exclamation-circle'"></i>
+    {{ t.message }}
+  </div>
+</div>
+
+<div class="roles-grid" *ngIf="!loading">
+  <div class="role-card" *ngFor="let role of roles">
+    <div class="role-card-head" (click)="toggleExpand(role)">
+      <div class="role-name-row">
+        <span class="role-badge" [class.system]="role.isSystem">{{ role.name }}</span>
+        <span class="role-desc">{{ role.description || 'Sin descripción' }}</span>
+      </div>
+      <button class="expand-btn" [class.open]="expandedRoleId === role.id">
+        <i class="bi" [ngClass]="expandedRoleId === role.id ? 'bi-chevron-up' : 'bi-chevron-down'"></i>
+      </button>
+    </div>
+    <div class="role-stats">
+      <span><i class="bi bi-people"></i> {{ role._count?.users ?? 0 }} usuarios</span>
+      <span><i class="bi bi-shield-check"></i> {{ (role.permissions || []).length }} permisos</span>
+    </div>
+    <div class="role-card-actions">
+      <button class="delete-btn" *ngIf="!role.isSystem" (click)="deleteRole(role)"><i class="bi bi-trash"></i> Eliminar</button>
+      <span class="system-tag" *ngIf="role.isSystem">Sistema</span>
+    </div>
+
+    <div class="permission-panel" *ngIf="expandedRoleId === role.id">
+      <h4>Permisos</h4>
+      <div class="perm-group" *ngFor="let group of permissionGroups()">
+        <div class="perm-group-title">{{ group.module }}</div>
+        <div class="perm-list">
+          <label class="perm-item" *ngFor="let p of group.items">
+            <input type="checkbox" [checked]="hasPermission(role, p.id)" (change)="togglePermission(role, p.id)" />
+            <span class="perm-name">{{ p.name }}</span>
+            <span class="perm-key">{{ p.code }}</span>
+          </label>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- Create role modal -->
+<div class="modal-overlay" *ngIf="showCreate" (click)="showCreate = false">
+  <div class="modal-content" (click)="$event.stopPropagation()">
+    <button class="modal-close" (click)="showCreate = false"><i class="bi bi-x-lg"></i></button>
+    <h3>Nuevo rol</h3>
+    <div class="form-group">
+      <label>Nombre (clave)</label>
+      <input class="form-control" [(ngModel)]="newRoleName" placeholder="Ej: MARKETING" />
+    </div>
+    <div class="form-group">
+      <label>Descripción</label>
+      <input class="form-control" [(ngModel)]="newRoleDescription" placeholder="Responsable de..." />
+    </div>
+    <div class="form-group">
+      <label>Permisos iniciales</label>
+      <div class="perm-select-list">
+        <label class="perm-item" *ngFor="let group of permissionGroups(); let g = index">
+          <ng-container *ngFor="let p of group.items">
+            <input type="checkbox" [checked]="newRolePermissionIds.has(p.id)" (change)="toggleNewPermission(p.id)" />
+            <span class="perm-name">{{ p.name }}</span>
+          </ng-container>
+        </label>
+      </div>
+    </div>
+    <div class="modal-actions">
+      <button class="btn-secondary" (click)="showCreate = false">Cancelar</button>
+      <button class="btn-primary" (click)="createRole()" [disabled]="!newRoleName.trim()">Crear rol</button>
+    </div>
+  </div>
+</div>

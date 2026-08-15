@@ -7,6 +7,7 @@ import {
   Project, ProjectImage, Technology, Skill, Language,
   SocialLink, Repository, ContactMessage, Category,
   Setting, CertificateFile, Company, Service, Client, Testimonial, TeamMember,
+  Role, Permission, MediaFile, Notification, AuditLog,
 } from '../models';
 
 @Injectable({ providedIn: 'root' })
@@ -32,7 +33,9 @@ export class ApiService {
   }
 
   getMe(): Observable<User> {
-    return this.http.get<User>(`${this.apiUrl}/auth/me`);
+    return this.http.get<{ user: User }>(`${this.apiUrl}/auth/me`).pipe(
+      map((res) => res.user)
+    );
   }
 
   // Profile
@@ -196,6 +199,18 @@ export class ApiService {
     return this.http.get<Technology[]>(`${this.apiUrl}/technologies`);
   }
 
+  createTechnology(data: Partial<Technology>): Observable<Technology> {
+    return this.http.post<Technology>(`${this.apiUrl}/technologies`, data);
+  }
+
+  updateTechnology(id: string, data: Partial<Technology>): Observable<Technology> {
+    return this.http.put<Technology>(`${this.apiUrl}/technologies/${id}`, data);
+  }
+
+  deleteTechnology(id: string): Observable<void> {
+    return this.http.delete<void>(`${this.apiUrl}/technologies/${id}`);
+  }
+
   // Skills
   getSkillsAll(): Observable<Skill[]> {
     return this.http.get<Skill[]>(`${this.apiUrl}/skills`);
@@ -337,7 +352,32 @@ export class ApiService {
   getContactMessagesAll(params?: { read?: boolean }): Observable<ContactMessage[]> {
     let httpParams = new HttpParams();
     if (params?.read != null) httpParams = httpParams.set('read', String(params.read));
-    return this.http.get<ContactMessage[]>(`${this.apiUrl}/contact`, { params: httpParams });
+    return this.http.get<any>(`${this.apiUrl}/contact`, { params: httpParams }).pipe(
+      map((res) => (Array.isArray(res) ? res : (res.contacts || [])))
+    );
+  }
+
+  getLeads(params?: { page?: number; limit?: number; status?: string; search?: string; unreadOnly?: boolean }): Observable<{
+    contacts: ContactMessage[];
+    total: number;
+    page: number;
+    limit: number;
+    statusCounts: Record<string, number>;
+    statuses: string[];
+  }> {
+    let httpParams = new HttpParams();
+    if (params?.page) httpParams = httpParams.set('page', String(params.page));
+    if (params?.limit) httpParams = httpParams.set('limit', String(params.limit));
+    if (params?.status) httpParams = httpParams.set('status', params.status);
+    if (params?.search) httpParams = httpParams.set('search', params.search);
+    if (params?.unreadOnly) httpParams = httpParams.set('unreadOnly', 'true');
+    return this.http.get<any>(`${this.apiUrl}/contact`, { params: httpParams });
+  }
+
+  updateLead(id: string, data: { status?: string; notes?: string; assignedToId?: string; isRead?: boolean }): Observable<ContactMessage> {
+    return this.http.put<{ contact: ContactMessage }>(`${this.apiUrl}/contact/${id}/lead`, data).pipe(
+      map((res) => res.contact)
+    );
   }
 
   getContactMessageById(id: string): Observable<ContactMessage> {
@@ -405,8 +445,9 @@ export class ApiService {
     return this.http.get<any>(`${this.apiUrl}/public/portfolio`, { params });
   }
 
-  getPublicProjects(): Observable<Project[]> {
-    return this.http.get<{ projects: Project[] }>(`${this.apiUrl}/public/projects`).pipe(
+  getPublicProjects(filters?: { search?: string; category?: string; technology?: string; status?: string }): Observable<Project[]> {
+    const params = new HttpParams({ fromObject: (filters || {}) as any });
+    return this.http.get<{ projects: Project[] }>(`${this.apiUrl}/public/projects`, { params }).pipe(
       map((res) => res.projects)
     );
   }
@@ -415,6 +456,10 @@ export class ApiService {
     return this.http.get<{ project: Project }>(`${this.apiUrl}/public/projects/${id}`).pipe(
       map((res) => res.project)
     );
+  }
+
+  getPublicProjectBySlug(slug: string): Observable<{ project: Project; related: Project[] }> {
+    return this.http.get<{ project: Project; related: Project[] }>(`${this.apiUrl}/public/projects/slug/${slug}`);
   }
 
   getPublicExperiences(): Observable<Experience[]> {
@@ -612,6 +657,151 @@ export class ApiService {
   getPublicTeamMember(slug: string): Observable<TeamMember> {
     return this.http.get<{ member: TeamMember }>(`${this.apiUrl}/public/team/${slug}`).pipe(
       map((res) => res.member)
+    );
+  }
+
+  // FASE 5 — Auth / password
+  forgotPassword(email: string): Observable<{ message: string }> {
+    return this.http.post<{ message: string }>(`${this.apiUrl}/auth/forgot-password`, { email });
+  }
+
+  resetPassword(token: string, password: string): Observable<{ message: string }> {
+    return this.http.post<{ message: string }>(`${this.apiUrl}/auth/reset-password`, { token, password });
+  }
+
+  // FASE 5 — Media library
+  getMedia(params?: { page?: number; limit?: number; search?: string; folder?: string; mimeType?: string }): Observable<{
+    files: MediaFile[];
+    total: number;
+    page: number;
+    limit: number;
+    folders: { folder: string; _count: { _all: number } }[];
+  }> {
+    let httpParams = new HttpParams();
+    if (params?.page) httpParams = httpParams.set('page', String(params.page));
+    if (params?.limit) httpParams = httpParams.set('limit', String(params.limit));
+    if (params?.search) httpParams = httpParams.set('search', params.search);
+    if (params?.folder) httpParams = httpParams.set('folder', params.folder);
+    if (params?.mimeType) httpParams = httpParams.set('mimeType', params.mimeType);
+    return this.http.get<any>(`${this.apiUrl}/media`, { params: httpParams });
+  }
+
+  updateMediaFile(id: string, data: { altText?: string; folder?: string }): Observable<MediaFile> {
+    return this.http.put<{ file: MediaFile }>(`${this.apiUrl}/media/${id}`, data).pipe(
+      map((res) => res.file)
+    );
+  }
+
+  deleteMediaFile(id: string): Observable<void> {
+    return this.http.delete<void>(`${this.apiUrl}/media/${id}`);
+  }
+
+  uploadImage(file: File): Observable<MediaFile> {
+    const formData = new FormData();
+    formData.append('image', file);
+    return this.http.post<{ image: MediaFile }>(`${this.apiUrl}/upload/image`, formData).pipe(
+      map((res) => res.image)
+    );
+  }
+
+  // FASE 5 — RBAC
+  getRoles(): Observable<Role[]> {
+    return this.http.get<{ roles: Role[] }>(`${this.apiUrl}/roles`).pipe(
+      map((res) => res.roles)
+    );
+  }
+
+  getPermissions(): Observable<Permission[]> {
+    return this.http.get<{ permissions: Permission[] }>(`${this.apiUrl}/roles/permissions`).pipe(
+      map((res) => res.permissions)
+    );
+  }
+
+  createRole(data: { name: string; description?: string; permissionIds?: string[] }): Observable<Role> {
+    return this.http.post<{ role: Role }>(`${this.apiUrl}/roles`, data).pipe(
+      map((res) => res.role)
+    );
+  }
+
+  updateRolePermissions(roleId: string, permissionIds: string[]): Observable<Role> {
+    return this.http.put<{ role: Role }>(`${this.apiUrl}/roles/${roleId}/permissions`, { permissionIds }).pipe(
+      map((res) => res.role)
+    );
+  }
+
+  deleteRole(roleId: string): Observable<void> {
+    return this.http.delete<void>(`${this.apiUrl}/roles/${roleId}`);
+  }
+
+  // FASE 5 — Users
+  getUsers(params?: { page?: number; limit?: number; search?: string; role?: string }): Observable<{
+    users: User[];
+    total: number;
+    totalPages: number;
+  }> {
+    let httpParams = new HttpParams();
+    if (params?.page) httpParams = httpParams.set('page', String(params.page));
+    if (params?.limit) httpParams = httpParams.set('limit', String(params.limit));
+    if (params?.search) httpParams = httpParams.set('search', params.search);
+    if (params?.role) httpParams = httpParams.set('role', params.role);
+    return this.http.get<any>(`${this.apiUrl}/users`, { params: httpParams });
+  }
+
+  assignUserRole(userId: string, roleId: string): Observable<User> {
+    return this.http.put<{ user: User }>(`${this.apiUrl}/users/${userId}/role`, { roleId }).pipe(
+      map((res) => res.user)
+    );
+  }
+
+  updateUser(id: string, data: Partial<User>): Observable<User> {
+    return this.http.put<{ user: User }>(`${this.apiUrl}/users/${id}`, data).pipe(
+      map((res) => res.user)
+    );
+  }
+
+  deleteUser(id: string): Observable<void> {
+    return this.http.delete<void>(`${this.apiUrl}/users/${id}`);
+  }
+
+  // FASE 5 — Audit
+  getAuditLogs(params?: { page?: number; limit?: number; entity?: string; action?: string; search?: string }): Observable<{
+    logs: AuditLog[];
+    total: number;
+  }> {
+    let httpParams = new HttpParams();
+    if (params?.page) httpParams = httpParams.set('page', String(params.page));
+    if (params?.limit) httpParams = httpParams.set('limit', String(params.limit));
+    if (params?.entity) httpParams = httpParams.set('entity', params.entity);
+    if (params?.action) httpParams = httpParams.set('action', params.action);
+    if (params?.search) httpParams = httpParams.set('search', params.search);
+    return this.http.get<any>(`${this.apiUrl}/audit`, { params: httpParams });
+  }
+
+  // FASE 5 — Notifications
+  getNotifications(params?: { page?: number; limit?: number; unreadOnly?: boolean }): Observable<{
+    notifications: Notification[];
+    total: number;
+    unread: number;
+  }> {
+    let httpParams = new HttpParams();
+    if (params?.page) httpParams = httpParams.set('page', String(params.page));
+    if (params?.limit) httpParams = httpParams.set('limit', String(params.limit));
+    if (params?.unreadOnly) httpParams = httpParams.set('unreadOnly', 'true');
+    return this.http.get<any>(`${this.apiUrl}/notifications`, { params: httpParams });
+  }
+
+  markNotificationRead(id: string): Observable<void> {
+    return this.http.put<void>(`${this.apiUrl}/notifications/${id}/read`, {});
+  }
+
+  markAllNotificationsRead(): Observable<void> {
+    return this.http.put<void>(`${this.apiUrl}/notifications/read-all`, {});
+  }
+
+  // FASE 5 — Corporate stats
+  getCorporateStats(): Observable<Record<string, any>> {
+    return this.http.get<{ stats: Record<string, any> }>(`${this.apiUrl}/stats/corporate`).pipe(
+      map((res) => res.stats)
     );
   }
 }

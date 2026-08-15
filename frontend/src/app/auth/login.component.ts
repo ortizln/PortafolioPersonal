@@ -46,6 +46,9 @@ import { AuthService } from '../core/services/auth.service';
         <div class="register-link">
           Don't have an account? <a routerLink="/auth/register">Register</a>
         </div>
+        <div class="forgot-link">
+          <a routerLink="/auth/forgot-password">¿Olvidaste tu contraseña?</a>
+        </div>
         <div class="back-link">
           <a routerLink="/">&larr; Go Back</a>
         </div>

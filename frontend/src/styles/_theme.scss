@@ -1,25 +1,33 @@
 :root {
-  --primary: #0a0a1a;
-  --secondary: #12121e;
-  --accent: #818cf8;
-  --accent-secondary: #a855f7;
-  --text-primary: #f1f5f9;
+  /* Identidad ALANTEK (sobrescrita en runtime desde Company.primaryColor/accentColor) */
+  --alantek-primary: #2563eb;
+  --alantek-secondary: #1e40af;
+  --alantek-accent: #22d3ee;
+  --alantek-background: #070c14;
+  --alantek-surface: #111d31;
+  --alantek-text: #e2e8f0;
+
+  --primary: #0b1220;
+  --secondary: #101a2e;
+  --accent: #22d3ee;
+  --accent-secondary: #2563eb;
+  --text-primary: #e2e8f0;
   --text-secondary: #94a3b8;
   --text-muted: #64748b;
-  --bg-primary: #08080f;
-  --bg-secondary: #0e0e1a;
-  --bg-card: #161625;
-  --bg-card-hover: #1c1c30;
-  --border: #1e1e32;
-  --border-color: #1e1e32;
+  --bg-primary: #070c14;
+  --bg-secondary: #0c1524;
+  --bg-card: #111d31;
+  --bg-card-hover: #16243c;
+  --border: #1c2c46;
+  --border-color: #1c2c46;
   --text-tertiary: #64748b;
-  --accent-rgb: 129, 140, 248;
+  --accent-rgb: 34, 211, 238;
   --success: #10b981;
   --warning: #f59e0b;
   --error: #ef4444;
   --white: #e2e8f0;
-  --glass-bg: rgba(22, 22, 37, 0.7);
-  --glass-border: rgba(129, 140, 248, 0.1);
+  --glass-bg: rgba(17, 29, 49, 0.7);
+  --glass-border: rgba(34, 211, 238, 0.1);
   --shadow: 0 4px 20px rgba(0, 0, 0, 0.4);
   --shadow-lg: 0 8px 40px rgba(0, 0, 0, 0.5);
   --radius: 12px;
@@ -31,24 +39,28 @@
 }
 
 [data-theme="light"] {
+  --alantek-background: #f8fafc;
+  --alantek-surface: #ffffff;
+  --alantek-text: #0f172a;
+
   --primary: #ffffff;
-  --secondary: #f8fafc;
-  --accent: #6366f1;
-  --accent-secondary: #7c3aed;
+  --secondary: #f1f5f9;
+  --accent: #0284c7;
+  --accent-secondary: #2563eb;
   --text-primary: #0f172a;
   --text-secondary: #475569;
   --text-muted: #94a3b8;
-  --bg-primary: #fafafa;
+  --bg-primary: #f8fafc;
   --bg-secondary: #f1f5f9;
   --bg-card: #ffffff;
   --bg-card-hover: #f8fafc;
   --border: #e2e8f0;
   --border-color: #e2e8f0;
   --text-tertiary: #94a3b8;
-  --accent-rgb: 99, 102, 241;
+  --accent-rgb: 2, 132, 199;
   --white: #0f172a;
   --glass-bg: rgba(255, 255, 255, 0.7);
-  --glass-border: rgba(99, 102, 241, 0.1);
+  --glass-border: rgba(2, 132, 199, 0.1);
   --shadow: 0 4px 20px rgba(0, 0, 0, 0.06);
   --shadow-lg: 0 8px 40px rgba(0, 0, 0, 0.1);
 }
@@ -149,7 +161,7 @@ a {
   transition: var(--transition);
   &:hover {
     transform: translateY(-2px);
-    box-shadow: 0 8px 25px rgba(100, 255, 218, 0.3);
+    box-shadow: 0 8px 25px rgba(var(--accent-rgb), 0.3);
     color: var(--bg-primary);
   }
 }
@@ -163,7 +175,7 @@ a {
   font-weight: 600;
   transition: var(--transition);
   &:hover {
-    background: rgba(100, 255, 218, 0.1);
+    background: rgba(var(--accent-rgb), 0.1);
     transform: translateY(-2px);
   }
 }
@@ -237,8 +249,8 @@ a {
   border-radius: 20px;
   font-size: 0.8rem;
   font-weight: 500;
-  background: rgba(100, 255, 218, 0.1);
+  background: rgba(var(--accent-rgb), 0.1);
   color: var(--accent);
-  border: 1px solid rgba(100, 255, 218, 0.2);
+  border: 1px solid rgba(var(--accent-rgb), 0.2);
   margin: 2px;
 }

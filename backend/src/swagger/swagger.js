@@ -317,6 +317,27 @@ const options = {
           responses: { 200: { description: 'Team member found' }, 404: { description: 'Not found' } }
         }
       },
+      '/api/public/projects': {
+        get: {
+          tags: ['Public'],
+          summary: 'Get public projects (supports search, category, technology, status filters)',
+          parameters: [
+            { in: 'query', name: 'search', required: false, schema: { type: 'string' } },
+            { in: 'query', name: 'category', required: false, schema: { type: 'string' } },
+            { in: 'query', name: 'technology', required: false, schema: { type: 'string' } },
+            { in: 'query', name: 'status', required: false, schema: { type: 'string' } }
+          ],
+          responses: { 200: { description: 'List of projects' } }
+        }
+      },
+      '/api/public/projects/slug/{slug}': {
+        get: {
+          tags: ['Public'],
+          summary: 'Get public project by slug with related projects',
+          parameters: [{ in: 'path', name: 'slug', required: true, schema: { type: 'string' } }],
+          responses: { 200: { description: 'Project found with related' }, 404: { description: 'Not found' } }
+        }
+      },
       '/api/public/company': {
         get: {
           tags: ['Public'],
@@ -343,6 +364,148 @@ const options = {
           tags: ['Public'],
           summary: 'Get published testimonials',
           responses: { 200: { description: 'List of testimonials' } }
+        }
+      },
+      '/api/auth/forgot-password': {
+        post: {
+          tags: ['Auth'],
+          summary: 'Request password reset link',
+          security: [],
+          requestBody: {
+            required: true,
+            content: { 'application/json': { schema: { type: 'object', properties: { email: { type: 'string' } } } } }
+          },
+          responses: { 200: { description: 'Reset link sent (if email exists)' } }
+        }
+      },
+      '/api/auth/reset-password': {
+        post: {
+          tags: ['Auth'],
+          summary: 'Reset password with token',
+          security: [],
+          requestBody: {
+            required: true,
+            content: { 'application/json': { schema: { type: 'object', properties: { token: { type: 'string' }, password: { type: 'string' } } } } }
+          },
+          responses: { 200: { description: 'Password updated' } }
+        }
+      },
+      '/api/media': {
+        get: {
+          tags: ['Media'],
+          summary: 'List media files (search/filter/paginate)',
+          responses: { 200: { description: 'Media files list' } }
+        }
+      },
+      '/api/media/{id}': {
+        put: {
+          tags: ['Media'],
+          summary: 'Update media file (altText, folder)',
+          parameters: [{ in: 'path', name: 'id', required: true, schema: { type: 'string' } }],
+          responses: { 200: { description: 'Updated file' } }
+        },
+        delete: {
+          tags: ['Media'],
+          summary: 'Delete media file',
+          parameters: [{ in: 'path', name: 'id', required: true, schema: { type: 'string' } }],
+          responses: { 200: { description: 'File deleted' } }
+        }
+      },
+      '/api/contact/{id}/lead': {
+        put: {
+          tags: ['Contact'],
+          summary: 'Update lead (status, notes, assignee)',
+          parameters: [{ in: 'path', name: 'id', required: true, schema: { type: 'string' } }],
+          responses: { 200: { description: 'Updated lead' } }
+        }
+      },
+      '/api/roles': {
+        get: {
+          tags: ['RBAC'],
+          summary: 'List roles with permissions',
+          responses: { 200: { description: 'Roles list' } }
+        },
+        post: {
+          tags: ['RBAC'],
+          summary: 'Create custom role',
+          responses: { 201: { description: 'Role created' } }
+        }
+      },
+      '/api/roles/permissions': {
+        get: {
+          tags: ['RBAC'],
+          summary: 'List all permissions',
+          responses: { 200: { description: 'Permissions list' } }
+        }
+      },
+      '/api/roles/{roleId}/permissions': {
+        put: {
+          tags: ['RBAC'],
+          summary: 'Assign permissions to role',
+          parameters: [{ in: 'path', name: 'roleId', required: true, schema: { type: 'string' } }],
+          responses: { 200: { description: 'Role updated' } }
+        }
+      },
+      '/api/roles/{roleId}': {
+        put: {
+          tags: ['RBAC'],
+          summary: 'Update role description',
+          parameters: [{ in: 'path', name: 'roleId', required: true, schema: { type: 'string' } }],
+          responses: { 200: { description: 'Role updated' } }
+        },
+        delete: {
+          tags: ['RBAC'],
+          summary: 'Delete custom role',
+          parameters: [{ in: 'path', name: 'roleId', required: true, schema: { type: 'string' } }],
+          responses: { 200: { description: 'Role deleted' } }
+        }
+      },
+      '/api/users/{id}/role': {
+        put: {
+          tags: ['Users'],
+          summary: 'Assign role to user',
+          parameters: [{ in: 'path', name: 'id', required: true, schema: { type: 'string' } }],
+          requestBody: {
+            required: true,
+            content: { 'application/json': { schema: { type: 'object', properties: { roleId: { type: 'string' } } } } }
+          },
+          responses: { 200: { description: 'User updated' } }
+        }
+      },
+      '/api/audit': {
+        get: {
+          tags: ['System'],
+          summary: 'List audit logs (filters, pagination)',
+          responses: { 200: { description: 'Audit logs' } }
+        }
+      },
+      '/api/notifications': {
+        get: {
+          tags: ['System'],
+          summary: 'List my notifications',
+          responses: { 200: { description: 'Notifications' } }
+        }
+      },
+      '/api/notifications/read-all': {
+        put: {
+          tags: ['System'],
+          summary: 'Mark all notifications as read',
+          responses: { 200: { description: 'All marked read' } }
+        }
+      },
+      '/api/notifications/{id}/read': {
+        put: {
+          tags: ['System'],
+          summary: 'Mark notification as read',
+          parameters: [{ in: 'path', name: 'id', required: true, schema: { type: 'string' } }],
+          responses: { 200: { description: 'Marked read' } }
+        }
+      },
+      '/api/stats/corporate': {
+        get: {
+          tags: ['Stats'],
+          summary: 'Corporate dashboard KPIs',
+          responses: { 200: { description: 'Corporate stats' } }
         }
       }
     }

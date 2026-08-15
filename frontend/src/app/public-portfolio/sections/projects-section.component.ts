@@ -91,7 +91,7 @@ import { UploadUrlPipe } from '../../shared/upload-url.pipe';
                 <span
                   class="project-tech"
                   *ngFor="let tech of project.technologies"
-                  [style.--tech-color]="tech.color || '#64ffda'"
+                  [style.--tech-color]="tech.color || 'var(--accent)'"
                 >
                   {{ tech.name }}
                 </span>

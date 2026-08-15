@@ -1,6 +1,7 @@
 const prisma = require('../config/database');
 const { AppError } = require('../middlewares/errorHandler');
 const slugify = require('slugify');
+const { audit } = require('../helpers/audit');
 
 const teamController = {
   async getAll(req, res, next) {
@@ -71,6 +72,15 @@ const teamController = {
         }
       });
 
+      await audit({
+        userId: req.user?.id,
+        action: 'CREATE',
+        entity: 'TeamMember',
+        entityId: member.id,
+        description: `Miembro de equipo creado: ${member.fullName}`,
+        req
+      });
+
       res.status(201).json({ member });
     } catch (error) {
       if (error.code === 'P2002') {
@@ -118,6 +128,15 @@ const teamController = {
         data
       });
 
+      await audit({
+        userId: req.user?.id,
+        action: 'UPDATE',
+        entity: 'TeamMember',
+        entityId: member.id,
+        description: `Miembro de equipo actualizado: ${member.fullName}`,
+        req
+      });
+
       res.json({ member });
     } catch (error) {
       if (error.code === 'P2002') {
@@ -138,6 +157,15 @@ const teamController = {
       await prisma.teamMember.update({
         where: { id: existing.id },
         data: { deletedAt: new Date() }
+      });
+
+      await audit({
+        userId: req.user?.id,
+        action: 'DELETE',
+        entity: 'TeamMember',
+        entityId: existing.id,
+        description: `Miembro de equipo eliminado: ${existing.fullName}`,
+        req
       });
 
       res.json({ message: 'Team member deleted successfully' });

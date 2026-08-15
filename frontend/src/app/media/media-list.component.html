@@ -1,0 +1,98 @@
+<div class="media-header">
+  <div class="media-title-row">
+    <h2>Biblioteca multimedia</h2>
+    <button class="btn-primary" (click)="fileInput.click()" [disabled]="uploading">
+      <i class="bi" [ngClass]="uploading ? 'bi-arrow-repeat spin' : 'bi-upload'"></i>
+      {{ uploading ? 'Subiendo...' : 'Subir archivo' }}
+    </button>
+    <input #fileInput type="file" hidden (change)="onFileSelected($event)" />
+  </div>
+  <div class="media-toolbar">
+    <div class="search-box">
+      <i class="bi bi-search"></i>
+      <input
+        type="text"
+        [(ngModel)]="search"
+        (keyup.enter)="onSearch()"
+        placeholder="Buscar por nombre o alt..."
+      />
+      <button *ngIf="search" (click)="clearSearch()" aria-label="Limpiar"><i class="bi bi-x-lg"></i></button>
+    </div>
+    <div class="folder-chips">
+      <button class="chip" [class.active]="folderFilter === ''" (click)="filterFolder('')">Todos</button>
+      <button class="chip" *ngFor="let f of folders" [class.active]="folderFilter === f.folder" (click)="filterFolder(f.folder)">
+        {{ f.folder }} <span class="chip-count">{{ f.count }}</span>
+      </button>
+    </div>
+  </div>
+</div>
+
+<div class="toast-stack">
+  <div class="toast" *ngFor="let t of toasts" [class.error]="t.type === 'error'">
+    <i class="bi" [ngClass]="t.type === 'success' ? 'bi-check-circle' : 'bi-exclamation-circle'"></i>
+    {{ t.message }}
+  </div>
+</div>
+
+<div class="media-grid" *ngIf="!loading && files.length > 0">
+  <div class="media-card" *ngFor="let f of files">
+    <div class="media-thumb" (click)="openPreview(f)">
+      <img *ngIf="isImage(f)" [src]="thumbUrl(f)" [alt]="f.altText || f.originalName" loading="lazy" />
+      <i *ngIf="!isImage(f)" class="bi bi-file-earmark-text file-icon"></i>
+      <span class="media-type">{{ f.mimeType?.split('/')[0] }}</span>
+    </div>
+    <div class="media-info">
+      <span class="media-name" [title]="f.originalName">{{ f.originalName }}</span>
+      <span class="media-meta">{{ f.folder }} · {{ formatSize(f.size) }}</span>
+    </div>
+    <div class="media-actions">
+      <button (click)="copyUrl(f)" title="Copiar URL"><i class="bi bi-link-45deg"></i></button>
+      <button (click)="startEditAlt(f)" title="Editar alt"><i class="bi bi-type"></i></button>
+      <button (click)="deleteFile(f)" title="Eliminar"><i class="bi bi-trash"></i></button>
+    </div>
+  </div>
+</div>
+
+<div class="empty-state" *ngIf="!loading && files.length === 0">
+  <i class="bi bi-images"></i>
+  <p>No hay archivos{{ search ? ' que coincidan con la búsqueda' : '' }}. Sube el primero.</p>
+</div>
+
+<div class="pagination" *ngIf="totalPages() > 1">
+  <button [disabled]="page === 1" (click)="goPage(page - 1)"><i class="bi bi-chevron-left"></i></button>
+  <span>Página {{ page }} de {{ totalPages() }} · {{ total }} archivos</span>
+  <button [disabled]="page === totalPages()" (click)="goPage(page + 1)"><i class="bi bi-chevron-right"></i></button>
+</div>
+
+<!-- Preview modal -->
+<div class="modal-overlay" *ngIf="previewFile" (click)="closePreview()">
+  <div class="modal-content media-preview" (click)="$event.stopPropagation()">
+    <button class="modal-close" (click)="closePreview()"><i class="bi bi-x-lg"></i></button>
+    <img *ngIf="isImage(previewFile)" [src]="previewUrl" [alt]="previewFile.altText || previewFile.originalName" />
+    <div *ngIf="!isImage(previewFile)" class="preview-file">
+      <i class="bi bi-file-earmark-text"></i>
+      <span>{{ previewFile.originalName }}</span>
+    </div>
+    <div class="preview-info">
+      <span>{{ previewFile.originalName }}</span>
+      <span>{{ previewFile.mimeType }} · {{ formatSize(previewFile.size) }}</span>
+      <div class="preview-actions">
+        <button class="btn-secondary" (click)="copyUrl(previewFile)"><i class="bi bi-link-45deg"></i> Copiar URL</button>
+        <button class="btn-danger" (click)="deleteFile(previewFile); closePreview()"><i class="bi bi-trash"></i> Eliminar</button>
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- Edit alt modal -->
+<div class="modal-overlay" *ngIf="editingAlt" (click)="editingAlt = null">
+  <div class="modal-content small" (click)="$event.stopPropagation()">
+    <h3>Texto alternativo</h3>
+    <p class="muted">{{ editingAlt.originalName }}</p>
+    <input class="form-control" [(ngModel)]="altText" placeholder="Describe la imagen..." />
+    <div class="modal-actions">
+      <button class="btn-secondary" (click)="editingAlt = null">Cancelar</button>
+      <button class="btn-primary" (click)="saveAlt()">Guardar</button>
+    </div>
+  </div>
+</div>

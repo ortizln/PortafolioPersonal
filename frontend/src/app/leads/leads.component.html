@@ -1,0 +1,122 @@
+<div class="leads-header">
+  <h2>Contactos / Leads</h2>
+</div>
+
+<div class="status-bar">
+  <button class="status-chip" [class.active]="statusFilter === 'ALL'" (click)="filterStatus('ALL')">
+    Todos <span class="count">{{ total }}</span>
+  </button>
+  <button
+    class="status-chip"
+    *ngFor="let s of statuses"
+    [class.active]="statusFilter === s"
+    (click)="filterStatus(s)"
+  >
+    {{ statusLabels[s] || s }} <span class="count">{{ statusCounts[s] || 0 }}</span>
+  </button>
+</div>
+
+<div class="toolbar">
+  <div class="search-box">
+    <i class="bi bi-search"></i>
+    <input type="text" [(ngModel)]="search" (keyup.enter)="applyFilters()" placeholder="Buscar por nombre, email, asunto..." />
+    <button *ngIf="search" (click)="search = ''; applyFilters()"><i class="bi bi-x-lg"></i></button>
+  </div>
+</div>
+
+<div class="toast-stack">
+  <div class="toast" *ngFor="let t of toasts" [class.error]="t.type === 'error'">
+    <i class="bi" [ngClass]="t.type === 'success' ? 'bi-check-circle' : 'bi-exclamation-circle'"></i>
+    {{ t.message }}
+  </div>
+</div>
+
+<div class="leads-table-wrap" *ngIf="!loading">
+  <table class="leads-table">
+    <thead>
+      <tr>
+        <th></th>
+        <th>Nombre</th>
+        <th>Asunto</th>
+        <th>Estado</th>
+        <th>Asignado a</th>
+        <th>Fecha</th>
+        <th></th>
+      </tr>
+    </thead>
+    <tbody>
+      <tr *ngFor="let lead of leads">
+        <td>
+          <button class="read-toggle" [class.unread]="!lead.isRead" (click)="toggleRead(lead)" [title]="lead.isRead ? 'Marcar no leído' : 'Marcar leído'">
+            <i class="bi" [ngClass]="lead.isRead ? 'bi-envelope-open' : 'bi-envelope'"></i>
+          </button>
+        </td>
+        <td>
+          <button class="lead-name" (click)="openDetail(lead)">
+            {{ lead.name }}
+            <span class="lead-email">{{ lead.email }}</span>
+          </button>
+        </td>
+        <td class="lead-subject">{{ lead.subject || '—' }}</td>
+        <td>
+          <select class="status-select" [value]="lead.status" (change)="changeStatus(lead, $any($event.target).value)">
+            <option *ngFor="let s of statuses" [value]="s">{{ statusLabels[s] || s }}</option>
+          </select>
+        </td>
+        <td>
+          <select class="assign-select" [value]="lead.assignedToId || ''" (change)="assignTo(lead, $any($event.target).value)">
+            <option value="">Sin asignar</option>
+            <option *ngFor="let u of users" [value]="u.id">{{ u.name }}</option>
+          </select>
+        </td>
+        <td class="lead-date">{{ lead.createdAt | date: 'dd/MM/yyyy HH:mm' }}</td>
+        <td>
+          <button class="delete-btn" (click)="deleteLead(lead)"><i class="bi bi-trash"></i></button>
+        </td>
+      </tr>
+      <tr *ngIf="leads.length === 0">
+        <td colspan="7" class="empty-row">No hay leads{{ search ? ' que coincidan' : '' }}.</td>
+      </tr>
+    </tbody>
+  </table>
+</div>
+
+<div class="pagination" *ngIf="totalPages() > 1">
+  <button [disabled]="page === 1" (click)="goPage(page - 1)"><i class="bi bi-chevron-left"></i></button>
+  <span>Página {{ page }} de {{ totalPages() }} · {{ total }} leads</span>
+  <button [disabled]="page === totalPages()" (click)="goPage(page + 1)"><i class="bi bi-chevron-right"></i></button>
+</div>
+
+<!-- Detail modal -->
+<div class="modal-overlay" *ngIf="selectedLead" (click)="closeDetail()">
+  <div class="modal-content" (click)="$event.stopPropagation()">
+    <button class="modal-close" (click)="closeDetail()"><i class="bi bi-x-lg"></i></button>
+    <h3>{{ selectedLead.name }}</h3>
+    <p class="detail-email"><a [href]="'mailto:' + selectedLead.email">{{ selectedLead.email }}</a></p>
+    <div class="detail-meta">
+      <span class="badge">{{ statusLabels[selectedLead.status] || selectedLead.status }}</span>
+      <span class="badge-secondary">{{ selectedLead.createdAt | date: 'dd/MM/yyyy HH:mm' }}</span>
+      <span class="badge-secondary" *ngIf="selectedLead.source">Fuente: {{ selectedLead.source }}</span>
+    </div>
+    <div class="detail-subject" *ngIf="selectedLead.subject">{{ selectedLead.subject }}</div>
+    <p class="detail-message">{{ selectedLead.message }}</p>
+    <div class="detail-section">
+      <label>Asignar a</label>
+      <select class="form-control" [value]="selectedLead.assignedToId || ''" (change)="assignTo(selectedLead, $any($event.target).value)">
+        <option value="">Sin asignar</option>
+        <option *ngFor="let u of users" [value]="u.id">{{ u.name }}</option>
+      </select>
+    </div>
+    <div class="detail-section">
+      <label>Estado</label>
+      <select class="form-control" [value]="selectedLead.status" (change)="changeStatus(selectedLead, $any($event.target).value)">
+        <option *ngFor="let s of statuses" [value]="s">{{ statusLabels[s] || s }}</option>
+      </select>
+    </div>
+    <div class="detail-section">
+      <label>Notas internas</label>
+      <textarea class="form-control" [(ngModel)]="selectedLead.notes" rows="3" placeholder="Notas de seguimiento..."></textarea>
+      <button class="btn-primary" (click)="saveNotes()">Guardar notas</button>
+    </div>
+  </div>
+</div>

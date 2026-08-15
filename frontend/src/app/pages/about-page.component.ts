@@ -116,7 +116,7 @@ import { UploadUrlPipe } from '../shared/upload-url.pipe';
     .phone-link:hover { color: #25D366; }
     .about-cv { margin-bottom: 24px; }
     .cv-download-btn { display: inline-flex; align-items: center; gap: 8px; padding: 12px 24px; background: linear-gradient(135deg, var(--accent), var(--accent-secondary)); color: var(--bg-primary); border-radius: 12px; font-weight: 600; font-size: 0.9rem; text-decoration: none; transition: var(--transition); }
-    .cv-download-btn:hover { transform: translateY(-2px); box-shadow: 0 8px 25px rgba(100, 255, 218, 0.3); color: var(--bg-primary); }
+    .cv-download-btn:hover { transform: translateY(-2px); box-shadow: 0 8px 25px rgba(var(--accent-rgb), 0.3); color: var(--bg-primary); }
     .about-socials { display: flex; gap: 12px; }
     .social-icon { width: 44px; height: 44px; border-radius: 12px; background: rgba(var(--accent-rgb, 100, 255, 218), 0.1); color: var(--accent); display: flex; align-items: center; justify-content: center; font-size: 1.2rem; transition: var(--transition); }
     .social-icon:hover { background: var(--accent); color: var(--bg-primary); transform: translateY(-3px); }

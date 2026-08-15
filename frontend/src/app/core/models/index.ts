@@ -1,13 +1,77 @@
 export interface User {
-  id: number;
+  id: string;
   email: string;
   name: string;
   role: string;
+  roleId?: string;
   isActive: boolean;
   lastLogin?: string;
   createdAt: string;
   updatedAt: string;
   profile?: Profile;
+  roles?: string[];
+  permissions?: string[];
+  rbacRole?: Role;
+  userRoles?: { role: Role }[];
+}
+
+export interface Role {
+  id: string;
+  name: string;
+  description?: string;
+  isSystem?: boolean;
+  createdAt?: string;
+  updatedAt?: string;
+  permissions?: Permission[];
+  _count?: { users?: number };
+}
+
+export interface Permission {
+  id: string;
+  name: string;
+  description?: string;
+  module?: string;
+}
+
+export interface MediaFile {
+  id: string;
+  fileName: string;
+  originalName: string;
+  mimeType: string;
+  size: number;
+  path: string;
+  url?: string;
+  width?: number;
+  height?: number;
+  altText?: string;
+  folder?: string;
+  thumbnail?: string;
+  uploadedBy?: string;
+  createdAt: string;
+}
+
+export interface Notification {
+  id: string;
+  title: string;
+  message?: string;
+  type: 'INFO' | 'SUCCESS' | 'WARNING' | 'MESSAGE' | 'LEAD';
+  link?: string;
+  readAt?: string;
+  createdAt: string;
+}
+
+export type LeadStatus = 'NEW' | 'CONTACTED' | 'QUALIFIED' | 'PROPOSAL' | 'WON' | 'LOST' | 'CLOSED';
+
+export interface AuditLog {
+  id: string;
+  action: string;
+  entity: string;
+  entityId?: string;
+  description?: string;
+  ipAddress?: string;
+  userAgent?: string;
+  createdAt: string;
+  user?: { id: string; name: string; email: string };
 }
 
 export interface Profile {
@@ -98,10 +162,15 @@ export interface CertificateFile {
 export interface Project {
   id: string;
   title: string;
+  slug: string;
   description?: string;
   summary?: string;
   client?: string;
+  clientId?: string;
+  serviceId?: string;
   status: string;
+  projectType?: string;
+  visibility?: string;
   startDate?: string;
   endDate?: string;
   demoUrl?: string;
@@ -110,14 +179,34 @@ export interface Project {
   videoUrl?: string;
   bannerImage?: string;
   architecture?: string;
+  challenge?: string;
+  solution?: string;
+  results?: string;
+  metrics?: any;
   features?: any;
   isFeatured: boolean;
+  isCaseStudy?: boolean;
   order: number;
+  seoTitle?: string;
+  seoDescription?: string;
   createdAt: string;
   updatedAt: string;
   images?: ProjectImage[];
   technologies?: Technology[];
   categories?: Category[];
+  clientRel?: Client;
+  service?: Service;
+  members?: ProjectMember[];
+}
+
+export interface ProjectMember {
+  id: string;
+  projectId: string;
+  teamMemberId: string;
+  role?: string;
+  description?: string;
+  isLead: boolean;
+  teamMember?: TeamMember;
 }
 
 export interface ProjectImage {
@@ -134,6 +223,7 @@ export interface ProjectImage {
 export interface Technology {
   id: string;
   name: string;
+  slug: string;
   description?: string;
   icon?: string;
   color?: string;
@@ -141,6 +231,7 @@ export interface Technology {
   website?: string;
   createdAt: string;
   updatedAt: string;
+  _count?: { projects?: number; skills?: number };
 }
 
 export interface Skill {
@@ -202,7 +293,13 @@ export interface ContactMessage {
   subject?: string;
   message: string;
   isRead: boolean;
+  status: LeadStatus;
+  source?: string;
+  notes?: string;
+  assignedToId?: string;
+  assignedUser?: { id: string; name: string; email: string };
   createdAt: string;
+  updatedAt: string;
 }
 
 export interface Category {
@@ -221,19 +318,6 @@ export interface Setting {
   description?: string;
   createdAt: string;
   updatedAt: string;
-}
-
-export interface AuditLog {
-  id: number;
-  action: string;
-  entity: string;
-  entityId?: string;
-  description?: string;
-  metadata?: any;
-  ipAddress?: string;
-  userAgent?: string;
-  userId?: string;
-  createdAt: string;
 }
 
 export interface Company {

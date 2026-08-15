@@ -1,0 +1,113 @@
+<div class="dash" *ngIf="stats">
+  <div class="dash-header">
+    <div>
+      <h2>Panel corporativo</h2>
+      <p>Resumen general del sitio y la operación</p>
+    </div>
+  </div>
+
+  <div class="kpi-grid">
+    <a class="kpi-card" *ngFor="let kpi of kpis()" [routerLink]="kpi.link">
+      <div class="kpi-icon"><i class="bi" [ngClass]="kpi.icon"></i></div>
+      <div class="kpi-info">
+        <span class="kpi-value">{{ kpi.value }}</span>
+        <span class="kpi-label">{{ kpi.label }}</span>
+      </div>
+    </a>
+  </div>
+
+  <div class="dash-grid">
+    <section class="panel-card">
+      <h3><i class="bi bi-activity"></i> Leads por estado</h3>
+      <div class="h-list">
+        <div class="h-item" *ngFor="let item of stats.leadsByStatus | keyvalue">
+          <div class="h-row">
+            <span class="h-label">{{ statusLabels[item.key] || item.key }}</span>
+            <span class="h-value">{{ item.value }}</span>
+          </div>
+          <div class="h-bar"><div class="h-fill" [style.width.%]="barWidth(item.value, maxLeads())" [style.background]="statusColor(item.key)"></div></div>
+        </div>
+        <p class="h-empty" *ngIf="(stats.leadsByStatus | keyvalue).length === 0">Sin leads registrados.</p>
+      </div>
+    </section>
+
+    <section class="panel-card">
+      <h3><i class="bi bi-folder"></i> Proyectos por categoría</h3>
+      <div class="h-list">
+        <div class="h-item" *ngFor="let item of stats.projectsByCategory | keyvalue">
+          <div class="h-row">
+            <span class="h-label">{{ item.key }}</span>
+            <span class="h-value">{{ item.value }}</span>
+          </div>
+          <div class="h-bar"><div class="h-fill" [style.width.%]="barWidth(item.value, maxCategory())"></div></div>
+        </div>
+        <p class="h-empty" *ngIf="(stats.projectsByCategory | keyvalue).length === 0">Sin categorías.</p>
+      </div>
+    </section>
+
+    <section class="panel-card">
+      <h3><i class="bi bi-cpu"></i> Proyectos por tecnología</h3>
+      <div class="h-list">
+        <div class="h-item" *ngFor="let item of stats.projectsByTechnology | keyvalue">
+          <div class="h-row">
+            <span class="h-label">{{ item.key }}</span>
+            <span class="h-value">{{ item.value }}</span>
+          </div>
+          <div class="h-bar"><div class="h-fill" [style.width.%]="barWidth(item.value, maxTech())"></div></div>
+        </div>
+        <p class="h-empty" *ngIf="(stats.projectsByTechnology | keyvalue).length === 0">Sin tecnologías.</p>
+      </div>
+    </section>
+
+    <section class="panel-card">
+      <h3><i class="bi bi-bar-chart"></i> Contactos últimos 6 meses</h3>
+      <div class="m-chart">
+        <div class="m-col" *ngFor="let item of stats.messagesByMonth | keyvalue">
+          <div class="m-bar" [style.height.%]="barWidth(item.value, maxMonth())"></div>
+          <span class="m-label">{{ monthLabel(item.key) }}</span>
+          <span class="m-value">{{ item.value }}</span>
+        </div>
+        <p class="h-empty" *ngIf="(stats.messagesByMonth | keyvalue).length === 0">Sin contactos.</p>
+      </div>
+    </section>
+
+    <section class="panel-card">
+      <h3><i class="bi bi-fire"></i> Proyectos más vistos</h3>
+      <div class="rows">
+        <div class="row-item" *ngFor="let p of stats.topProjects">
+          <a class="row-title" [routerLink]="['/admin/projects', p.id, 'edit']">{{ p.title }}</a>
+          <span class="row-value"><i class="bi bi-eye"></i> {{ p.views }}</span>
+        </div>
+        <p class="h-empty" *ngIf="stats.topProjects.length === 0">Sin proyectos.</p>
+      </div>
+    </section>
+
+    <section class="panel-card">
+      <h3><i class="bi bi-compass"></i> Páginas más vistas</h3>
+      <div class="rows">
+        <div class="row-item" *ngFor="let page of stats.topPages">
+          <span class="row-title mono">{{ page.path }}</span>
+          <span class="row-value">{{ page.count }}</span>
+        </div>
+        <p class="h-empty" *ngIf="stats.topPages.length === 0">Sin registros de vistas.</p>
+      </div>
+    </section>
+  </div>
+
+  <section class="panel-card audit-card">
+    <h3><i class="bi bi-clock-history"></i> Auditoría reciente</h3>
+    <div class="audit-list">
+      <div class="audit-item" *ngFor="let log of stats.recentAudit">
+        <span class="audit-action">{{ log.action }}</span>
+        <span class="audit-desc">{{ log.description || log.entity }}</span>
+        <span class="audit-user">{{ log.user?.name || 'Sistema' }}</span>
+        <span class="audit-date">{{ log.createdAt | date: 'dd/MM HH:mm' }}</span>
+      </div>
+      <p class="h-empty" *ngIf="stats.recentAudit.length === 0">Sin registros.</p>
+    </div>
+  </section>
+</div>
+
+<div class="loading-state" *ngIf="loading">
+  <div class="spinner"></div>
+</div>

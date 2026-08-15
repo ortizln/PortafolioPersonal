@@ -92,6 +92,10 @@ const serviceRoutes = require('./routes/service.routes');
 const clientRoutes = require('./routes/client.routes');
 const testimonialRoutes = require('./routes/testimonial.routes');
 const teamRoutes = require('./routes/team.routes');
+const roleRoutes = require('./routes/role.routes');
+const mediaRoutes = require('./routes/media.routes');
+const auditRoutes = require('./routes/audit.routes');
+const notificationRoutes = require('./routes/notification.routes');
 
 app.use('/api/auth', authRoutes);
 app.use('/api/users', userRoutes);
@@ -107,6 +111,7 @@ app.use('/api/repositories', repositoryRoutes);
 app.use('/api/categories', categoryRoutes);
 app.use('/api/contact', contactRoutes);
 app.use('/api/uploads', uploadRoutes);
+app.use('/api/media', mediaRoutes);
 app.use('/api/settings', settingRoutes);
 app.use('/api/technologies', technologyRoutes);
 app.use('/api/public', publicRoutes);
@@ -116,6 +121,9 @@ app.use('/api/services', serviceRoutes);
 app.use('/api/clients', clientRoutes);
 app.use('/api/testimonials', testimonialRoutes);
 app.use('/api/team', teamRoutes);
+app.use('/api/roles', roleRoutes);
+app.use('/api/audit', auditRoutes);
+app.use('/api/notifications', notificationRoutes);
 
 app.get('/api/health', (req, res) => {
   res.json({ status: 'ok', timestamp: new Date().toISOString() });

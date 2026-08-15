@@ -1,6 +1,10 @@
-import { Component, HostListener } from '@angular/core';
+import { Component, HostListener, inject, OnInit } from '@angular/core';
 import { RouterOutlet, RouterLink, RouterLinkActive } from '@angular/router';
 import { NgIf, NgFor } from '@angular/common';
+import { ApiService } from '../../core/services/api.service';
+import { Company, Service } from '../../core/models';
+import { applyCompanyBrand } from '../../core/utils/brand.util';
+import { environment } from '../../../environments/environment';
 
 @Component({
   selector: 'app-public-layout',
@@ -13,7 +17,8 @@ import { NgIf, NgFor } from '@angular/common';
       <nav class="navbar" [class.scrolled]="isScrolled" aria-label="Navegación principal">
         <div class="container">
           <a class="navbar-brand" routerLink="/" aria-label="Ir al inicio">
-            <span class="logo-text" aria-hidden="true">&lt;Dev /&gt;</span>
+            <img *ngIf="companyLogo" [src]="companyLogo" class="logo-img" [alt]="companyName + ' logo'" />
+            <span *ngIf="!companyLogo" class="logo-text" aria-hidden="true">{{ companyName }}</span>
           </a>
 
           <button class="hamburger" (click)="isMobileMenuOpen = !isMobileMenuOpen" [class.active]="isMobileMenuOpen"
@@ -21,14 +26,15 @@ import { NgIf, NgFor } from '@angular/common';
             <span></span><span></span><span></span>
           </button>
 
-          <div class="nav-collapse" [class.open]="isMobileMenuOpen" id="nav-menu" role="menubar">
+          <div class="nav-collapse" [class.open]="isMobileMenuOpen" id="nav-menu">
             <ul class="nav-links">
-              <li *ngFor="let link of navLinks" role="none">
+              <li *ngFor="let link of navLinks">
                 <a [routerLink]="link.href" routerLinkActive="active-link" [routerLinkActiveOptions]="{exact: link.href === '/'}"
-                  (click)="isMobileMenuOpen = false" role="menuitem">{{ link.label }}</a>
+                  (click)="isMobileMenuOpen = false">{{ link.label }}</a>
               </li>
             </ul>
             <div class="nav-actions">
+              <a class="navbar-cta" routerLink="/contacto" (click)="isMobileMenuOpen = false">Cotizar</a>
               <button class="theme-toggle" (click)="toggleTheme()"
                 [attr.aria-label]="isDark ? 'Cambiar a modo claro' : 'Cambiar a modo oscuro'">
                 <i class="bi" [class.bi-sun]="isDark" [class.bi-moon]="!isDark" aria-hidden="true"></i>
@@ -47,62 +53,110 @@ import { NgIf, NgFor } from '@angular/common';
       <div class="container">
         <div class="footer-grid">
           <div class="footer-brand">
-            <a class="footer-logo" routerLink="/" aria-label="Ir al inicio">&lt;Dev /&gt;</a>
-            <p class="footer-desc">Desarrollador Full Stack. Creando soluciones digitales modernas con tecnologías de vanguardia.</p>
+            <a class="footer-logo" routerLink="/" aria-label="Ir al inicio">
+              <img *ngIf="companyLogo" [src]="companyLogo" class="footer-logo-img" [alt]="companyName + ' logo'" />
+              <span *ngIf="!companyLogo">{{ companyName }}</span>
+            </a>
+            <p class="footer-desc">{{ company?.shortDescription || company?.description || 'Soluciones digitales de software y tecnología para empresas.' }}</p>
             <div class="footer-social">
               <a href="https://github.com" target="_blank" rel="noopener noreferrer" aria-label="GitHub"><i class="bi bi-github" aria-hidden="true"></i></a>
               <a href="https://linkedin.com" target="_blank" rel="noopener noreferrer" aria-label="LinkedIn"><i class="bi bi-linkedin" aria-hidden="true"></i></a>
-              <a href="mailto:alexis.ortiz81@outlook.com" aria-label="Enviar correo"><i class="bi bi-envelope-fill" aria-hidden="true"></i></a>
+              <a [href]="'mailto:' + (company?.email || 'contacto@alantek.com')" aria-label="Enviar correo"><i class="bi bi-envelope-fill" aria-hidden="true"></i></a>
             </div>
           </div>
           <div class="footer-col">
             <h4 id="foot-nav">Navegación</h4>
             <ul aria-labelledby="foot-nav">
               <li><a routerLink="/">Inicio</a></li>
-              <li><a routerLink="/about">Sobre Mí</a></li>
-              <li><a routerLink="/projects">Proyectos</a></li>
-              <li><a routerLink="/contact">Contacto</a></li>
+              <li><a routerLink="/nosotros">Nosotros</a></li>
+              <li><a routerLink="/servicios">Servicios</a></li>
+              <li><a routerLink="/equipo">Equipo</a></li>
+              <li><a routerLink="/portafolio">Portafolio</a></li>
+              <li><a routerLink="/contacto">Contacto</a></li>
+            </ul>
+          </div>
+          <div class="footer-col">
+            <h4 id="foot-services">Servicios</h4>
+            <ul aria-labelledby="foot-services">
+              <li *ngFor="let s of footerServices">
+                <i class="bi bi-arrow-right-short" aria-hidden="true"></i>
+                <a [routerLink]="'/servicios'">{{ s.name }}</a>
+              </li>
+              <li *ngIf="footerServices.length === 0"><i class="bi bi-arrow-right-short" aria-hidden="true"></i> Desarrollo Web</li>
+              <li *ngIf="footerServices.length === 0"><i class="bi bi-arrow-right-short" aria-hidden="true"></i> Apps Móviles</li>
             </ul>
           </div>
           <div class="footer-col">
             <h4 id="foot-contact">Contacto</h4>
             <ul aria-labelledby="foot-contact">
-              <li><i class="bi bi-geo-alt" aria-hidden="true"></i> Ciudad de Tulcan, EC</li>
-              <li><i class="bi bi-envelope" aria-hidden="true"></i> alexis.ortiz81&#64;outlook.com</li>
-              <li><i class="bi bi-file-text" aria-hidden="true"></i> <a href="#" aria-label="Descargar currículum">Descargar CV</a></li>
+              <li *ngIf="company?.address || company?.city"><i class="bi bi-geo-alt" aria-hidden="true"></i> {{ company?.address }}{{ company?.address && company?.city ? ', ' : '' }}{{ company?.city }}</li>
+              <li><i class="bi bi-envelope" aria-hidden="true"></i> {{ company?.email || 'contacto@alantek.com' }}</li>
+              <li *ngIf="company?.phone"><i class="bi bi-telephone" aria-hidden="true"></i> {{ company?.phone }}</li>
+              <li><i class="bi bi-file-text" aria-hidden="true"></i> <a href="#" aria-label="Descargar información">Información de la empresa</a></li>
             </ul>
-          </div>
-          <div class="footer-col">
-            <h4 id="foot-tech">Tecnologías</h4>
-            <div class="footer-techs" aria-labelledby="foot-tech">
-              <span>Angular</span><span>Node.js</span><span>PostgreSQL</span>
-              <span>TypeScript</span><span>Docker</span><span>Prisma</span>
-            </div>
           </div>
         </div>
         <div class="footer-bottom">
-          <p>&copy; {{ currentYear }} Alan Tek. Todos los derechos reservados.</p>
-          <span class="footer-version" aria-label="Versión v2.0.0">v2.0.0</span>
+          <p>&copy; {{ currentYear }} {{ companyName }}. Todos los derechos reservados.</p>
+          <span class="footer-version" aria-label="Versión ALANTEK">ALANTEK</span>
         </div>
       </div>
     </footer>
   `,
   styleUrls: ['./public-layout.component.scss'],
 })
-export class PublicLayoutComponent {
+export class PublicLayoutComponent implements OnInit {
+  private api = inject(ApiService);
+
   isScrolled = false;
   isMobileMenuOpen = false;
   isDark = true;
   currentYear = new Date().getFullYear();
 
+  company: Company | null = null;
+  companyName = 'ALANTEK';
+  companyLogo: string | null = null;
+  footerServices: Service[] = [];
+
   navLinks = [
     { label: 'Inicio', href: '/' },
-    { label: 'Sobre Mí', href: '/about' },
-    { label: 'Experiencia', href: '/experience' },
-    { label: 'Proyectos', href: '/projects' },
-    { label: 'Habilidades', href: '/skills' },
-    { label: 'Contacto', href: '/contact' },
+    { label: 'Nosotros', href: '/nosotros' },
+    { label: 'Servicios', href: '/servicios' },
+    { label: 'Equipo', href: '/equipo' },
+    { label: 'Clientes', href: '/clientes' },
+    { label: 'Portafolio', href: '/portafolio' },
+    { label: 'Contacto', href: '/contacto' },
   ];
+
+  ngOnInit(): void {
+    this.loadCompany();
+    this.loadServices();
+  }
+
+  private loadCompany(): void {
+    this.api.getPublicCompany().subscribe({
+      next: (c) => {
+        this.company = c;
+        if (c?.name) this.companyName = c.name;
+        this.companyLogo = this.resolveAsset(c?.logoUrl);
+        applyCompanyBrand(c);
+      },
+      error: () => applyCompanyBrand(null),
+    });
+  }
+
+  private loadServices(): void {
+    this.api.getPublicServices().subscribe({
+      next: (list) => (this.footerServices = (list || []).slice(0, 6)),
+      error: () => {},
+    });
+  }
+
+  private resolveAsset(url?: string): string | null {
+    if (!url) return null;
+    if (url.startsWith('http://') || url.startsWith('https://') || url.startsWith('data:')) return url;
+    return `${environment.uploadUrl}/${url}`;
+  }
 
   @HostListener('window:scroll')
   onScroll(): void {
@@ -112,13 +166,5 @@ export class PublicLayoutComponent {
   toggleTheme(): void {
     this.isDark = !this.isDark;
     document.documentElement.setAttribute('data-theme', this.isDark ? 'dark' : 'light');
-  }
-
-  scrollTo(href: string): void {
-    this.isMobileMenuOpen = false;
-    const el = document.querySelector(href);
-    if (el) {
-      el.scrollIntoView({ behavior: 'smooth' });
-    }
   }
 }

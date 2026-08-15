@@ -1,15 +1,16 @@
 const { Router } = require('express');
 const userController = require('../controllers/user.controller');
-const { authenticate, authorize } = require('../middlewares/auth');
+const { authenticate, authorize, requirePermission } = require('../middlewares/auth');
 const { idParam } = require('../validations');
 
 const router = Router();
 
-router.use(authenticate, authorize('ADMIN'));
+router.use(authenticate, authorize('ADMIN', 'SUPER_ADMIN'));
 
-router.get('/', userController.getAll);
-router.get('/:id', idParam, userController.getById);
-router.put('/:id', idParam, userController.update);
-router.delete('/:id', idParam, userController.delete);
+router.get('/', requirePermission('users.manage'), userController.getAll);
+router.get('/:id', requirePermission('users.manage'), idParam, userController.getById);
+router.put('/:id', requirePermission('users.manage'), idParam, userController.update);
+router.put('/:id/role', requirePermission('users.manage', 'roles.manage'), idParam, userController.updateRole);
+router.delete('/:id', requirePermission('users.manage'), idParam, userController.delete);
 
 module.exports = router;

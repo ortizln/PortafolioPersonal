@@ -82,6 +82,35 @@ export class AuthService {
     return localStorage.getItem('refreshToken');
   }
 
+  getCurrentUser(): User | null {
+    return this.currentUserSubject.getValue();
+  }
+
+  setCurrentUser(user: User): void {
+    localStorage.setItem('currentUser', JSON.stringify(user));
+    this.currentUserSubject.next(user);
+  }
+
+  hasPermission(permission: string): boolean {
+    const user = this.getCurrentUser();
+    if (!user) return false;
+    if (user.roles?.includes('SUPER_ADMIN')) return true;
+    return !!user.permissions?.includes(permission);
+  }
+
+  hasAnyPermission(permissions: string[]): boolean {
+    const user = this.getCurrentUser();
+    if (!user) return false;
+    if (user.roles?.includes('SUPER_ADMIN')) return true;
+    return !!permissions.some((p) => user.permissions?.includes(p));
+  }
+
+  hasRole(role: string): boolean {
+    const user = this.getCurrentUser();
+    if (!user) return false;
+    return !!user.roles?.includes(role);
+  }
+
   clearStorage(): void {
     localStorage.removeItem('accessToken');
     localStorage.removeItem('refreshToken');

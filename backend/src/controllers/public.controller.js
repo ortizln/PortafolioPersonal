@@ -1,6 +1,21 @@
 const prisma = require('../config/database');
 const { AppError } = require('../middlewares/errorHandler');
 
+async function trackPageView(req, path) {
+  try {
+    if (!path) return;
+    const userAgent = req.get?.('user-agent') || '';
+    if (/bot|spider|crawler|slurp|bingpreview/i.test(userAgent)) return;
+    await prisma.pageView.upsert({
+      where: { path },
+      update: { count: { increment: 1 } },
+      create: { path }
+    });
+  } catch (error) {
+    // no romper el flujo público por tracking
+  }
+}
+
 const publicController = {
   async getPortfolio(req, res, next) {
     try {
@@ -93,22 +108,79 @@ const publicController = {
 
   async getProject(req, res, next) {
     try {
-      const project = await prisma.project.findUnique({
-        where: { id: req.params.id },
+      const { slug } = req.params;
+      const project = await prisma.project.findFirst({
+        where: {
+          deletedAt: null,
+          OR: [{ id: slug }, { slug }]
+        },
         include: {
           images: true,
           technologies: { include: { technology: true } },
-          categories: { include: { category: true } }
+          categories: { include: { category: true } },
+          client: true,
+          service: true,
+          members: { include: { teamMember: true }, orderBy: { isLead: 'desc' } }
         }
       });
 
-      if (!project || project.deletedAt) {
+      if (!project) {
         throw new AppError('Project not found', 404);
       }
 
       res.json({ project });
     } catch (error) {
-      if (error.code === 'P2025') return next(new AppError('Project not found', 404));
+      next(error);
+    }
+  },
+
+  async getProjectBySlug(req, res, next) {
+    try {
+      const { slug } = req.params;
+      const project = await prisma.project.findFirst({
+        where: { slug, deletedAt: null },
+        include: {
+          images: true,
+          technologies: { include: { technology: true } },
+          categories: { include: { category: true } },
+          client: true,
+          service: true,
+          members: { include: { teamMember: true }, orderBy: { isLead: 'desc' } }
+        }
+      });
+
+      if (!project) {
+        throw new AppError('Project not found', 404);
+      }
+
+      await prisma.project.update({
+        where: { id: project.id },
+        data: { views: { increment: 1 } }
+      });
+
+      await trackPageView(req, `/proyectos/${project.slug}`);
+
+      const related = await prisma.project.findMany({
+        where: {
+          deletedAt: null,
+          id: { not: project.id },
+          OR: [
+            { categories: { some: { categoryId: { in: project.categories.map((c) => c.categoryId) } } } },
+            { technologies: { some: { technologyId: { in: project.technologies.map((t) => t.technologyId) } } } }
+          ]
+        },
+        include: {
+          images: true,
+          technologies: { include: { technology: true } },
+          categories: { include: { category: true } },
+          client: true
+        },
+        orderBy: { createdAt: 'desc' },
+        take: 3
+      });
+
+      res.json({ project, related });
+    } catch (error) {
       next(error);
     }
   },
@@ -120,14 +192,36 @@ const publicController = {
         orderBy: { updatedAt: 'desc' }
       });
       const userId = profile?.userId;
+
+      const { search, category, technology, status } = req.query;
+      const where = { deletedAt: null };
+      if (userId) where.userId = userId;
+      if (status) where.status = status.toUpperCase();
+      if (search) {
+        where.OR = [
+          { title: { contains: search, mode: 'insensitive' } },
+          { summary: { contains: search, mode: 'insensitive' } },
+          { description: { contains: search, mode: 'insensitive' } }
+        ];
+      }
+      if (category) {
+        where.categories = { some: { category: { slug: category } } };
+      }
+      if (technology) {
+        where.technologies = { some: { technology: { slug: technology } } };
+      }
+
       const projects = userId ? await prisma.project.findMany({
-        where: { deletedAt: null, userId },
+        where,
         include: {
           images: true,
           technologies: { include: { technology: true } },
-          categories: { include: { category: true } }
+          categories: { include: { category: true } },
+          client: true,
+          service: true,
+          members: { include: { teamMember: true }, orderBy: { isLead: 'desc' } }
         },
-        orderBy: [{ order: 'asc' }, { createdAt: 'desc' }]
+        orderBy: [{ isFeatured: 'desc' }, { order: 'asc' }, { createdAt: 'desc' }]
       }) : [];
 
       res.json({ projects });

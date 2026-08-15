@@ -1,0 +1,52 @@
+<div class="header-row">
+  <h2>Registro de auditoría</h2>
+</div>
+
+<div class="toolbar">
+  <div class="search-box">
+    <i class="bi bi-search"></i>
+    <input type="text" [(ngModel)]="search" (keyup.enter)="applyFilters()" placeholder="Buscar por usuario o descripción..." />
+  </div>
+  <select class="filter-select" [(ngModel)]="entity" (change)="applyFilters()">
+    <option value="">Todas las entidades</option>
+    <option *ngFor="let e of entities" [value]="e">{{ e }}</option>
+  </select>
+  <select class="filter-select" [(ngModel)]="action" (change)="applyFilters()">
+    <option value="">Todas las acciones</option>
+    <option *ngFor="let a of actions" [value]="a">{{ a }}</option>
+  </select>
+</div>
+
+<div class="table-wrap" *ngIf="!loading">
+  <table class="audit-table">
+    <thead>
+      <tr>
+        <th>Fecha</th>
+        <th>Acción</th>
+        <th>Entidad</th>
+        <th>Descripción</th>
+        <th>Usuario</th>
+        <th>IP</th>
+      </tr>
+    </thead>
+    <tbody>
+      <tr *ngFor="let log of logs">
+        <td class="log-date">{{ log.createdAt | date: 'dd/MM/yyyy HH:mm:ss' }}</td>
+        <td><span class="action-badge" [class]="actionClass(log.action)">{{ log.action }}</span></td>
+        <td>{{ log.entity }}<span class="entity-id" *ngIf="log.entityId"> · {{ log.entityId }}</span></td>
+        <td class="log-desc" [title]="log.description">{{ log.description || '—' }}</td>
+        <td class="log-user">{{ log.user?.name || 'Sistema' }}</td>
+        <td class="log-ip">{{ log.ipAddress || '—' }}</td>
+      </tr>
+      <tr *ngIf="logs.length === 0">
+        <td colspan="6" class="empty-row">No hay registros.</td>
+      </tr>
+    </tbody>
+  </table>
+</div>
+
+<div class="pagination" *ngIf="totalPages() > 1">
+  <button [disabled]="page === 1" (click)="goPage(page - 1)"><i class="bi bi-chevron-left"></i></button>
+  <span>Página {{ page }} de {{ totalPages() }} · {{ total }} registros</span>
+  <button [disabled]="page === totalPages()" (click)="goPage(page + 1)"><i class="bi bi-chevron-right"></i></button>
+</div>

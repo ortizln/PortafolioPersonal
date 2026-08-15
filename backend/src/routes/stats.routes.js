@@ -8,5 +8,6 @@ router.use(authenticate);
 
 router.get('/', statsController.getStats);
 router.get('/projects', statsController.getProjectStats);
+router.get('/corporate', statsController.getCorporateStats);
 
 module.exports = router;

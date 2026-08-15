@@ -3,7 +3,7 @@ import { ReactiveFormsModule, FormBuilder, FormGroup } from '@angular/forms';
 import { NgFor, NgIf, NgClass, NgStyle, DatePipe } from '@angular/common';
 import { ApiService } from '../core/services/api.service';
 import { ConfirmService } from '../core/services/confirm.service';
-import { Project, ProjectImage, Technology, Category } from '../core/models';
+import { Project, ProjectImage, Technology, Category, Client, Service, TeamMember } from '../core/models';
 import { environment } from '../../environments/environment';
 
 @Component({
@@ -21,6 +21,9 @@ export class ProjectListComponent implements OnInit {
   projects: Project[] = [];
   categories: Category[] = [];
   technologies: Technology[] = [];
+  clients: Client[] = [];
+  services: Service[] = [];
+  teamMembers: TeamMember[] = [];
   projectImages: ProjectImage[] = [];
   bannerPreview: string | null = null;
   bannerFile: File | null = null;
@@ -33,6 +36,7 @@ export class ProjectListComponent implements OnInit {
 
   selectedTechIds: string[] = [];
   selectedCategoryIds: string[] = [];
+  selectedMemberIds: string[] = [];
 
   toasts: { message: string; type: 'success' | 'error'; id: number }[] = [];
   private toastId = 0;
@@ -42,6 +46,9 @@ export class ProjectListComponent implements OnInit {
     this.loadProjects();
     this.loadCategories();
     this.loadTechnologies();
+    this.loadClients();
+    this.loadServices();
+    this.loadTeamMembers();
   }
 
   private buildForm(): void {
@@ -50,7 +57,11 @@ export class ProjectListComponent implements OnInit {
       description: [''],
       summary: [''],
       client: [''],
+      clientId: [''],
+      serviceId: [''],
       status: ['draft'],
+      projectType: [''],
+      visibility: ['PUBLIC'],
       startDate: [''],
       endDate: [''],
       demoUrl: [''],
@@ -58,9 +69,16 @@ export class ProjectListComponent implements OnInit {
       gitlabUrl: [''],
       videoUrl: [''],
       architecture: [''],
+      challenge: [''],
+      solution: [''],
+      results: [''],
+      metrics: [''],
       features: [''],
       isFeatured: [false],
+      isCaseStudy: [false],
       order: [0],
+      seoTitle: [''],
+      seoDescription: [''],
     });
   }
 
@@ -92,6 +110,24 @@ export class ProjectListComponent implements OnInit {
     });
   }
 
+  private loadClients(): void {
+    this.apiService.getClientsAll().subscribe({
+      next: (list) => (this.clients = list),
+    });
+  }
+
+  private loadServices(): void {
+    this.apiService.getServicesAll().subscribe({
+      next: (list) => (this.services = list),
+    });
+  }
+
+  private loadTeamMembers(): void {
+    this.apiService.getTeamAll().subscribe({
+      next: (list) => (this.teamMembers = list),
+    });
+  }
+
   openAdd(): void {
     this.editingId = null;
     this.projectImages = [];
@@ -100,7 +136,8 @@ export class ProjectListComponent implements OnInit {
     this.additionalFiles = [];
     this.selectedTechIds = [];
     this.selectedCategoryIds = [];
-    this.projectForm.reset({ isFeatured: false, order: 0, status: 'draft' });
+    this.selectedMemberIds = [];
+    this.projectForm.reset({ isFeatured: false, isCaseStudy: false, order: 0, status: 'draft', visibility: 'PUBLIC' });
     this.showForm = true;
   }
 
@@ -115,13 +152,18 @@ export class ProjectListComponent implements OnInit {
       .map((c) => c.category?.id ?? c.id)
       .filter(Boolean)
       .slice(0, 1);
+    this.selectedMemberIds = (project.members as any[] || []).map((m) => m.teamMemberId).filter(Boolean);
 
     this.projectForm.patchValue({
       title: project.title,
       description: project.description,
       summary: (project as any).summary || project.description,
       client: (project as any).client || '',
+      clientId: (project as any).clientId || '',
+      serviceId: (project as any).serviceId || '',
       status: (project as any).status || 'draft',
+      projectType: (project as any).projectType || '',
+      visibility: (project as any).visibility || 'PUBLIC',
       startDate: project.startDate?.slice(0, 10),
       endDate: project.endDate?.slice(0, 10) ?? null,
       demoUrl: project.demoUrl || '',
@@ -129,9 +171,16 @@ export class ProjectListComponent implements OnInit {
       gitlabUrl: (project as any).gitlabUrl || '',
       videoUrl: (project as any).videoUrl || '',
       architecture: (project as any).architecture || '',
+      challenge: (project as any).challenge || '',
+      solution: (project as any).solution || '',
+      results: (project as any).results || '',
+      metrics: (project as any).metrics ? JSON.stringify((project as any).metrics, null, 2) : '',
       features: (project as any).features ? JSON.stringify((project as any).features, null, 2) : '',
       isFeatured: project.isFeatured,
+      isCaseStudy: (project as any).isCaseStudy || false,
       order: project.order,
+      seoTitle: (project as any).seoTitle || '',
+      seoDescription: (project as any).seoDescription || '',
     });
     this.showForm = true;
   }
@@ -143,7 +192,8 @@ export class ProjectListComponent implements OnInit {
     this.bannerPreview = null;
     this.bannerFile = null;
     this.additionalFiles = [];
-    this.projectForm.reset({ isFeatured: false, order: 0, status: 'draft' });
+    this.selectedMemberIds = [];
+    this.projectForm.reset({ isFeatured: false, isCaseStudy: false, order: 0, status: 'draft', visibility: 'PUBLIC' });
   }
 
   save(): void {
@@ -160,24 +210,47 @@ export class ProjectListComponent implements OnInit {
       return;
     }
 
+    let metrics: any = null;
+    try {
+      if (form.metrics) metrics = JSON.parse(form.metrics);
+    } catch {
+      this.showToast('Métricas debe ser JSON válido', 'error');
+      this.saving = false;
+      return;
+    }
+
     const payload: any = {
       title: form.title,
       description: form.description,
       content: form.summary,
+      summary: form.summary,
       demoUrl: form.demoUrl,
       githubUrl: form.githubUrl,
       startDate: form.startDate,
       endDate: form.endDate || null,
       isFeatured: form.isFeatured,
+      isCaseStudy: form.isCaseStudy,
       order: form.order,
       categoryId: this.selectedCategoryIds[0] || null,
+      categoryIds: this.selectedCategoryIds,
       client: form.client,
+      clientId: form.clientId || null,
+      serviceId: form.serviceId || null,
       status: form.status,
+      projectType: form.projectType || null,
+      visibility: form.visibility || 'PUBLIC',
       gitlabUrl: form.gitlabUrl,
       videoUrl: form.videoUrl,
       architecture: form.architecture,
+      challenge: form.challenge || null,
+      solution: form.solution || null,
+      results: form.results || null,
+      metrics: metrics || null,
       features,
       technologyIds: this.selectedTechIds,
+      members: this.teamMembers
+        .filter((m) => this.selectedMemberIds.includes(m.id))
+        .map((m) => ({ teamMemberId: m.id, role: '', description: '', isLead: false })),
     };
 
     const request = this.editingId
@@ -280,6 +353,16 @@ export class ProjectListComponent implements OnInit {
 
   isCatSelected(id: string): boolean {
     return this.selectedCategoryIds.includes(id);
+  }
+
+  toggleMember(memberId: string): void {
+    const idx = this.selectedMemberIds.indexOf(memberId);
+    if (idx >= 0) this.selectedMemberIds.splice(idx, 1);
+    else this.selectedMemberIds.push(memberId);
+  }
+
+  isMemberSelected(id: string): boolean {
+    return this.selectedMemberIds.includes(id);
   }
 
   uploadImages(event: Event): void {
