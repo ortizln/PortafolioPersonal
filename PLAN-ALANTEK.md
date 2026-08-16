@@ -1291,19 +1291,21 @@ tar xzf uploads_*.tar.gz   # en el volumen backend_uploads
 
 ## FASE 7 — QA y producción
 
-- [ ] Unit tests.
-- [ ] Integration tests.
-- [ ] E2E.
-- [ ] Pruebas de permisos.
-- [ ] Pruebas de uploads.
-- [ ] Lighthouse.
-- [ ] Seguridad.
-- [ ] Backup/restore.
-- [ ] Build production.
-- [ ] Deploy staging.
+- [x] Unit tests (backend Vitest: jwt, memberScope — `npm test` en `backend/`).
+- [x] Integration/smoke tests (supertest sobre la app real con BD: rutas públicas, blog, sitemap, robots, 401 en protegidas; se saltan si la BD no está disponible).
+- [ ] E2E (pendiente: e.g. Playwright/Cypress).
+- [ ] Pruebas de permisos (manual, por rol).
+- [ ] Pruebas de uploads (manual).
+- [ ] Lighthouse (manual sobre producción).
+- [x] Seguridad base (helmet con CSP, rate limiting por API y por auth, CORS restringido, headers en nginx).
+- [x] Backup/restore (`backup.sh` con pg_dump + uploads, retención 7 días).
+- [x] Build production (frontend `npm run build` verificado; migraciones aplicadas en BD local).
+- [ ] Deploy staging (manual en servidor: `./deploy.sh` + `./migrate-corporate.sh`).
 - [ ] UAT.
 - [ ] Deploy producción.
 - [ ] Monitoreo.
+
+**Notas FASE 7:** nginx actualizado (`server_name 192.168.100.215` + proxy de `/sitemap.xml` y `/robots.txt` al backend). Correcciones de bugs detectados por los smoke: `Company` no tiene `deletedAt` (ahora filtra `isActive`) y `Project` no tiene `isPublished` (filtra `visibility: 'PUBLIC'`).
 
 ---
 

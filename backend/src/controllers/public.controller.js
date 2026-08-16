@@ -534,7 +534,7 @@ const publicController = {
     try {
       const path = req.query.path || '/';
       const [company, settings, meta] = await Promise.all([
-        prisma.company.findFirst({ where: { deletedAt: null } }),
+        prisma.company.findFirst({ where: { isActive: true } }),
         prisma.setting.findMany({ where: { key: { in: ['seo_title', 'seo_description', 'seo_image', 'seo_default_robots'] } } }),
         prisma.seoMetadata.findFirst({ where: { entityType: 'PAGE', entityId: path } })
       ]);
@@ -563,11 +563,11 @@ const publicController = {
 
   async getSitemap(req, res, next) {
     try {
-      const company = await prisma.company.findFirst({ where: { deletedAt: null } });
+      const company = await prisma.company.findFirst({ where: { isActive: true } });
       const baseUrl = company?.website || `${req.protocol}://${req.get('host')}`;
 
       const [projects, posts, team, pages] = await Promise.all([
-        prisma.project.findMany({ where: { deletedAt: null, isPublished: true, visibility: 'PUBLIC' }, select: { slug: true, updatedAt: true } }),
+        prisma.project.findMany({ where: { deletedAt: null, visibility: 'PUBLIC' }, select: { slug: true, updatedAt: true } }),
         prisma.post.findMany({ where: { deletedAt: null, status: 'PUBLISHED', publishedAt: { lte: new Date() } }, select: { slug: true, updatedAt: true } }),
         prisma.teamMember.findMany({ where: { deletedAt: null, isActive: true, isPublic: true }, select: { slug: true, updatedAt: true } }),
         ['', 'nosotros', 'servicios', 'equipo', 'clientes', 'portafolio', 'contacto', 'blog', 'skills']
@@ -594,7 +594,7 @@ const publicController = {
 
   async getRobots(req, res, next) {
     try {
-      const company = await prisma.company.findFirst({ where: { deletedAt: null } });
+      const company = await prisma.company.findFirst({ where: { isActive: true } });
       const baseUrl = company?.website || `${req.protocol}://${req.get('host')}`;
       const robots = [
         'User-agent: *',
