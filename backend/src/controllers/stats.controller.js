@@ -116,7 +116,7 @@ const statsController = {
         recentAudit
       ] = await Promise.all([
         prisma.project.count({ where: { deletedAt: null } }),
-        prisma.project.count({ where: { deletedAt: null, isPublished: true, visibility: 'PUBLIC' } }),
+        prisma.project.count({ where: { deletedAt: null, visibility: 'PUBLIC' } }),
         prisma.teamMember.count({ where: { deletedAt: null } }),
         prisma.service.count({ where: { deletedAt: null, status: 'ACTIVE' } }),
         prisma.client.count({ where: { deletedAt: null } }),

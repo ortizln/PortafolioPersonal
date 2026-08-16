@@ -9,10 +9,11 @@ export const errorInterceptor: HttpInterceptorFn = (req, next) => {
   const router = inject(Router);
   let retryCount = 0;
   const maxRetries = 1;
+  const isAuthEndpoint = /\/auth\/(login|register|refresh|forgot-password|reset-password)/.test(req.url);
 
   return next(req).pipe(
     catchError((error: HttpErrorResponse) => {
-      if (error.status === 401 && !req.url.includes('/auth/refresh') && retryCount < maxRetries) {
+      if (error.status === 401 && !isAuthEndpoint && retryCount < maxRetries) {
         retryCount++;
         return authService.refreshToken().pipe(
           switchMap((tokens) => {

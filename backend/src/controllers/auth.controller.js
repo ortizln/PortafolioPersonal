@@ -49,6 +49,13 @@ async function buildUserPayload(user) {
     });
   });
 
+  if (roles.includes('SUPER_ADMIN')) {
+    const allPermissions = await prisma.permission.findMany({ select: { name: true } });
+    allPermissions.forEach((p) => {
+      if (!permissions.includes(p.name)) permissions.push(p.name);
+    });
+  }
+
   const { rbacRole, userRoles, ...base } = withRoles;
   return { ...base, roles, permissions };
 }

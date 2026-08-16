@@ -155,6 +155,7 @@ export class AdminLayoutComponent implements OnInit, OnDestroy {
   notifications: Notification[] = [];
   unreadCount = 0;
   private notifTimer: any;
+  private userSub: any;
   currentUser = this.authService.getCurrentUser();
 
   menuGroups: NavGroup[] = [
@@ -212,6 +213,13 @@ export class AdminLayoutComponent implements OnInit, OnDestroy {
   ];
 
   get filteredGroups(): NavGroup[] {
+    if (!this._filteredGroups) this._filteredGroups = this.buildNavGroups();
+    return this._filteredGroups;
+  }
+
+  private _filteredGroups: NavGroup[] | null = null;
+
+  private buildNavGroups(): NavGroup[] {
     return this.menuGroups
       .map((group) => ({
         ...group,
@@ -227,12 +235,17 @@ export class AdminLayoutComponent implements OnInit, OnDestroy {
   }
 
   ngOnInit(): void {
+    this._filteredGroups = this.buildNavGroups();
+    this.userSub = this.authService.currentUser$.subscribe(() => {
+      this._filteredGroups = null;
+    });
     this.loadNotifications();
     this.notifTimer = setInterval(() => this.loadNotifications(), 60000);
   }
 
   ngOnDestroy(): void {
     if (this.notifTimer) clearInterval(this.notifTimer);
+    if (this.userSub) this.userSub.unsubscribe();
   }
 
   loadNotifications(): void {

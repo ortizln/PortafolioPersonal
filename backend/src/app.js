@@ -21,7 +21,7 @@ const limiter = rateLimit({
 
 const authLimiter = rateLimit({
   windowMs: 15 * 60 * 1000,
-  max: 10,
+  max: parseInt(process.env.RATE_LIMIT_AUTH_MAX) || 10,
   message: { error: 'Too many auth attempts, please try again later.' }
 });
 
