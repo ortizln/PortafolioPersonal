@@ -20,12 +20,7 @@ prisma/*.db
 prisma/*.db-journal
 
 # Uploads (keep structure, ignore files)
-backend/uploads/images/*
-backend/uploads/certificates/*
-backend/uploads/resumes/*
-backend/uploads/projects/*
-backend/uploads/banners/*
-backend/uploads/thumbnails/*
+backend/uploads/*
 !backend/uploads/**/.gitkeep
 
 # Logs

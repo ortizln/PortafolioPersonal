@@ -1294,8 +1294,8 @@ tar xzf uploads_*.tar.gz   # en el volumen backend_uploads
 - [x] Unit tests (backend Vitest: jwt, memberScope — `npm test` en `backend/`).
 - [x] Integration/smoke tests (supertest sobre la app real con BD: rutas públicas, blog, sitemap, robots, 401 en protegidas; se saltan si la BD no está disponible).
 - [ ] E2E (pendiente: e.g. Playwright/Cypress).
-- [ ] Pruebas de permisos (manual, por rol).
-- [ ] Pruebas de uploads (manual).
+- [x] Pruebas de permisos (integración RBAC por rol en `backend/test/integration/rbac.test.js`).
+- [x] Pruebas de uploads (integración en `backend/test/integration/upload.test.js`: tipos válidos, tipos rechazados, límite de tamaño, 401/403).
 - [ ] Lighthouse (manual sobre producción).
 - [x] Seguridad base (helmet con CSP, rate limiting por API y por auth, CORS restringido, headers en nginx).
 - [x] Backup/restore (`backup.sh` con pg_dump + uploads, retención 7 días).
@@ -1305,7 +1305,7 @@ tar xzf uploads_*.tar.gz   # en el volumen backend_uploads
 - [ ] Deploy producción.
 - [ ] Monitoreo.
 
-**Notas FASE 7:** nginx actualizado (`server_name 192.168.100.215` + proxy de `/sitemap.xml` y `/robots.txt` al backend). Correcciones de bugs detectados por los smoke: `Company` no tiene `deletedAt` (ahora filtra `isActive`) y `Project` no tiene `isPublished` (filtra `visibility: 'PUBLIC'`).
+**Notas FASE 7:** nginx actualizado (`server_name 192.168.100.215` + proxy de `/sitemap.xml` y `/robots.txt` al backend). Correcciones de bugs detectados por los smoke: `Company` no tiene `deletedAt` (ahora filtra `isActive`) y `Project` no tiene `isPublished` (filtra `visibility: 'PUBLIC'`). Se detectó y corrigió drift de esquema: el enum `"Role"` heredado de la BD fue renombrado a `"LegacyRole"` (migración `20260814130000_rename_role_enum`) para alinear con `schema.prisma`; sin esto `prisma.user.create` (registro de usuarios) fallaba.
 
 ---
 
