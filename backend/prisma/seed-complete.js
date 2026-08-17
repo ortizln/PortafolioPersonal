@@ -793,7 +793,7 @@ async function seedPosts() {
 
   for (const p of posts) {
     const { categorySlugs, tagSlugs, ...data } = p;
-    const post = await prisma.post.create({ data });
+    const post = await prisma.post.create({ data: { ...data, publishedAt: new Date() } });
 
     for (const cs of categorySlugs) {
       const cat = postCategories[cs];

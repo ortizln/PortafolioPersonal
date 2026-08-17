@@ -23,11 +23,11 @@ export const routes: Routes = [
       { path: 'projects', redirectTo: 'portafolio', pathMatch: 'full' },
       { path: 'skills', loadComponent: () => import('./pages/skills-page.component').then((m) => m.SkillsPageComponent) },
       { path: 'contact', redirectTo: 'contacto', pathMatch: 'full' },
-    ],
-  },
       { path: 'portfolio', redirectTo: '', pathMatch: 'full' },
       { path: 'blog', loadComponent: () => import('./pages/blog-page.component').then((m) => m.BlogPageComponent) },
       { path: 'blog/:slug', loadComponent: () => import('./pages/blog-detail-page.component').then((m) => m.BlogDetailPageComponent) },
+    ],
+  },
   {
     path: 'admin',
     loadComponent: () =>
