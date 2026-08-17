@@ -37,6 +37,7 @@ router.get('/certifications', pageTracker(() => '/experience'), publicController
 router.get('/skills', pageTracker(() => '/skills'), publicController.getSkills);
 router.get('/company', publicController.getCompany);
 router.get('/services', pageTracker(() => '/servicios'), publicController.getServices);
+router.get('/services/slug/:slug', publicController.getServiceBySlug);
 router.get('/clients', pageTracker(() => '/clientes'), publicController.getClients);
 router.get('/testimonials', pageTracker(() => '/'), publicController.getTestimonials);
 router.get('/team', pageTracker(() => '/equipo'), publicController.getTeam);

@@ -344,6 +344,30 @@ const publicController = {
     }
   },
 
+  async getServiceBySlug(req, res, next) {
+    try {
+      const service = await prisma.service.findFirst({
+        where: { slug: req.params.slug, deletedAt: null, status: 'ACTIVE' },
+        include: {
+          features: { orderBy: { order: 'asc' } },
+          technologies: { include: { technology: true } },
+          projects: {
+            where: { deletedAt: null, visibility: 'PUBLIC' },
+            select: { id: true, title: true, slug: true, summary: true, bannerImage: true, isFeatured: true },
+            orderBy: { createdAt: 'desc' },
+            take: 4,
+          },
+        },
+      });
+      if (!service) {
+        throw new AppError('Service not found', 404);
+      }
+      res.json({ service });
+    } catch (error) {
+      next(error);
+    }
+  },
+
   async getClients(req, res, next) {
     try {
       const clients = await prisma.client.findMany({

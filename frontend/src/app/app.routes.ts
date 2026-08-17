@@ -12,6 +12,7 @@ export const routes: Routes = [
       { path: '', loadComponent: () => import('./public-portfolio/portfolio.component').then((m) => m.PortfolioComponent) },
       { path: 'nosotros', loadComponent: () => import('./pages/nosotros-page.component').then((m) => m.NosotrosPageComponent) },
       { path: 'servicios', loadComponent: () => import('./pages/servicios-page.component').then((m) => m.ServiciosPageComponent) },
+      { path: 'servicios/:slug', loadComponent: () => import('./pages/servicio-detail-page.component').then((m) => m.ServicioDetailPageComponent) },
       { path: 'equipo', loadComponent: () => import('./pages/team-page.component').then((m) => m.TeamPageComponent) },
       { path: 'equipo/:slug', loadComponent: () => import('./pages/team-detail-page.component').then((m) => m.TeamDetailPageComponent) },
       { path: 'clientes', loadComponent: () => import('./pages/clientes-page.component').then((m) => m.ClientesPageComponent) },

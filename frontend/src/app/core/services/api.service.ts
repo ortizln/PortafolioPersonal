@@ -636,6 +636,10 @@ export class ApiService {
     );
   }
 
+  getPublicServiceBySlug(slug: string): Observable<{ service: Service }> {
+    return this.http.get<{ service: Service }>(`${this.apiUrl}/public/services/slug/${slug}`);
+  }
+
   getPublicClients(): Observable<Client[]> {
     return this.http.get<{ clients: Client[] }>(`${this.apiUrl}/public/clients`).pipe(
       map((res) => res.clients || [])
