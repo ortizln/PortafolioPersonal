@@ -40,6 +40,7 @@ router.get('/services', pageTracker(() => '/servicios'), publicController.getSer
 router.get('/services/slug/:slug', publicController.getServiceBySlug);
 router.get('/clients', pageTracker(() => '/clientes'), publicController.getClients);
 router.get('/testimonials', pageTracker(() => '/'), publicController.getTestimonials);
+router.get('/technologies', publicController.getTechnologies);
 router.get('/team', pageTracker(() => '/equipo'), publicController.getTeam);
 router.get('/team/:slug', publicController.getTeamMember);
 router.get('/blog', pageTracker(() => '/blog'), publicController.getPosts);

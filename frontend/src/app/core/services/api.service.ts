@@ -664,6 +664,12 @@ export class ApiService {
     );
   }
 
+  getPublicTechnologies(): Observable<Technology[]> {
+    return this.http.get<{ technologies: Technology[] }>(`${this.apiUrl}/public/technologies`).pipe(
+      map((res) => res.technologies || [])
+    );
+  }
+
   // FASE 5 — Auth / password
   forgotPassword(email: string): Observable<{ message: string }> {
     return this.http.post<{ message: string }>(`${this.apiUrl}/auth/forgot-password`, { email });

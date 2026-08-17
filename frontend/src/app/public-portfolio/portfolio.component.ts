@@ -1,8 +1,9 @@
 import { Component, OnInit, inject } from '@angular/core';
 import { NgIf, NgFor, NgClass, DatePipe } from '@angular/common';
 import { RouterLink } from '@angular/router';
+import { forkJoin } from 'rxjs';
 import { ApiService } from '../core/services/api.service';
-import { Company, Service, Client, Testimonial, Project } from '../core/models';
+import { Company, Service, Client, Testimonial, Project, TeamMember, Technology, Post } from '../core/models';
 import { applyCompanyBrand } from '../core/utils/brand.util';
 import { environment } from '../../environments/environment';
 
@@ -150,6 +151,63 @@ import { environment } from '../../environments/environment';
           </div>
         </section>
 
+        <!-- EQUIPO -->
+        <section class="section section--alt" id="equipo" *ngIf="teamMembers.length" data-aos="fade-up">
+          <div class="container">
+            <h2 class="section-title">Nuestro equipo</h2>
+            <p class="section-subtitle">Profesionales comprometidos con la excelencia.</p>
+            <div class="team-grid">
+              <a class="team-card" *ngFor="let m of teamMembers" [routerLink]="['/equipo', m.slug]" data-aos="fade-up">
+                <div class="team-avatar">
+                  <img *ngIf="m.photoUrl" [src]="resolveAsset(m.photoUrl)" [alt]="m.fullName" loading="lazy" />
+                  <i *ngIf="!m.photoUrl" class="bi bi-person-circle" aria-hidden="true"></i>
+                </div>
+                <h3 class="team-name">{{ m.fullName }}</h3>
+                <span class="team-role">{{ m.professionalTitle }}</span>
+                <span class="team-location" *ngIf="m.location"><i class="bi bi-geo-alt" aria-hidden="true"></i> {{ m.location }}</span>
+              </a>
+            </div>
+            <div class="section-cta">
+              <a class="btn-outline-accent" routerLink="/equipo">Conoce al equipo</a>
+            </div>
+          </div>
+        </section>
+
+        <!-- TECNOLOGÍAS -->
+        <section class="section" id="tecnologias" *ngIf="technologies.length" data-aos="fade-up">
+          <div class="container">
+            <h2 class="section-title">Tecnologías</h2>
+            <p class="section-subtitle">Stack tecnológico que dominamos.</p>
+            <div class="tech-grid">
+              <div class="tech-card" *ngFor="let t of technologies" data-aos="fade-up">
+                <span class="tech-dot" [style.background]="t.color || '#888'"></span>
+                <span class="tech-name">{{ t.name }}</span>
+                <span class="tech-category">{{ t.category }}</span>
+              </div>
+            </div>
+          </div>
+        </section>
+
+        <!-- BLOG RECIENTE -->
+        <section class="section section--alt" id="blog" *ngIf="recentPosts.length" data-aos="fade-up">
+          <div class="container">
+            <h2 class="section-title">Últimas publicaciones</h2>
+            <p class="section-subtitle">Artículos y novedades de nuestro blog.</p>
+            <div class="blog-grid">
+              <a class="blog-card" *ngFor="let p of recentPosts" [routerLink]="['/blog', p.slug]" data-aos="fade-up">
+                <div class="blog-body">
+                  <span class="blog-date"><i class="bi bi-calendar3" aria-hidden="true"></i> {{ p.publishedAt | date: "dd 'de' MMM, yyyy" }}</span>
+                  <h3 class="blog-title">{{ p.title }}</h3>
+                  <p class="blog-excerpt">{{ p.excerpt }}</p>
+                </div>
+              </a>
+            </div>
+            <div class="section-cta">
+              <a class="btn-outline-accent" routerLink="/blog">Ver el blog</a>
+            </div>
+          </div>
+        </section>
+
         <!-- CTA CONTACTO -->
         <section class="section cta-banner" data-aos="fade-up">
           <div class="container cta-inner">
@@ -253,6 +311,34 @@ import { environment } from '../../environments/environment';
     .author-name { font-size: 0.95rem; font-weight: 700; color: var(--white); }
     .author-role { font-size: 0.8rem; color: var(--text-muted); }
 
+    /* TEAM */
+    .team-grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(220px, 1fr)); gap: 20px; }
+    .team-card { display: flex; flex-direction: column; align-items: center; text-align: center; background: var(--bg-card); border: 1px solid var(--border); border-radius: 16px; padding: 28px 20px; text-decoration: none; transition: var(--transition); }
+    .team-card:hover { border-color: var(--accent); transform: translateY(-4px); box-shadow: var(--shadow-lg); }
+    .team-avatar { width: 80px; height: 80px; border-radius: 50%; overflow: hidden; background: var(--bg-secondary); display: flex; align-items: center; justify-content: center; margin-bottom: 14px; }
+    .team-avatar img { width: 100%; height: 100%; object-fit: cover; }
+    .team-avatar i { font-size: 2.4rem; color: var(--text-muted); }
+    .team-name { font-size: 1rem; font-weight: 700; color: var(--white); margin: 0 0 4px; }
+    .team-role { font-size: 0.82rem; color: var(--accent); margin-bottom: 6px; }
+    .team-location { font-size: 0.78rem; color: var(--text-muted); display: inline-flex; align-items: center; gap: 4px; }
+
+    /* TECHNOLOGIES */
+    .tech-grid { display: flex; flex-wrap: wrap; gap: 10px; }
+    .tech-card { display: inline-flex; align-items: center; gap: 10px; padding: 10px 18px; background: var(--bg-card); border: 1px solid var(--border); border-radius: 12px; transition: var(--transition); }
+    .tech-card:hover { border-color: var(--accent); }
+    .tech-dot { width: 10px; height: 10px; border-radius: 50%; flex-shrink: 0; }
+    .tech-name { font-size: 0.88rem; font-weight: 600; color: var(--text-primary); }
+    .tech-category { font-size: 0.72rem; color: var(--text-muted); text-transform: uppercase; letter-spacing: 0.04em; }
+
+    /* BLOG PREVIEW */
+    .blog-grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(300px, 1fr)); gap: 20px; }
+    .blog-card { display: block; background: var(--bg-card); border: 1px solid var(--border); border-radius: 16px; text-decoration: none; transition: var(--transition); overflow: hidden; }
+    .blog-card:hover { border-color: var(--accent); transform: translateY(-4px); box-shadow: var(--shadow-lg); }
+    .blog-body { padding: 22px; }
+    .blog-date { font-size: 0.78rem; color: var(--text-muted); display: flex; align-items: center; gap: 4px; margin-bottom: 8px; }
+    .blog-title { font-size: 1.05rem; font-weight: 700; color: var(--white); margin: 0 0 8px; line-height: 1.35; }
+    .blog-excerpt { font-size: 0.85rem; color: var(--text-secondary); line-height: 1.6; margin: 0; display: -webkit-box; -webkit-line-clamp: 3; -webkit-box-orient: vertical; overflow: hidden; }
+
     /* CTA */
     .cta-banner { background: linear-gradient(135deg, var(--accent), var(--accent-secondary)); }
     .cta-inner { text-align: center; }
@@ -281,6 +367,9 @@ export class PortfolioComponent implements OnInit {
   testimonials: Testimonial[] = [];
   projects: Project[] = [];
   featuredProjects: Project[] = [];
+  teamMembers: TeamMember[] = [];
+  technologies: Technology[] = [];
+  recentPosts: Post[] = [];
   stats = { projects: 0, clients: 0, team: 0 };
   loading = true;
   error = false;
@@ -292,6 +381,7 @@ export class PortfolioComponent implements OnInit {
   loadAll(): void {
     this.loading = true;
     this.error = false;
+
     this.api.getPublicCompany().subscribe({
       next: (c) => {
         this.company = c;
@@ -331,9 +421,21 @@ export class PortfolioComponent implements OnInit {
       error: () => {},
     });
     this.api.getPublicTeam().subscribe({
-      next: (list) => (this.stats.team = (list || []).length),
+      next: (list) => {
+        this.teamMembers = (list || []).slice(0, 4);
+        this.stats.team = (list || []).length;
+      },
       error: () => {},
     });
+    this.api.getPublicTechnologies().subscribe({
+      next: (list) => (this.technologies = list || []),
+      error: () => {},
+    });
+    this.api.getPublicBlog({ limit: 3 }).subscribe({
+      next: (res) => (this.recentPosts = (res?.posts || []).slice(0, 3)),
+      error: () => {},
+    });
+
     setTimeout(() => {
       this.loading = false;
       this.initAOS();

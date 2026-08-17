@@ -393,6 +393,18 @@ const publicController = {
     }
   },
 
+  async getTechnologies(req, res, next) {
+    try {
+      const technologies = await prisma.technology.findMany({
+        include: { _count: { select: { projects: true, skills: true } } },
+        orderBy: [{ category: 'asc' }, { name: 'asc' }]
+      });
+      res.json({ technologies });
+    } catch (error) {
+      next(error);
+    }
+  },
+
   async getTeam(req, res, next) {
     try {
       const members = await prisma.teamMember.findMany({
