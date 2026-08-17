@@ -7,6 +7,10 @@ backend/node_modules/
 frontend/dist/
 backend/dist/
 
+# Playwright
+e2e/test-results/
+e2e/playwright-report/
+
 # Environment files
 .env
 .env.local
