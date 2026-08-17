@@ -1,14 +1,15 @@
 import { Component, OnInit, inject } from '@angular/core';
-import { NgFor, NgIf, NgClass } from '@angular/common';
+import { DatePipe, NgFor, NgIf, NgClass } from '@angular/common';
 import { ActivatedRoute, Router, RouterLink } from '@angular/router';
 import { ApiService } from '../core/services/api.service';
+import { SeoService } from '../core/services/seo.service';
 import { Project, ProjectMember } from '../core/models';
 import { environment } from '../../environments/environment';
 
 @Component({
   selector: 'app-project-detail-page',
   standalone: true,
-  imports: [NgIf, NgFor, NgClass, RouterLink],
+  imports: [DatePipe, NgIf, NgFor, NgClass, RouterLink],
   template: `
     <div class="page-wrapper">
       <div class="page-loading" *ngIf="loading"><div class="spinner"></div></div>
@@ -184,6 +185,7 @@ export class ProjectDetailPageComponent implements OnInit {
   private api = inject(ApiService);
   private route = inject(ActivatedRoute);
   private router = inject(Router);
+  private seoService = inject(SeoService);
 
   project: Project | null = null;
   related: Project[] = [];
@@ -191,27 +193,37 @@ export class ProjectDetailPageComponent implements OnInit {
   error = false;
 
   ngOnInit(): void {
-    const slug = this.route.snapshot.paramMap.get('slug');
-    if (!slug) {
-      this.error = true;
-      this.loading = false;
-      return;
-    }
-    this.api.getPublicProjectBySlug(slug).subscribe({
-      next: (res) => {
-        this.project = res.project;
-        this.related = (res.related || []).map((p) => ({
-          ...p,
-          technologies: (p.technologies as any[] | undefined)?.map((t: any) =>
-            t.technology ? { ...t.technology, id: t.technology.id } : t
-          ) || [],
-        }));
-        this.loading = false;
-      },
-      error: () => {
+    this.route.paramMap.subscribe(params => {
+      const slug = params.get('slug');
+      if (!slug) {
         this.error = true;
         this.loading = false;
-      },
+        return;
+      }
+      this.loading = true;
+      this.error = false;
+      this.api.getPublicProjectBySlug(slug).subscribe({
+        next: (res) => {
+          this.project = res.project;
+          this.related = (res.related || []).map((p) => ({
+            ...p,
+            technologies: (p.technologies as any[] | undefined)?.map((t: any) =>
+              t.technology ? { ...t.technology, id: t.technology.id } : t
+            ) || [],
+          }));
+          this.loading = false;
+          this.seoService.setSeo({
+            title: `${res.project.title} | Proyectos ALANTEK`,
+            description: res.project.summary || res.project.description || `Proyecto ${res.project.title} de ALANTEK.`,
+            canonical: this.seoService.canonicalUrl(`/proyectos/${slug}`),
+            robots: 'index,follow',
+          });
+        },
+        error: () => {
+          this.error = true;
+          this.loading = false;
+        },
+      });
     });
   }
 

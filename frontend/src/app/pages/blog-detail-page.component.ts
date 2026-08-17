@@ -1,5 +1,5 @@
 import { Component, OnInit, inject } from '@angular/core';
-import { NgIf, NgFor } from '@angular/common';
+import { DatePipe, NgIf, NgFor } from '@angular/common';
 import { RouterLink, ActivatedRoute } from '@angular/router';
 import { ApiService } from '../core/services/api.service';
 import { SeoService } from '../core/services/seo.service';
@@ -9,7 +9,7 @@ import { environment } from '../../environments/environment';
 @Component({
   selector: 'app-blog-detail-page',
   standalone: true,
-  imports: [NgIf, NgFor, RouterLink],
+  imports: [DatePipe, NgIf, NgFor, RouterLink],
   styles: [
     `
       :host { display: block; min-height: 60vh; }

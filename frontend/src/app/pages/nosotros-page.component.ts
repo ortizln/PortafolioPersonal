@@ -2,6 +2,7 @@ import { Component, OnInit, inject } from '@angular/core';
 import { NgIf, NgFor } from '@angular/common';
 import { RouterLink } from '@angular/router';
 import { ApiService } from '../core/services/api.service';
+import { SeoService } from '../core/services/seo.service';
 import { Company, TeamMember } from '../core/models';
 import { applyCompanyBrand } from '../core/utils/brand.util';
 import { environment } from '../../environments/environment';
@@ -92,6 +93,7 @@ import { environment } from '../../environments/environment';
 })
 export class NosotrosPageComponent implements OnInit {
   private api = inject(ApiService);
+  private seoService = inject(SeoService);
 
   company: Company | null = null;
   companyName = 'ALANTEK';
@@ -99,6 +101,12 @@ export class NosotrosPageComponent implements OnInit {
   loading = true;
 
   ngOnInit(): void {
+    this.seoService.setSeo({
+      title: 'Nosotros | ALANTEK',
+      description: 'Conoce la historia, misión y visión de ALANTEK.',
+      canonical: this.seoService.canonicalUrl('/nosotros'),
+      robots: 'index,follow',
+    });
     this.api.getPublicCompany().subscribe({
       next: (c) => {
         this.company = c;

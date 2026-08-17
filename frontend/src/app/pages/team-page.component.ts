@@ -2,6 +2,7 @@ import { Component, OnInit, inject } from '@angular/core';
 import { NgIf, NgFor } from '@angular/common';
 import { RouterLink } from '@angular/router';
 import { ApiService } from '../core/services/api.service';
+import { SeoService } from '../core/services/seo.service';
 import { TeamMember } from '../core/models';
 import { environment } from '../../environments/environment';
 
@@ -58,10 +59,17 @@ import { environment } from '../../environments/environment';
 })
 export class TeamPageComponent implements OnInit {
   private api = inject(ApiService);
+  private seoService = inject(SeoService);
   members: TeamMember[] = [];
   loading = true;
 
   ngOnInit(): void {
+    this.seoService.setSeo({
+      title: 'Equipo | ALANTEK',
+      description: 'Conoce al equipo de profesionales de ALANTEK.',
+      canonical: this.seoService.canonicalUrl('/equipo'),
+      robots: 'index,follow',
+    });
     this.api.getPublicTeam().subscribe({
       next: (list) => {
         this.members = list || [];

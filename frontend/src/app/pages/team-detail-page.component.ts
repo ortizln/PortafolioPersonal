@@ -2,6 +2,7 @@ import { Component, OnInit, inject } from '@angular/core';
 import { NgIf, NgFor, DatePipe } from '@angular/common';
 import { ActivatedRoute, RouterLink } from '@angular/router';
 import { ApiService } from '../core/services/api.service';
+import { SeoService } from '../core/services/seo.service';
 import { TeamMember } from '../core/models';
 import { environment } from '../../environments/environment';
 
@@ -148,27 +149,38 @@ import { environment } from '../../environments/environment';
 export class TeamDetailPageComponent implements OnInit {
   private api = inject(ApiService);
   private route = inject(ActivatedRoute);
+  private seoService = inject(SeoService);
 
   member: TeamMember | null = null;
   loading = true;
   error = false;
 
   ngOnInit(): void {
-    const slug = this.route.snapshot.paramMap.get('slug');
-    if (!slug) {
-      this.error = true;
-      this.loading = false;
-      return;
-    }
-    this.api.getPublicTeamMember(slug).subscribe({
-      next: (m) => {
-        this.member = m;
+    this.route.paramMap.subscribe(params => {
+      const slug = params.get('slug');
+      if (!slug) {
+        this.error = true;
         this.loading = false;
+        return;
+      }
+      this.loading = true;
+      this.error = false;
+      this.api.getPublicTeamMember(slug).subscribe({
+        next: (m) => {
+          this.member = m;
+          this.loading = false;
+          this.seoService.setSeo({
+            title: `${m.fullName} | Equipo ALANTEK`,
+            description: m.professionalTitle || `Conoce a ${m.fullName}, miembro del equipo de ALANTEK.`,
+            canonical: this.seoService.canonicalUrl(`/equipo/${slug}`),
+            robots: 'index,follow',
+          });
       },
       error: () => {
         this.error = true;
         this.loading = false;
       },
+    });
     });
   }
 

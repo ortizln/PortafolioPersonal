@@ -382,6 +382,16 @@ export class PortfolioComponent implements OnInit {
     this.loading = true;
     this.error = false;
 
+    const totalCalls = 8;
+    let completed = 0;
+    const onDone = () => {
+      completed++;
+      if (completed >= totalCalls) {
+        this.loading = false;
+        this.initAOS();
+      }
+    };
+
     this.api.getPublicCompany().subscribe({
       next: (c) => {
         this.company = c;
@@ -390,10 +400,12 @@ export class PortfolioComponent implements OnInit {
         applyCompanyBrand(c);
       },
       error: () => {},
+      complete: onDone,
     });
     this.api.getPublicServices().subscribe({
       next: (list) => (this.services = (list || []).slice(0, 6)),
       error: () => {},
+      complete: onDone,
     });
     this.api.getPublicClients().subscribe({
       next: (list) => {
@@ -401,10 +413,12 @@ export class PortfolioComponent implements OnInit {
         this.stats.clients = this.clients.length;
       },
       error: () => {},
+      complete: onDone,
     });
     this.api.getPublicTestimonials().subscribe({
       next: (list) => (this.testimonials = (list || []).slice(0, 3)),
       error: () => {},
+      complete: onDone,
     });
     this.api.getPublicProjects().subscribe({
       next: (list) => {
@@ -419,6 +433,7 @@ export class PortfolioComponent implements OnInit {
         this.featuredProjects = (featured.length ? featured : this.projects).slice(0, 3);
       },
       error: () => {},
+      complete: onDone,
     });
     this.api.getPublicTeam().subscribe({
       next: (list) => {
@@ -426,20 +441,18 @@ export class PortfolioComponent implements OnInit {
         this.stats.team = (list || []).length;
       },
       error: () => {},
+      complete: onDone,
     });
     this.api.getPublicTechnologies().subscribe({
       next: (list) => (this.technologies = list || []),
       error: () => {},
+      complete: onDone,
     });
     this.api.getPublicBlog({ limit: 3 }).subscribe({
       next: (res) => (this.recentPosts = (res?.posts || []).slice(0, 3)),
       error: () => {},
+      complete: onDone,
     });
-
-    setTimeout(() => {
-      this.loading = false;
-      this.initAOS();
-    }, 600);
   }
 
   get yearsActive(): number {

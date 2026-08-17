@@ -166,7 +166,7 @@ export interface Experience {
   endDate?: string;
   current: boolean;
   location?: string;
-  achievements?: string;
+  achievements?: string[] | string;
   technologies: string[];
   companyLogo?: string;
   createdAt: string;

@@ -3,6 +3,7 @@ import { NgFor, NgIf, NgClass } from '@angular/common';
 import { FormsModule, NgForm } from '@angular/forms';
 import { RouterLink } from '@angular/router';
 import { ApiService } from '../core/services/api.service';
+import { SeoService } from '../core/services/seo.service';
 import { Profile, SocialLink } from '../core/models';
 
 @Component({
@@ -65,6 +66,13 @@ import { Profile, SocialLink } from '../core/models';
             </div>
 
             <div class="contact-form-wrapper" data-aos="fade-left">
+              <div class="error-message" *ngIf="submitError">
+                <i class="bi bi-exclamation-triangle-fill"></i>
+                <h3>Error al enviar</h3>
+                <p>No se pudo enviar el mensaje. Intenta de nuevo más tarde.</p>
+                <button class="btn-secondary" (click)="submitError = false">Reintentar</button>
+              </div>
+
               <div class="success-message" *ngIf="submitted">
                 <i class="bi bi-check-circle-fill"></i>
                 <h3>¡Mensaje Enviado!</h3>
@@ -72,7 +80,7 @@ import { Profile, SocialLink } from '../core/models';
                 <button class="btn-secondary" (click)="submitted = false">Enviar otro</button>
               </div>
 
-              <form #contactForm="ngForm" (ngSubmit)="onSubmit(contactForm)" class="contact-form" *ngIf="!submitted">
+              <form #contactForm="ngForm" (ngSubmit)="onSubmit(contactForm)" class="contact-form" *ngIf="!submitted && !submitError">
                 <div class="form-group">
                   <label class="form-label" for="name">Nombre</label>
                   <input id="name" name="name" type="text" class="form-input" [(ngModel)]="formData.name" required minlength="2" #name="ngModel" placeholder="Tu nombre" />
@@ -136,6 +144,10 @@ import { Profile, SocialLink } from '../core/models';
     .success-message i { font-size: 3rem; color: #22c55e; margin-bottom: 16px; }
     .success-message h3 { color: var(--white); margin: 0 0 8px; }
     .success-message p { color: var(--text-secondary); margin: 0 0 20px; }
+    .error-message { text-align: center; padding: 40px 20px; }
+    .error-message i { font-size: 3rem; color: #ef4444; margin-bottom: 16px; }
+    .error-message h3 { color: var(--white); margin: 0 0 8px; }
+    .error-message p { color: var(--text-secondary); margin: 0 0 20px; }
     .btn-secondary { background: transparent; border: 1px solid var(--border); color: var(--text-primary); padding: 12px 28px; border-radius: 12px; cursor: pointer; }
     .btn-secondary:hover { border-color: var(--accent); }
     .contact-form { display: flex; flex-direction: column; gap: 20px; }
@@ -152,6 +164,7 @@ import { Profile, SocialLink } from '../core/models';
 })
 export class ContactPageComponent implements OnInit {
   private api = inject(ApiService);
+  private seoService = inject(SeoService);
   profile: Profile | null = null;
   socialLinks: SocialLink[] = [];
   loading = true;
@@ -159,8 +172,15 @@ export class ContactPageComponent implements OnInit {
   formData = { name: '', email: '', subject: '', message: '' };
   submitted = false;
   sending = false;
+  submitError = false;
 
   ngOnInit(): void {
+    this.seoService.setSeo({
+      title: 'Contacto | ALANTEK',
+      description: 'Contáctanos para conversar sobre tu próximo proyecto.',
+      canonical: this.seoService.canonicalUrl('/contacto'),
+      robots: 'index,follow',
+    });
     this.loadData();
   }
 
@@ -204,7 +224,7 @@ export class ContactPageComponent implements OnInit {
         this.formData = { name: '', email: '', subject: '', message: '' };
         form.resetForm();
       },
-      error: () => { this.submitted = true; this.sending = false; },
+      error: () => { this.submitError = true; this.sending = false; },
     });
   }
 }

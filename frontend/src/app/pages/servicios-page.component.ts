@@ -2,6 +2,7 @@ import { Component, OnInit, inject } from '@angular/core';
 import { NgIf, NgFor } from '@angular/common';
 import { RouterLink } from '@angular/router';
 import { ApiService } from '../core/services/api.service';
+import { SeoService } from '../core/services/seo.service';
 import { Service } from '../core/models';
 
 @Component({
@@ -72,10 +73,17 @@ import { Service } from '../core/models';
 })
 export class ServiciosPageComponent implements OnInit {
   private api = inject(ApiService);
+  private seoService = inject(SeoService);
   services: Service[] = [];
   loading = true;
 
   ngOnInit(): void {
+    this.seoService.setSeo({
+      title: 'Servicios | ALANTEK',
+      description: 'Soluciones de software y consultoría tecnológica de ALANTEK.',
+      canonical: this.seoService.canonicalUrl('/servicios'),
+      robots: 'index,follow',
+    });
     this.api.getPublicServices().subscribe({
       next: (list) => {
         this.services = (list || []).map((s) => ({

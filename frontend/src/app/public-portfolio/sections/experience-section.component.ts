@@ -52,10 +52,10 @@ import { Experience } from '../../core/models';
 
               <p class="exp-description">{{ exp.description }}</p>
 
-              <div class="exp-achievements" *ngIf="exp.achievements?.length">
+              <div class="exp-achievements" *ngIf="getAchievements(exp).length">
                 <h4 class="exp-achievements-title">Logros</h4>
                 <ul>
-                  <li *ngFor="let ach of exp.achievements">{{ ach }}</li>
+                  <li *ngFor="let ach of getAchievements(exp)">{{ ach }}</li>
                 </ul>
               </div>
 
@@ -72,4 +72,13 @@ import { Experience } from '../../core/models';
 })
 export class ExperienceSectionComponent {
   @Input() experiences: Experience[] = [];
+
+  getAchievements(exp: any): string[] {
+    if (!exp.achievements) return [];
+    if (Array.isArray(exp.achievements)) return exp.achievements;
+    if (typeof exp.achievements === 'string') {
+      try { return JSON.parse(exp.achievements); } catch { return []; }
+    }
+    return [];
+  }
 }
