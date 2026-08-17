@@ -14,6 +14,7 @@ import { environment } from '../../environments/environment';
   styles: [
     `
       :host { display: block; min-height: 60vh; }
+      .page-wrapper { min-height: 100vh; padding-top: 80px; background: var(--bg-primary); }
       .page-header { padding: 4rem 0 2rem; text-align: center; }
       .page-header h1 { font-size: 2.4rem; margin: 0.5rem 0; color: var(--text-primary); }
       .page-header p { color: var(--text-secondary); margin: 0 auto 1.5rem; max-width: 560px; }

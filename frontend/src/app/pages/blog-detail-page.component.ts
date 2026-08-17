@@ -13,6 +13,7 @@ import { environment } from '../../environments/environment';
   styles: [
     `
       :host { display: block; min-height: 60vh; }
+      .page-wrapper { min-height: 100vh; padding-top: 80px; background: var(--bg-primary); }
       .back-link { color: var(--accent); text-decoration: none; font-size: 0.9rem; display: inline-block; margin: 2rem 0 0; }
       .page-loading { display: flex; justify-content: center; padding: 4rem; }
       .spinner { width: 38px; height: 38px; border: 3px solid rgba(255,255,255,0.12); border-top-color: var(--accent); border-radius: 50%; animation: spin 0.8s linear infinite; }
