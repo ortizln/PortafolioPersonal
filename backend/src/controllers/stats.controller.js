@@ -108,12 +108,17 @@ const statsController = {
         servicesCount,
         clientsCount,
         unreadMessages,
+        testimonialsCount,
         leadsByStatus,
         categoriesByProject,
         techByProject,
         topProjects,
         topPages,
-        recentAudit
+        recentAudit,
+        recentPosts,
+        postsByStatus,
+        postsByCategory,
+        recentContacts
       ] = await Promise.all([
         prisma.project.count({ where: { deletedAt: null } }),
         prisma.project.count({ where: { deletedAt: null, visibility: 'PUBLIC' } }),
@@ -121,6 +126,7 @@ const statsController = {
         prisma.service.count({ where: { deletedAt: null, status: 'ACTIVE' } }),
         prisma.client.count({ where: { deletedAt: null } }),
         prisma.contactMessage.count({ where: { isRead: false } }),
+        prisma.testimonial.count({ where: { deletedAt: null, isPublished: true } }),
         prisma.contactMessage.groupBy({ by: ['status'], _count: { _all: true } }),
         prisma.projectCategory.groupBy({ by: ['categoryId'], _count: { _all: true } }),
         prisma.projectTechnology.groupBy({ by: ['technologyId'], _count: { _all: true } }),
@@ -135,6 +141,22 @@ const statsController = {
           orderBy: { createdAt: 'desc' },
           take: 10,
           include: { user: { select: { name: true, email: true } } }
+        }),
+        prisma.post.findMany({
+          where: { deletedAt: null, status: 'PUBLISHED' },
+          orderBy: { publishedAt: 'desc' },
+          take: 5,
+          select: { id: true, title: true, slug: true, publishedAt: true, excerpt: true }
+        }),
+        prisma.post.groupBy({ by: ['status'], where: { deletedAt: null }, _count: { _all: true } }),
+        prisma.postCategory.findMany({
+          select: { id: true, name: true, _count: { select: { posts: true } } },
+          orderBy: { name: 'asc' }
+        }),
+        prisma.contactMessage.findMany({
+          orderBy: { createdAt: 'desc' },
+          take: 5,
+          select: { id: true, name: true, email: true, subject: true, status: true, createdAt: true, isRead: true }
         })
       ]);
 
@@ -171,6 +193,12 @@ const statsController = {
         monthCounts[key] = (monthCounts[key] || 0) + m._count._all;
       });
 
+      const postStatusCounts = {};
+      postsByStatus.forEach((s) => { postStatusCounts[s.status] = s._count._all; });
+
+      const postCategoryCounts = {};
+      postsByCategory.forEach((c) => { postCategoryCounts[c.name] = c._count.posts; });
+
       res.json({
         stats: {
           projects: projectsCount,
@@ -179,14 +207,19 @@ const statsController = {
           teamMembers: teamCount,
           services: servicesCount,
           clients: clientsCount,
+          testimonials: testimonialsCount,
           unreadMessages,
           leadsByStatus: leadCounts,
           projectsByCategory: categoryCounts,
           projectsByTechnology: technologyCounts,
+          postsByStatus: postStatusCounts,
+          postsByCategory: postCategoryCounts,
           topProjects,
           topPages,
           messagesByMonth: monthCounts,
-          recentAudit
+          recentAudit,
+          recentPosts,
+          recentContacts
         }
       });
     } catch (error) {

@@ -9,14 +9,19 @@ interface Stats {
   teamMembers: number;
   services: number;
   clients: number;
+  testimonials: number;
   unreadMessages: number;
   leadsByStatus: Record<string, number>;
   projectsByCategory: Record<string, number>;
   projectsByTechnology: Record<string, number>;
+  postsByStatus: Record<string, number>;
+  postsByCategory: Record<string, number>;
   topProjects: { id: string; title: string; views: number; slug: string }[];
   topPages: { path: string; count: number }[];
   messagesByMonth: Record<string, number>;
   recentAudit: { id: string; action: string; entity: string; description?: string; createdAt: string; user?: { name: string } }[];
+  recentPosts: { id: string; title: string; slug: string; publishedAt: string; excerpt: string }[];
+  recentContacts: { id: string; name: string; email: string; subject: string; status: string; createdAt: string; isRead: boolean }[];
 }
 
 const STATUS_LABELS: Record<string, string> = {
@@ -72,6 +77,8 @@ export class CorporateDashboardComponent implements OnInit {
       { label: 'Equipo', value: this.stats.teamMembers, icon: 'bi-people', link: '/admin/team' },
       { label: 'Servicios', value: this.stats.services, icon: 'bi-grid', link: '/admin/services' },
       { label: 'Clientes', value: this.stats.clients, icon: 'bi-briefcase', link: '/admin/clients' },
+      { label: 'Testimonios', value: this.stats.testimonials, icon: 'bi-chat-quote', link: '/admin/testimonials' },
+      { label: 'Blog posts', value: Object.values(this.stats.postsByStatus || {}).reduce((a, b) => a + b, 0), icon: 'bi-journal-text', link: '/admin/posts' },
       { label: 'No leídos', value: this.stats.unreadMessages, icon: 'bi-envelope-exclamation', link: '/admin/leads' },
     ];
   }
@@ -108,5 +115,21 @@ export class CorporateDashboardComponent implements OnInit {
 
   statusColor(status: string): string {
     return STATUS_COLORS[status] || 'var(--text-secondary)';
+  }
+
+  maxPostCategory(): number {
+    if (!this.stats) return 1;
+    const vals = Object.values(this.stats.postsByCategory || {});
+    return vals.length ? Math.max(1, ...vals) : 1;
+  }
+
+  totalPosts(): number {
+    if (!this.stats) return 0;
+    return Object.values(this.stats.postsByStatus || {}).reduce((a, b) => a + b, 0);
+  }
+
+  publishedPosts(): number {
+    if (!this.stats) return 0;
+    return this.stats.postsByStatus?.['PUBLISHED'] || 0;
   }
 }

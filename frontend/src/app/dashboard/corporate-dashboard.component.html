@@ -92,6 +92,45 @@
         <p class="h-empty" *ngIf="stats.topPages.length === 0">Sin registros de vistas.</p>
       </div>
     </section>
+
+    <section class="panel-card">
+      <h3><i class="bi bi-journal-text"></i> Blog: posts por categoría</h3>
+      <div class="h-list">
+        <div class="h-item" *ngFor="let item of stats.postsByCategory | keyvalue">
+          <div class="h-row">
+            <span class="h-label">{{ item.key }}</span>
+            <span class="h-value">{{ item.value }}</span>
+          </div>
+          <div class="h-bar"><div class="h-fill" [style.width.%]="barWidth(item.value, maxPostCategory())"></div></div>
+        </div>
+        <p class="h-empty" *ngIf="(stats.postsByCategory | keyvalue).length === 0">Sin categorías de blog.</p>
+      </div>
+    </section>
+
+    <section class="panel-card">
+      <h3><i class="bi bi-clock"></i> Mensajes recientes</h3>
+      <div class="rows">
+        <div class="row-item" *ngFor="let c of stats.recentContacts">
+          <a class="row-title" [routerLink]="['/admin/messages']">{{ c.name || c.email }}</a>
+          <span class="row-value">
+            <span class="status-dot" [class.unread]="!c.isRead"></span>
+            {{ c.createdAt | date: 'dd/MM HH:mm' }}
+          </span>
+        </div>
+        <p class="h-empty" *ngIf="!stats.recentContacts?.length">Sin mensajes.</p>
+      </div>
+    </section>
+
+    <section class="panel-card">
+      <h3><i class="bi bi-pencil-square"></i> Últimos posts publicados</h3>
+      <div class="rows">
+        <div class="row-item" *ngFor="let p of stats.recentPosts">
+          <a class="row-title" [routerLink]="['/admin/posts']">{{ p.title }}</a>
+          <span class="row-value">{{ p.publishedAt | date: 'dd/MM' }}</span>
+        </div>
+        <p class="h-empty" *ngIf="!stats.recentPosts?.length">Sin posts publicados.</p>
+      </div>
+    </section>
   </div>
 
   <section class="panel-card audit-card">

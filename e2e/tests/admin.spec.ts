@@ -34,7 +34,7 @@ test.describe('Admin', () => {
     await page.locator('button.btn-submit').click();
     await expect(page).toHaveURL(/\/admin\/dashboard/, { timeout: 20_000 });
 
-    await page.getByRole('link', { name: /Blog/ }).click();
+    await page.locator('.sidebar-nav').getByRole('link', { name: /Blog/ }).click();
     await expect(page).toHaveURL(/\/admin\/posts/);
     await expect(page.locator('body')).toContainText(/publicaciones|Posts|Blog/i);
   });

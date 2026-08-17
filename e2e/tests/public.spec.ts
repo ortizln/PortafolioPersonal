@@ -10,18 +10,19 @@ test.describe('Sitio público', () => {
 
   test('la página /blog lista publicaciones o muestra estado vacío', async ({ page }) => {
     await page.goto('blog');
-    const empty = page.locator('.page-empty');
-    const grid = page.locator('.blog-grid');
-    await expect(page.getByText('No hay publicaciones aún', { exact: false }).or(grid)).toBeVisible();
-    if ((await grid.count()) > 0) {
-      await expect(grid.locator('.blog-card').first()).toBeVisible();
-    }
+    await page.waitForLoadState('networkidle');
+    await expect(page.locator('.spinner').first()).toBeHidden({ timeout: 10_000 }).catch(() => {});
+    const empty = page.getByText('No hay publicaciones aún', { exact: false });
+    const cards = page.locator('article.blog-card');
+    await expect(empty.or(cards.first())).toBeVisible({ timeout: 10_000 });
   });
 
   test('abre un post desde la lista del blog', async ({ page }) => {
     await page.goto('blog');
-    const card = page.locator('.blog-card').first();
-    if ((await card.count()) === 0) {
+    await page.waitForLoadState('networkidle');
+    const card = page.locator('article.blog-card').first();
+    const count = await card.count();
+    if (count === 0) {
       test.skip(true, 'No hay publicaciones publicadas');
       return;
     }
@@ -31,7 +32,8 @@ test.describe('Sitio público', () => {
 
   test('la página /contacto muestra el formulario', async ({ page }) => {
     await page.goto('contacto');
-    await expect(page.locator('.contact-form').first()).toBeVisible();
+    await page.waitForLoadState('networkidle');
+    await expect(page.locator('.contact-form').first()).toBeVisible({ timeout: 15_000 });
   });
 
   test('una ruta inexistente redirige a la home', async ({ page }) => {

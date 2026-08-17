@@ -286,6 +286,20 @@
   }
 }
 
+.status-dot {
+  display: inline-block;
+  width: 8px;
+  height: 8px;
+  border-radius: 50%;
+  background: var(--text-muted);
+  margin-right: 6px;
+
+  &.unread {
+    background: #ef4444;
+    box-shadow: 0 0 6px rgba(239, 68, 68, 0.5);
+  }
+}
+
 @keyframes spin {
   to {
     transform: rotate(360deg);

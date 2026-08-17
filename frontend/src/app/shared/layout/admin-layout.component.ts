@@ -174,6 +174,7 @@ export class AdminLayoutComponent implements OnInit, OnDestroy {
         { label: 'Proyectos', route: '/admin/projects', icon: 'bi-folder2', permission: 'projects.read' },
         { label: 'Categorías', route: '/admin/categories', icon: 'bi-tags', permission: 'categories.manage' },
         { label: 'Tecnologías', route: '/admin/technologies', icon: 'bi-cpu', permission: 'technologies.manage' },
+        { label: 'Repositorios', route: '/admin/repositories', icon: 'bi-git', permission: 'projects.read' },
       ],
     },
     {
@@ -184,6 +185,7 @@ export class AdminLayoutComponent implements OnInit, OnDestroy {
         { label: 'Educación', route: '/admin/education', icon: 'bi-book', permissions: ['team.update', 'team.read'] },
         { label: 'Certificaciones', route: '/admin/certificates', icon: 'bi-patch-check', permissions: ['team.update', 'team.read'] },
         { label: 'Habilidades', route: '/admin/skills', icon: 'bi-gear', permissions: ['team.update', 'team.read'] },
+        { label: 'Redes sociales', route: '/admin/social-links', icon: 'bi-link-45deg', permissions: ['team.update', 'team.read'] },
       ],
     },
     {
@@ -204,6 +206,7 @@ export class AdminLayoutComponent implements OnInit, OnDestroy {
     {
       title: 'SISTEMA',
       items: [
+        { label: 'Mi perfil', route: '/admin/profile', icon: 'bi-person-circle', permission: 'users.manage' },
         { label: 'Usuarios', route: '/admin/users', icon: 'bi-people-fill', permission: 'users.manage' },
         { label: 'Roles y permisos', route: '/admin/roles', icon: 'bi-shield-lock', permission: 'roles.manage' },
         { label: 'Configuración', route: '/admin/settings', icon: 'bi-sliders', permission: 'settings.manage' },
