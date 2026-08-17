@@ -25,7 +25,7 @@
   --success: #10b981;
   --warning: #f59e0b;
   --error: #ef4444;
-  --white: #e2e8f0;
+  --white: #ffffff;
   --glass-bg: rgba(17, 29, 49, 0.7);
   --glass-border: rgba(34, 211, 238, 0.1);
   --shadow: 0 4px 20px rgba(0, 0, 0, 0.4);
@@ -125,7 +125,7 @@ body {
 
 h1, h2, h3, h4, h5, h6 {
   font-family: var(--font-heading);
-  color: #ffffff;
+  color: var(--white);
   font-weight: 600;
   line-height: 1.2;
 }
