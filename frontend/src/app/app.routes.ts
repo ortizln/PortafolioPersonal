@@ -1,5 +1,5 @@
 import { Routes } from '@angular/router';
-import { authGuard } from './core/guards/auth.guard';
+import { authGuard, permissionGuard } from './core/guards/auth.guard';
 
 export const routes: Routes = [
   {
@@ -41,10 +41,10 @@ export const routes: Routes = [
       { path: 'dashboard', loadComponent: () => import('./dashboard/corporate-dashboard.component').then((m) => m.CorporateDashboardComponent) },
       { path: 'media', loadComponent: () => import('./media/media-list.component').then((m) => m.MediaListComponent) },
       { path: 'leads', loadComponent: () => import('./leads/leads.component').then((m) => m.LeadsComponent) },
-      { path: 'users', loadComponent: () => import('./users/user-list.component').then((m) => m.UserListComponent) },
-      { path: 'roles', loadComponent: () => import('./roles/role-list.component').then((m) => m.RoleListComponent) },
-      { path: 'audit', loadComponent: () => import('./audit/audit-log.component').then((m) => m.AuditLogComponent) },
-      { path: 'posts', loadComponent: () => import('./posts/post-list.component').then((m) => m.PostListComponent) },
+      { path: 'users', loadComponent: () => import('./users/user-list.component').then((m) => m.UserListComponent), canActivate: [permissionGuard('users.manage')] },
+      { path: 'roles', loadComponent: () => import('./roles/role-list.component').then((m) => m.RoleListComponent), canActivate: [permissionGuard('roles.manage')] },
+      { path: 'audit', loadComponent: () => import('./audit/audit-log.component').then((m) => m.AuditLogComponent), canActivate: [permissionGuard('audit.read')] },
+      { path: 'posts', loadComponent: () => import('./posts/post-list.component').then((m) => m.PostListComponent), canActivate: [permissionGuard('posts.read')] },
       { path: 'technologies', loadComponent: () => import('./technologies/technology-list.component').then((m) => m.TechnologyListComponent) },
       { path: 'profile', loadComponent: () => import('./profile/profile-edit.component').then((m) => m.ProfileEditComponent) },
       { path: 'experiences', loadComponent: () => import('./experiences/experience-list.component').then((m) => m.ExperienceListComponent) },
@@ -57,7 +57,7 @@ export const routes: Routes = [
       { path: 'repositories', loadComponent: () => import('./repositories/repository-list.component').then((m) => m.RepositoryListComponent) },
       { path: 'categories', loadComponent: () => import('./categories/category-list.component').then((m) => m.CategoryListComponent) },
       { path: 'messages', loadComponent: () => import('./dashboard/contact-messages.component').then((m) => m.ContactMessagesComponent) },
-      { path: 'settings', loadComponent: () => import('./settings/settings.component').then((m) => m.SettingsComponent) },
+      { path: 'settings', loadComponent: () => import('./settings/settings.component').then((m) => m.SettingsComponent), canActivate: [permissionGuard('settings.manage')] },
       { path: 'company', loadComponent: () => import('./company/company-edit.component').then((m) => m.CompanyEditComponent) },
       { path: 'services', loadComponent: () => import('./services/service-list.component').then((m) => m.ServiceListComponent) },
       { path: 'clients', loadComponent: () => import('./clients/client-list.component').then((m) => m.ClientListComponent) },

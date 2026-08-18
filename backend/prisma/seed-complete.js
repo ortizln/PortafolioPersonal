@@ -61,6 +61,7 @@ const PERMISSIONS = [
   { name: 'testimonials.manage', module: 'testimonials', description: 'Gestionar testimonios' },
   { name: 'categories.manage', module: 'projects', description: 'Gestionar categorías' },
   { name: 'technologies.manage', module: 'projects', description: 'Gestionar tecnologías' },
+  { name: 'posts.read', module: 'posts', description: 'Ver publicaciones' },
   { name: 'posts.manage', module: 'posts', description: 'Gestionar publicaciones' },
   { name: 'posts.publish', module: 'posts', description: 'Publicar contenido' },
   { name: 'media.upload', module: 'media', description: 'Subir archivos' },
@@ -77,10 +78,10 @@ const PERMISSIONS = [
 const ROLES = [
   { name: 'SUPER_ADMIN', description: 'Acceso total al sistema', permissions: PERMISSIONS.map(p => p.name) },
   { name: 'ADMIN', description: 'Administra contenido y operación del sitio', permissions: PERMISSIONS.filter(p => !['users.manage', 'roles.manage', 'settings.manage', 'audit.read'].includes(p.name)).map(p => p.name) },
-  { name: 'CONTENT_MANAGER', description: 'Gestiona contenido corporativo y del blog', permissions: ['company.read', 'company.update', 'team.read', 'team.update', 'services.manage', 'clients.manage', 'testimonials.manage', 'categories.manage', 'technologies.manage', 'posts.manage', 'posts.publish', 'media.upload', 'media.manage', 'projects.read', 'projects.update', 'messages.read'] },
-  { name: 'PROJECT_MANAGER', description: 'Gestiona proyectos y portafolio', permissions: ['projects.read', 'projects.create', 'projects.update', 'projects.delete', 'projects.publish', 'categories.manage', 'technologies.manage', 'media.upload', 'team.read', 'messages.read'] },
-  { name: 'TEAM_MEMBER', description: 'Colaborador del equipo', permissions: ['projects.read', 'team.read', 'company.read', 'messages.read', 'media.upload'] },
-  { name: 'VIEWER', description: 'Solo lectura', permissions: ['company.read', 'team.read', 'projects.read', 'messages.read'] },
+  { name: 'CONTENT_MANAGER', description: 'Gestiona contenido corporativo y del blog', permissions: ['company.read', 'company.update', 'team.read', 'team.update', 'services.manage', 'clients.manage', 'testimonials.manage', 'categories.manage', 'technologies.manage', 'posts.read', 'posts.manage', 'posts.publish', 'media.upload', 'media.manage', 'projects.read', 'projects.update', 'messages.read'] },
+  { name: 'PROJECT_MANAGER', description: 'Gestiona proyectos y portafolio', permissions: ['projects.read', 'projects.create', 'projects.update', 'projects.delete', 'projects.publish', 'categories.manage', 'technologies.manage', 'media.upload', 'team.read', 'messages.read', 'posts.read'] },
+  { name: 'TEAM_MEMBER', description: 'Colaborador del equipo', permissions: ['projects.read', 'team.read', 'company.read', 'messages.read', 'media.upload', 'posts.read'] },
+  { name: 'VIEWER', description: 'Solo lectura', permissions: ['company.read', 'team.read', 'projects.read', 'messages.read', 'posts.read'] },
 ];
 
 async function seedRbac() {

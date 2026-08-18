@@ -137,6 +137,12 @@ const postController = {
       const existing = await prisma.post.findUnique({ where: { id: req.params.id } });
       if (!existing || existing.deletedAt) throw new AppError('Post no encontrado', 404);
 
+      const isOwner = existing.authorId === req.user.id;
+      const hasManage = req.user.permissions?.includes('posts.manage');
+      if (!isOwner && !hasManage) {
+        throw new AppError('No tienes permiso para editar este post', 403);
+      }
+
       const {
         title,
         slug,
@@ -204,6 +210,15 @@ const postController = {
 
   async publish(req, res, next) {
     try {
+      const existing = await prisma.post.findUnique({ where: { id: req.params.id } });
+      if (!existing || existing.deletedAt) throw new AppError('Post no encontrado', 404);
+
+      const isOwner = existing.authorId === req.user.id;
+      const hasPublish = req.user.permissions?.includes('posts.publish');
+      if (!isOwner && !hasPublish) {
+        throw new AppError('No tienes permiso para publicar este post', 403);
+      }
+
       const post = await prisma.post.update({
         where: { id: req.params.id },
         data: { status: 'PUBLISHED', publishedAt: new Date() }
@@ -221,6 +236,15 @@ const postController = {
 
   async archive(req, res, next) {
     try {
+      const existing = await prisma.post.findUnique({ where: { id: req.params.id } });
+      if (!existing || existing.deletedAt) throw new AppError('Post no encontrado', 404);
+
+      const isOwner = existing.authorId === req.user.id;
+      const hasManage = req.user.permissions?.includes('posts.manage');
+      if (!isOwner && !hasManage) {
+        throw new AppError('No tienes permiso para archivar este post', 403);
+      }
+
       const post = await prisma.post.update({
         where: { id: req.params.id },
         data: { status: 'ARCHIVED' }
@@ -239,6 +263,13 @@ const postController = {
     try {
       const post = await prisma.post.findUnique({ where: { id: req.params.id } });
       if (!post || post.deletedAt) throw new AppError('Post no encontrado', 404);
+
+      const isOwner = post.authorId === req.user.id;
+      const hasManage = req.user.permissions?.includes('posts.manage');
+      if (!isOwner && !hasManage) {
+        throw new AppError('No tienes permiso para eliminar este post', 403);
+      }
+
       await prisma.post.update({
         where: { id: post.id },
         data: { deletedAt: new Date() }

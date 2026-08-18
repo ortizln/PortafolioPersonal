@@ -6,16 +6,16 @@ const router = Router();
 
 router.use(authenticate);
 
-router.get('/categories', postController.getCategories);
+router.get('/categories', requirePermission('posts.read', 'posts.manage'), postController.getCategories);
 router.post('/categories', requirePermission('posts.manage'), postController.createCategory);
 router.put('/categories/:id', requirePermission('posts.manage'), postController.updateCategory);
 router.delete('/categories/:id', requirePermission('posts.manage'), postController.removeCategory);
 
-router.get('/tags', postController.getTags);
+router.get('/tags', requirePermission('posts.read', 'posts.manage'), postController.getTags);
 router.post('/tags', requirePermission('posts.manage'), postController.createTag);
 router.delete('/tags/:id', requirePermission('posts.manage'), postController.removeTag);
 
-router.get('/', requirePermission('posts.manage'), postController.getAll);
+router.get('/', requirePermission('posts.read', 'posts.manage'), postController.getAll);
 router.get('/slug/:slug', postController.getBySlug);
 router.get('/:id', postController.getById);
 router.post('/', requirePermission('posts.manage'), postController.create);
