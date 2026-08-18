@@ -23,7 +23,7 @@ import { environment } from '../../environments/environment';
 
       <section class="container section" *ngIf="!loading && clients.length">
         <div class="clients-grid">
-          <a class="client-card" *ngFor="let c of clients" [href]="c.website || 'javascript:void(0)'" [attr.target]="c.website ? '_blank' : null" rel="noopener" data-aos="fade-up">
+          <a class="client-card" *ngFor="let c of clients" [href]="c.website || null" [attr.target]="c.website ? '_blank' : null" [attr.tabindex]="c.website ? null : -1" [attr.aria-hidden]="!c.website" rel="noopener" data-aos="fade-up">
             <img *ngIf="getLogo(c)" [src]="getLogo(c)" [alt]="c.name" loading="lazy" />
             <span *ngIf="!getLogo(c)" class="client-fallback">{{ c.name }}</span>
             <span class="client-industry" *ngIf="c.industry">{{ c.industry }}</span>

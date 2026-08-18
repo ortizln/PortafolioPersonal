@@ -123,7 +123,7 @@ import { environment } from '../../environments/environment';
             <h2 class="section-title">Nuestros clientes</h2>
             <p class="section-subtitle">Empresas que confían en nuestro trabajo.</p>
             <div class="clients-grid">
-              <a class="client-card" *ngFor="let c of clients" [href]="c.website || 'javascript:void(0)'" [attr.target]="c.website ? '_blank' : null" rel="noopener">
+              <a class="client-card" *ngFor="let c of clients" [href]="c.website || null" [attr.target]="c.website ? '_blank' : null" [attr.tabindex]="c.website ? null : -1" [attr.aria-hidden]="!c.website" rel="noopener">
                 <img *ngIf="getClientLogo(c)" [src]="getClientLogo(c)" [alt]="c.name" loading="lazy" />
                 <span *ngIf="!getClientLogo(c)" class="client-fallback">{{ c.name }}</span>
               </a>
@@ -138,9 +138,9 @@ import { environment } from '../../environments/environment';
             <p class="section-subtitle">Lo que dicen nuestros clientes.</p>
             <div class="testimonials-grid">
               <div class="testimonial-card" *ngFor="let t of testimonials" data-aos="fade-up">
-                <div class="stars" *ngIf="t.rating" [attr.aria-label]="t.rating + ' de 5 estrellas'">
+                <span class="stars" *ngIf="t.rating" role="img" [attr.aria-label]="t.rating + ' de 5 estrellas'">
                   <i class="bi bi-star-fill" *ngFor="let _ of [].constructor(t.rating)" aria-hidden="true"></i>
-                </div>
+                </span>
                 <blockquote class="testimonial-text">"{{ t.content }}"</blockquote>
                 <div class="testimonial-author">
                   <span class="author-name">{{ t.authorName }}</span>

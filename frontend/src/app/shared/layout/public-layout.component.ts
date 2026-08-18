@@ -66,7 +66,7 @@ import { environment } from '../../../environments/environment';
             </div>
           </div>
           <div class="footer-col">
-            <h4 id="foot-nav">Navegación</h4>
+            <h3 id="foot-nav">Navegación</h3>
             <ul aria-labelledby="foot-nav">
               <li><a routerLink="/">Inicio</a></li>
               <li><a routerLink="/nosotros">Nosotros</a></li>
@@ -78,7 +78,7 @@ import { environment } from '../../../environments/environment';
             </ul>
           </div>
           <div class="footer-col">
-            <h4 id="foot-services">Servicios</h4>
+            <h3 id="foot-services">Servicios</h3>
             <ul aria-labelledby="foot-services">
               <li *ngFor="let s of footerServices">
                 <i class="bi bi-arrow-right-short" aria-hidden="true"></i>
@@ -89,18 +89,18 @@ import { environment } from '../../../environments/environment';
             </ul>
           </div>
           <div class="footer-col">
-            <h4 id="foot-contact">Contacto</h4>
+            <h3 id="foot-contact">Contacto</h3>
             <ul aria-labelledby="foot-contact">
               <li *ngIf="company?.address || company?.city"><i class="bi bi-geo-alt" aria-hidden="true"></i> {{ company?.address }}{{ company?.address && company?.city ? ', ' : '' }}{{ company?.city }}</li>
               <li><i class="bi bi-envelope" aria-hidden="true"></i> {{ company?.email || 'contacto@alantek.com' }}</li>
               <li *ngIf="company?.phone"><i class="bi bi-telephone" aria-hidden="true"></i> {{ company?.phone }}</li>
-              <li><i class="bi bi-file-text" aria-hidden="true"></i> <a href="#" aria-label="Descargar información">Información de la empresa</a></li>
+              <li><i class="bi bi-file-text" aria-hidden="true"></i> Información de la empresa</li>
             </ul>
           </div>
         </div>
         <div class="footer-bottom">
           <p>&copy; {{ currentYear }} {{ companyName }}. Todos los derechos reservados.</p>
-          <span class="footer-version" aria-label="Versión ALANTEK">ALANTEK</span>
+          <span class="footer-version">ALANTEK</span>
         </div>
       </div>
     </footer>

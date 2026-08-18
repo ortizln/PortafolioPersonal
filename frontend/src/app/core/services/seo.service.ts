@@ -86,9 +86,9 @@ export class SeoService {
     if (cfg.jsonLd?.length) this.injectJsonLd(cfg.jsonLd);
   }
 
-  /** Ruta actual del SPA a URL canónica absoluta usando uploadUrl como base del sitio. */
+  /** Ruta actual de la SPA a URL canónica absoluta. */
   canonicalUrl(path: string): string {
     const base = environment.apiUrl.replace(/\/api$/, '');
-    return `${base}${path}`;
+    return `${window.location.origin}${base}${path}`;
   }
 }

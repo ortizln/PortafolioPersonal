@@ -209,7 +209,7 @@ main {
 }
 
 .footer-desc {
-  color: var(--text-secondary);
+  color: var(--text-primary);
   font-size: 0.88rem;
   line-height: 1.7;
   margin: 0.75rem 0 1.25rem;
@@ -321,7 +321,7 @@ main {
 .footer-version {
   font-family: var(--font-mono);
   font-size: 0.75rem;
-  color: var(--text-tertiary);
+  color: var(--text-secondary);
   padding: 0.2rem 0.6rem;
   border-radius: 4px;
   background: var(--bg-card);
@@ -396,7 +396,7 @@ main {
     justify-content: center;
   }
 
-  .footer-col h4 {
+  .footer-col h3 {
     text-align: center;
   }
 }
