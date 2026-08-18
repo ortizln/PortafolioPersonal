@@ -14,7 +14,7 @@ timestamp() { date '+%Y-%m-%d %H:%M:%S'; }
 check() {
   local name="$1" url="$2" expected="${3:-200}"
   local code
-  code=$(curl -s -o /dev/null -w '%{http_code}' --max-time 10 "$url" 2>/dev/null || echo "000")
+  code=$(curl -s -o /dev/null -w '%{http_code}' -L --max-time 10 "$url" 2>/dev/null || echo "000")
   if [ "$code" = "$expected" ]; then
     echo "[$(timestamp)] OK   $name ($code)"
     return 0

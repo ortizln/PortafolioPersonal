@@ -187,15 +187,8 @@ const publicController = {
 
   async getProjects(req, res, next) {
     try {
-      const profile = await prisma.profile.findFirst({
-        where: { deletedAt: null },
-        orderBy: { updatedAt: 'desc' }
-      });
-      const userId = profile?.userId;
-
       const { search, category, technology, status } = req.query;
       const where = { deletedAt: null };
-      if (userId) where.userId = userId;
       if (status) where.status = status.toUpperCase();
       if (search) {
         where.OR = [
@@ -211,7 +204,7 @@ const publicController = {
         where.technologies = { some: { technology: { slug: technology } } };
       }
 
-      const projects = userId ? await prisma.project.findMany({
+      const projects = await prisma.project.findMany({
         where,
         include: {
           images: true,
@@ -222,7 +215,7 @@ const publicController = {
           members: { include: { teamMember: true }, orderBy: { isLead: 'desc' } }
         },
         orderBy: [{ isFeatured: 'desc' }, { order: 'asc' }, { createdAt: 'desc' }]
-      }) : [];
+      });
 
       res.json({ projects });
     } catch (error) {

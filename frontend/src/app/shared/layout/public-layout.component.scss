@@ -161,6 +161,8 @@
 main {
   flex: 1;
   padding-top: 64px;
+  position: relative;
+  z-index: 1;
 }
 
 .footer {
@@ -168,6 +170,7 @@ main {
   border-top: 1px solid var(--border-color);
   padding: 4rem 0 0;
   position: relative;
+  z-index: 1;
 
   &::before {
     content: '';

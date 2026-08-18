@@ -6,12 +6,14 @@ import { SeoService } from '../../core/services/seo.service';
 import { Company, Service } from '../../core/models';
 import { applyCompanyBrand } from '../../core/utils/brand.util';
 import { environment } from '../../../environments/environment';
+import { NeonBackgroundComponent } from '../neon-bg.component';
 
 @Component({
   selector: 'app-public-layout',
   standalone: true,
-  imports: [RouterOutlet, NgIf, NgFor, RouterLink, RouterLinkActive],
+  imports: [RouterOutlet, NgIf, NgFor, RouterLink, RouterLinkActive, NeonBackgroundComponent],
   template: `
+    <app-neon-bg></app-neon-bg>
     <a class="skip-link" href="#main-content">Saltar al contenido</a>
 
     <header>
