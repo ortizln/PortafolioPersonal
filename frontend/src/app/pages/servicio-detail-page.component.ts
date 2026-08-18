@@ -4,6 +4,7 @@ import { RouterLink, ActivatedRoute } from '@angular/router';
 import { ApiService } from '../core/services/api.service';
 import { SeoService } from '../core/services/seo.service';
 import { Service } from '../core/models';
+import { environment } from '../../environments/environment';
 
 @Component({
   selector: 'app-servicio-detail-page',
@@ -151,9 +152,11 @@ export class ServicioDetailPageComponent implements OnInit {
   }
 
   private applySeo(s: Service): void {
+    const img = s.coverImage ? (s.coverImage.startsWith('http') ? s.coverImage : `${environment.uploadUrl}/${s.coverImage}`) : undefined;
     this.seo.setSeo({
       title: s.seoTitle || `${s.name} | Servicios | ALANTEK`,
       description: s.seoDescription || s.description || s.shortDescription || '',
+      image: img,
       canonical: this.seo.canonicalUrl(`/servicios/${s.slug}`),
       robots: 'index,follow',
     });

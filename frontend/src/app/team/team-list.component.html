@@ -24,7 +24,7 @@
           <tr>
             <td class="cell-main">
               @if (m.photoUrl) {
-                <img class="photo" [src]="m.photoUrl | uploadUrl" [alt]="m.fullName" />
+                <img class="photo" [src]="m.photoUrl | uploadUrl" [alt]="m.fullName" loading="lazy" decoding="async" />
               } @else {
                 <span class="photo-placeholder">{{ m.fullName.charAt(0) }}</span>
               }

@@ -74,8 +74,14 @@ export class SeoService {
     if (cfg.description) this.setMeta('description', cfg.description);
     if (cfg.ogTitle || cfg.title) this.setProperty('og:title', cfg.ogTitle || cfg.title || '');
     if (cfg.ogDescription || cfg.description) this.setProperty('og:description', cfg.ogDescription || cfg.description || '');
+    this.setProperty('og:type', 'website');
+    this.setProperty('og:site_name', 'ALANTEK');
+    this.setProperty('og:locale', 'es_ES');
+    if (cfg.canonical) this.setProperty('og:url', cfg.canonical);
     if (cfg.image) {
       this.setProperty('og:image', cfg.image);
+      this.setProperty('og:image:width', '1200');
+      this.setProperty('og:image:height', '630');
       this.setProperty('twitter:image', cfg.image);
     }
     this.setProperty('twitter:card', 'summary_large_image');

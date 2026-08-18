@@ -72,7 +72,7 @@ import { environment } from '../../environments/environment';
             </div>
           </header>
 
-          <img *ngIf="coverUrl" class="post-cover" [src]="coverUrl" [alt]="post.title" />
+          <img *ngIf="coverUrl" class="post-cover" [src]="coverUrl" [alt]="post.title" loading="lazy" decoding="async" />
 
           <div class="post-content" [innerHTML]="post.content || '<p>Sin contenido.</p>'"></div>
 

@@ -119,7 +119,7 @@
   <div class="card-grid" *ngIf="certificates.length > 0">
     <div class="cert-card" *ngFor="let cert of certificates">
       <div class="cert-card-top">
-        <img *ngIf="cert.imageUrl" [src]="getUploadUrl(cert.imageUrl)" class="cert-thumb" />
+        <img *ngIf="cert.imageUrl" [src]="getUploadUrl(cert.imageUrl)" class="cert-thumb" loading="lazy" decoding="async" />
         <div class="cert-icon" *ngIf="!cert.imageUrl">
           <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
             <circle cx="12" cy="8" r="4"/>

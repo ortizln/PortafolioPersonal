@@ -60,7 +60,7 @@ import { filter, Subscription } from 'rxjs';
         <div class="footer-grid">
           <div class="footer-brand">
             <a class="footer-logo" routerLink="/" aria-label="Ir al inicio">
-              <img *ngIf="companyLogo" [src]="companyLogo" class="footer-logo-img" [alt]="companyName + ' logo'" />
+              <img *ngIf="companyLogo" [src]="companyLogo" class="footer-logo-img" [alt]="companyName + ' logo'" loading="lazy" decoding="async" />
               <span *ngIf="!companyLogo">{{ companyName }}</span>
             </a>
             <p class="footer-desc">{{ company?.shortDescription || company?.description || 'Soluciones digitales de software y tecnología para empresas.' }}</p>

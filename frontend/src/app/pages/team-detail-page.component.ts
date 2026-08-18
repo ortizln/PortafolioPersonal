@@ -24,7 +24,7 @@ import { environment } from '../../environments/environment';
         <header class="profile-hero">
           <div class="container hero-inner">
             <div class="avatar-wrap">
-              <img [src]="getPhoto() || 'assets/avatar-placeholder.svg'" [alt]="member.fullName" />
+              <img [src]="getPhoto() || 'assets/avatar-placeholder.svg'" [alt]="member.fullName" loading="lazy" decoding="async" />
             </div>
             <div class="hero-info">
               <a routerLink="/equipo" class="back-link">&larr; Volver al equipo</a>

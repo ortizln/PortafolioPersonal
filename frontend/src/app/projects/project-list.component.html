@@ -227,7 +227,7 @@
   <div class="project-grid" *ngIf="projects.length > 0">
     <div class="project-card" *ngFor="let project of projects">
       <div class="project-banner" *ngIf="getPrimaryImage(project)">
-        <img [src]="getPrimaryImage(project)" [alt]="project.title" />
+        <img [src]="getPrimaryImage(project)" [alt]="project.title" loading="lazy" decoding="async" />
         <span class="project-status" [ngClass]="getStatusClass(project.status || 'draft')">{{ getStatusLabel(project.status || 'draft') }}</span>
       </div>
       <div class="project-banner project-banner--empty" *ngIf="!getPrimaryImage(project)">
@@ -259,7 +259,7 @@
         </div>
       </div>
       <div class="project-gallery-thumbs" *ngIf="project.images?.length > 1">
-        <img *ngFor="let img of project.images.slice(0, 4)" [src]="getImageUrl(img)" alt="" />
+        <img *ngFor="let img of project.images.slice(0, 4)" [src]="getImageUrl(img)" alt="" loading="lazy" decoding="async" />
         <span *ngIf="project.images.length > 4" class="more-count">+{{ project.images.length - 4 }}</span>
       </div>
       <div class="project-actions">

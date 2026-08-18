@@ -94,6 +94,7 @@ import { environment } from '../../environments/environment';
                   class="project-image"
                   [src]="getPrimaryImage(project) || 'assets/project-placeholder.svg'"
                   [alt]="'Captura del proyecto ' + project.title"
+                  loading="lazy" decoding="async"
                 />
                 <span class="project-featured-badge" *ngIf="project.isFeatured">
                   <i class="bi bi-star-fill"></i> Destacado

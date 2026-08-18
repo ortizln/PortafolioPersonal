@@ -79,7 +79,7 @@ import { environment } from '../../environments/environment';
           <section class="section" *ngIf="project.images?.length">
             <h2>Galería</h2>
             <div class="gallery">
-              <img class="gallery-item" *ngFor="let img of project.images" [src]="getImageUrl(img)" [alt]="img.alt || 'Imagen del proyecto'" />
+              <img class="gallery-item" *ngFor="let img of project.images" [src]="getImageUrl(img)" [alt]="img.alt || 'Imagen del proyecto'" loading="lazy" decoding="async" />
             </div>
           </section>
 
@@ -98,7 +98,7 @@ import { environment } from '../../environments/environment';
             <h2>Equipo que participó</h2>
             <div class="team-grid">
               <a class="team-card" *ngFor="let member of project.members" [routerLink]="'/equipo/' + member.teamMember?.slug">
-                <img class="team-avatar" [src]="getMemberAvatar(member)" [alt]="member.teamMember?.name" />
+                <img class="team-avatar" [src]="getMemberAvatar(member)" [alt]="member.teamMember?.name" loading="lazy" decoding="async" />
                 <div class="team-info">
                   <span class="team-name">{{ member.teamMember?.fullName }}</span>
                   <span class="team-role">{{ member.isLead ? 'Líder · ' : '' }}{{ member.role || member.teamMember?.professionalTitle || 'Miembro del equipo' }}</span>
@@ -113,7 +113,7 @@ import { environment } from '../../environments/environment';
             <h2>Proyectos relacionados</h2>
             <div class="related-grid">
               <a class="related-card" *ngFor="let p of related" [routerLink]="'/proyectos/' + p.slug">
-                <img class="related-image" [src]="getPrimaryImage(p) || 'assets/project-placeholder.svg'" [alt]="p.title" />
+                <img class="related-image" [src]="getPrimaryImage(p) || 'assets/project-placeholder.svg'" [alt]="p.title" loading="lazy" decoding="async" />
                 <div class="related-body">
                   <h3>{{ p.title }}</h3>
                   <p>{{ p.summary || p.description }}</p>
@@ -215,6 +215,7 @@ export class ProjectDetailPageComponent implements OnInit {
           this.seoService.setSeo({
             title: `${res.project.title} | Proyectos ALANTEK`,
             description: res.project.summary || res.project.description || `Proyecto ${res.project.title} de ALANTEK.`,
+            image: this.getPrimaryImage(res.project) || undefined,
             canonical: this.seoService.canonicalUrl(`/proyectos/${slug}`),
             robots: 'index,follow',
           });

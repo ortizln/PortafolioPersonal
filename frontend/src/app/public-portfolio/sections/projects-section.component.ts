@@ -54,6 +54,7 @@ import { UploadUrlPipe } from '../../shared/upload-url.pipe';
                 class="project-image"
                 [src]="getPrimaryImage(project) || 'assets/project-placeholder.svg'"
                 [alt]="'Captura del proyecto ' + project.title"
+                loading="lazy" decoding="async"
               />
               <div class="project-overlay" aria-hidden="true">
                 <div class="overlay-links">

@@ -22,7 +22,7 @@
           <tr>
             <td class="cell-main">
               @if (t.photoUrl) {
-                <img class="photo" [src]="t.photoUrl | uploadUrl" [alt]="t.authorName" />
+                <img class="photo" [src]="t.photoUrl | uploadUrl" [alt]="t.authorName" loading="lazy" decoding="async" />
               } @else {
                 <span class="photo-placeholder">{{ t.authorName.charAt(0) }}</span>
               }
