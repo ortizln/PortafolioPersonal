@@ -26,7 +26,7 @@ import { environment } from '../../environments/environment';
       .post-meta { display: flex; justify-content: center; gap: 0.75rem; flex-wrap: wrap; margin-bottom: 0.75rem; }
       .chip { font-size: 0.72rem; padding: 3px 12px; border-radius: 20px; background: rgba(var(--accent-rgb), 0.12); color: var(--accent); }
       .chip-neutral { background: rgba(255,255,255,0.06); color: var(--text-secondary); }
-      .post-title { font-size: 2.2rem; line-height: 1.25; color: var(--text-primary); margin: 0.25rem 0 0.75rem; }
+      .post-title { font-size: 2.2rem; line-height: 1.25; color: var(--white); margin: 0.25rem 0 0.75rem; }
       .post-sub { color: var(--text-secondary); font-size: 0.85rem; display: flex; gap: 1rem; justify-content: center; flex-wrap: wrap; }
       .post-sub span { display: inline-flex; align-items: center; gap: 0.35rem; }
       .post-cover { width: 100%; max-height: 460px; object-fit: cover; border-radius: 16px; margin-bottom: 1.5rem; background: var(--bg-secondary); }
@@ -34,15 +34,15 @@ import { environment } from '../../environments/environment';
       .post-content ::ng-deep img { max-width: 100%; border-radius: 12px; }
       .post-content ::ng-deep pre { background: var(--bg-secondary); padding: 1rem; border-radius: 10px; overflow-x: auto; border: 1px solid var(--border); }
       .post-content ::ng-deep blockquote { border-left: 3px solid var(--accent); padding-left: 1rem; color: var(--text-secondary); margin: 1.5rem 0; }
-      .post-content ::ng-deep h2, .post-content ::ng-deep h3 { color: var(--text-primary); }
+      .post-content ::ng-deep h2, .post-content ::ng-deep h3 { color: var(--white); }
       .post-content ::ng-deep a { color: var(--accent); }
       .post-tags { margin-top: 1.5rem; display: flex; gap: 0.5rem; flex-wrap: wrap; }
       .related { margin-top: 2.5rem; border-top: 1px solid var(--border); padding-top: 1.5rem; }
-      .related h3 { color: var(--text-primary); margin: 0 0 1rem; }
+      .related h3 { color: var(--white); margin: 0 0 1rem; }
       .related-grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(240px, 1fr)); gap: 1rem; }
       .rel-card { background: var(--bg-card); border: 1px solid var(--border); border-radius: 12px; padding: 1rem; text-decoration: none; transition: all 0.2s ease; display: flex; flex-direction: column; gap: 0.4rem; }
       .rel-card:hover { border-color: var(--accent); transform: translateY(-2px); }
-      .rel-title { font-weight: 600; color: var(--text-primary); font-size: 0.9rem; }
+      .rel-title { font-weight: 600; color: var(--white); font-size: 0.9rem; }
       .rel-date { font-size: 0.72rem; color: var(--text-secondary); }
     `,
   ],

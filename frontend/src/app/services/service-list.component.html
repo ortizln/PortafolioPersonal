@@ -90,7 +90,13 @@
       </div>
       <div class="form-group">
         <label>Imagen de portada (URL)</label>
-        <input type="text" [(ngModel)]="form.coverImage" placeholder="https://..." />
+        <div class="upload-row">
+          <input type="text" [(ngModel)]="form.coverImage" placeholder="https://..." />
+          <label class="btn-upload">
+            <i class="bi bi-upload"></i>
+            <input type="file" accept="image/*" (change)="uploadCover($event)" hidden />
+          </label>
+        </div>
       </div>
       <div class="form-group full-width">
         <label>Descripción corta</label>

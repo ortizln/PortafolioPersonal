@@ -495,11 +495,11 @@ export class ApiService {
     const formData = new FormData();
     formData.append('file', file);
     if (folder) formData.append('folder', folder);
-    return this.http.post<{ url: string; fileName: string }>(`${this.apiUrl}/upload`, formData);
+    return this.http.post<{ url: string; fileName: string }>(`${this.apiUrl}/uploads`, formData);
   }
 
   deleteFile(filename: string): Observable<void> {
-    return this.http.delete<void>(`${this.apiUrl}/upload/${filename}`);
+    return this.http.delete<void>(`${this.apiUrl}/uploads/${filename}`);
   }
 
   // Company
@@ -709,7 +709,7 @@ export class ApiService {
   uploadImage(file: File): Observable<MediaFile> {
     const formData = new FormData();
     formData.append('image', file);
-    return this.http.post<{ image: MediaFile }>(`${this.apiUrl}/upload/image`, formData).pipe(
+    return this.http.post<{ image: MediaFile }>(`${this.apiUrl}/uploads/image`, formData).pipe(
       map((res) => res.image)
     );
   }

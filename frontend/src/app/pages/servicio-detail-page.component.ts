@@ -31,19 +31,19 @@ import { Service } from '../core/models';
     .tech-dot { width: 8px; height: 8px; border-radius: 50%; }
 
     .section { padding: 50px 0; }
-    .section-title { font-size: 1.3rem; margin: 0 0 28px; color: var(--text-primary); }
+    .section-title { font-size: 1.3rem; margin: 0 0 28px; color: var(--white); }
     .features-grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(280px, 1fr)); gap: 18px; }
     .feature-card { background: var(--bg-card); border: 1px solid var(--border); border-radius: 14px; padding: 24px; transition: var(--transition); }
     .feature-card:hover { border-color: var(--accent); transform: translateY(-2px); }
     .feature-icon { display: inline-flex; align-items: center; justify-content: center; width: 42px; height: 42px; border-radius: 10px; background: rgba(var(--accent-rgb), 0.1); color: var(--accent); font-size: 1.1rem; margin-bottom: 14px; }
-    .feature-name { font-size: 1rem; font-weight: 600; color: var(--text-primary); margin: 0 0 6px; }
+    .feature-name { font-size: 1rem; font-weight: 600; color: var(--white); margin: 0 0 6px; }
     .feature-desc { font-size: 0.85rem; color: var(--text-secondary); line-height: 1.65; margin: 0; }
 
     .projects-section { border-top: 1px solid var(--border); }
     .projects-grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(240px, 1fr)); gap: 18px; }
     .project-card { display: block; background: var(--bg-card); border: 1px solid var(--border); border-radius: 14px; padding: 20px; text-decoration: none; transition: var(--transition); }
     .project-card:hover { border-color: var(--accent); transform: translateY(-3px); box-shadow: var(--shadow-md); }
-    .project-title { font-size: 0.95rem; font-weight: 600; color: var(--text-primary); margin: 0 0 6px; }
+    .project-title { font-size: 0.95rem; font-weight: 600; color: var(--white); margin: 0 0 6px; }
     .project-summary { font-size: 0.82rem; color: var(--text-secondary); line-height: 1.6; margin: 0; display: -webkit-box; -webkit-line-clamp: 3; -webkit-box-orient: vertical; overflow: hidden; }
 
     .cta-banner { background: linear-gradient(135deg, var(--accent), var(--accent-secondary)); padding: 56px 0; text-align: center; }

@@ -23,7 +23,7 @@
           <tr>
             <td class="cell-main">
               @if (client.logoUrl) {
-                <img class="logo" [src]="client.logoUrl" [alt]="client.name" />
+                <img class="logo" [src]="client.logoUrl | uploadUrl" [alt]="client.name" />
               } @else {
                 <span class="logo-placeholder">{{ client.name.charAt(0) }}</span>
               }

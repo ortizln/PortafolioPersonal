@@ -129,6 +129,20 @@ export class ServiceListComponent implements OnInit {
     });
   }
 
+  uploadCover(event: Event): void {
+    const input = event.target as HTMLInputElement;
+    const file = input.files?.[0];
+    if (!file) return;
+    this.apiService.uploadFile(file, 'services').subscribe({
+      next: (res) => {
+        this.form.coverImage = res.url;
+        this.showToast('Imagen subida', 'success');
+      },
+      error: () => this.showToast('Error al subir la imagen', 'error'),
+      complete: () => (input.value = '')
+    });
+  }
+
   private showToast(message: string, type: 'success' | 'error'): void {
     const id = ++this.toastId;
     this.toasts.push({ message, type, id });

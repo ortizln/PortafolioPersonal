@@ -55,7 +55,7 @@ import { environment } from '../../environments/environment';
       .blog-body { padding: 1.1rem 1.2rem 1.2rem; display: flex; flex-direction: column; gap: 0.5rem; flex: 1; }
       .blog-meta { display: flex; gap: 0.5rem; flex-wrap: wrap; }
       .chip { font-size: 0.68rem; padding: 2px 10px; border-radius: 20px; background: rgba(var(--accent-rgb), 0.12); color: var(--accent); }
-      .blog-title { font-size: 1.05rem; font-weight: 700; color: var(--text-primary); text-decoration: none; line-height: 1.35; }
+      .blog-title { font-size: 1.05rem; font-weight: 700; color: var(--white); text-decoration: none; line-height: 1.35; }
       .blog-title:hover { color: var(--accent); }
       .blog-excerpt { font-size: 0.85rem; color: var(--text-secondary); line-height: 1.55; flex: 1; }
       .blog-date { font-size: 0.75rem; color: var(--text-secondary); display: flex; align-items: center; gap: 0.4rem; }

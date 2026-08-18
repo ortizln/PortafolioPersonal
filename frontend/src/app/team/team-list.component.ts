@@ -3,12 +3,13 @@ import { CommonModule } from '@angular/common';
 import { FormsModule } from '@angular/forms';
 import { ApiService } from '../core/services/api.service';
 import { ConfirmService } from '../core/services/confirm.service';
+import { UploadUrlPipe } from '../shared/upload-url.pipe';
 import { TeamMember } from '../core/models';
 
 @Component({
   selector: 'app-team-list',
   standalone: true,
-  imports: [CommonModule, FormsModule],
+  imports: [CommonModule, FormsModule, UploadUrlPipe],
   templateUrl: './team-list.component.html',
   styleUrls: ['./team-list.component.scss']
 })

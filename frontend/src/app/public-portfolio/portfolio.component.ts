@@ -328,7 +328,7 @@ import { environment } from '../../environments/environment';
     .tech-card { display: inline-flex; align-items: center; gap: 10px; padding: 10px 18px; background: var(--bg-card); border: 1px solid var(--border); border-radius: 12px; transition: var(--transition); }
     .tech-card:hover { border-color: var(--accent); }
     .tech-dot { width: 10px; height: 10px; border-radius: 50%; flex-shrink: 0; }
-    .tech-name { font-size: 0.88rem; font-weight: 600; color: var(--text-primary); }
+    .tech-name { font-size: 0.88rem; font-weight: 600; color: var(--white); }
     .tech-category { font-size: 0.72rem; color: var(--text-muted); text-transform: uppercase; letter-spacing: 0.04em; }
 
     /* BLOG PREVIEW */

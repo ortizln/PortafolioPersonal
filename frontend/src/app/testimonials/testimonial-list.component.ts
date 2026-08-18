@@ -3,12 +3,13 @@ import { CommonModule } from '@angular/common';
 import { FormsModule } from '@angular/forms';
 import { ApiService } from '../core/services/api.service';
 import { ConfirmService } from '../core/services/confirm.service';
+import { UploadUrlPipe } from '../shared/upload-url.pipe';
 import { Testimonial, Client } from '../core/models';
 
 @Component({
   selector: 'app-testimonial-list',
   standalone: true,
-  imports: [CommonModule, FormsModule],
+  imports: [CommonModule, FormsModule, UploadUrlPipe],
   templateUrl: './testimonial-list.component.html',
   styleUrls: ['./testimonial-list.component.scss']
 })
@@ -99,6 +100,20 @@ export class TestimonialListComponent implements OnInit {
         this.showToast('Testimonio eliminado', 'success');
       },
       error: () => this.showToast('Error al eliminar el testimonio', 'error')
+    });
+  }
+
+  uploadPhoto(event: Event): void {
+    const input = event.target as HTMLInputElement;
+    const file = input.files?.[0];
+    if (!file) return;
+    this.apiService.uploadFile(file, 'testimonials').subscribe({
+      next: (res) => {
+        this.form.photoUrl = res.url;
+        this.showToast('Foto subida', 'success');
+      },
+      error: () => this.showToast('Error al subir la foto', 'error'),
+      complete: () => (input.value = '')
     });
   }
 

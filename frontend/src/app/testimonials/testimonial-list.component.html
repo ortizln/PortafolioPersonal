@@ -22,7 +22,7 @@
           <tr>
             <td class="cell-main">
               @if (t.photoUrl) {
-                <img class="photo" [src]="t.photoUrl" [alt]="t.authorName" />
+                <img class="photo" [src]="t.photoUrl | uploadUrl" [alt]="t.authorName" />
               } @else {
                 <span class="photo-placeholder">{{ t.authorName.charAt(0) }}</span>
               }
@@ -92,7 +92,13 @@
       </div>
       <div class="form-group">
         <label>Foto (URL)</label>
-        <input type="text" [(ngModel)]="form.photoUrl" placeholder="https://..." />
+        <div class="upload-row">
+          <input type="text" [(ngModel)]="form.photoUrl" placeholder="https://..." />
+          <label class="btn-upload">
+            <i class="bi bi-upload"></i>
+            <input type="file" accept="image/*" (change)="uploadPhoto($event)" hidden />
+          </label>
+        </div>
       </div>
       <div class="form-group">
         <label>Publicado</label>

@@ -3,12 +3,13 @@ import { CommonModule } from '@angular/common';
 import { FormsModule } from '@angular/forms';
 import { ApiService } from '../core/services/api.service';
 import { ConfirmService } from '../core/services/confirm.service';
+import { UploadUrlPipe } from '../shared/upload-url.pipe';
 import { Client } from '../core/models';
 
 @Component({
   selector: 'app-client-list',
   standalone: true,
-  imports: [CommonModule, FormsModule],
+  imports: [CommonModule, FormsModule, UploadUrlPipe],
   templateUrl: './client-list.component.html',
   styleUrls: ['./client-list.component.scss']
 })
