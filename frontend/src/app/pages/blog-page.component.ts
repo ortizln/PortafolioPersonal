@@ -16,7 +16,7 @@ import { environment } from '../../environments/environment';
       :host { display: block; min-height: 60vh; }
       .page-wrapper { min-height: 100vh; padding-top: 80px; background: var(--bg-primary); }
       .page-header { padding: 4rem 0 2rem; text-align: center; }
-      .page-header h1 { font-size: 2.4rem; margin: 0.5rem 0; color: var(--text-primary); }
+      .page-header h1 { font-size: 2.4rem; margin: 0.5rem 0; color: var(--white); }
       .page-header p { color: var(--text-secondary); margin: 0 auto 1.5rem; max-width: 560px; }
       .back-link { color: var(--accent); text-decoration: none; font-size: 0.9rem; }
       .filters { display: flex; flex-direction: column; gap: 0.9rem; align-items: center; }
