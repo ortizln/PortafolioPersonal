@@ -173,7 +173,7 @@ const publicController = {
           images: true,
           technologies: { include: { technology: true } },
           categories: { include: { category: true } },
-          client: true
+          clientRel: true
         },
         orderBy: { createdAt: 'desc' },
         take: 3
