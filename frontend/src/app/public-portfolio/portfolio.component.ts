@@ -25,6 +25,12 @@ import { environment } from '../../environments/environment';
         <button class="btn-retry" (click)="loadAll()" aria-label="Reintentar cargar">Reintentar</button>
       </div>
 
+      <div *ngIf="!loading && partialError && !error" class="partial-error" role="status">
+        <i class="bi bi-info-circle" aria-hidden="true"></i>
+        <span>{{ partialError }}</span>
+        <button class="btn-retry-sm" (click)="loadAll()">Reintentar</button>
+      </div>
+
       <ng-container *ngIf="!loading && !error">
         <!-- HERO -->
         <section class="hero" [class.hero--with-img]="heroImage">
@@ -375,6 +381,8 @@ export class PortfolioComponent implements OnInit {
   stats = { projects: 0, clients: 0, team: 0 };
   loading = true;
   error = false;
+  failedSections: string[] = [];
+  partialError = '';
 
   ngOnInit(): void {
     this.loadAll();
@@ -383,6 +391,7 @@ export class PortfolioComponent implements OnInit {
   loadAll(): void {
     this.loading = true;
     this.error = false;
+    this.failedSections = [];
 
     const totalCalls = 8;
     let completed = 0;
@@ -390,6 +399,11 @@ export class PortfolioComponent implements OnInit {
       completed++;
       if (completed >= totalCalls) {
         this.loading = false;
+        if (this.failedSections.length === totalCalls) {
+          this.error = true;
+        } else if (this.failedSections.length > 0) {
+          this.partialError = `Algunas secciones no pudieron cargar (${this.failedSections.join(', ')}).`;
+        }
         this.initAOS();
         this.cdr.markForCheck();
       }
@@ -403,7 +417,7 @@ export class PortfolioComponent implements OnInit {
         applyCompanyBrand(c);
         this.cdr.markForCheck();
       },
-      error: () => {},
+      error: () => { this.failedSections.push('Empresa'); },
       complete: onDone,
     });
     this.api.getPublicServices().subscribe({
@@ -411,7 +425,7 @@ export class PortfolioComponent implements OnInit {
         this.services = (list || []).slice(0, 6);
         this.cdr.markForCheck();
       },
-      error: () => {},
+      error: () => { this.failedSections.push('Servicios'); },
       complete: onDone,
     });
     this.api.getPublicClients().subscribe({
@@ -420,7 +434,7 @@ export class PortfolioComponent implements OnInit {
         this.stats.clients = this.clients.length;
         this.cdr.markForCheck();
       },
-      error: () => {},
+      error: () => { this.failedSections.push('Clientes'); },
       complete: onDone,
     });
     this.api.getPublicTestimonials().subscribe({
@@ -428,7 +442,7 @@ export class PortfolioComponent implements OnInit {
         this.testimonials = (list || []).slice(0, 3);
         this.cdr.markForCheck();
       },
-      error: () => {},
+      error: () => { this.failedSections.push('Testimonios'); },
       complete: onDone,
     });
     this.api.getPublicProjects().subscribe({
@@ -444,7 +458,7 @@ export class PortfolioComponent implements OnInit {
         this.featuredProjects = (featured.length ? featured : this.projects).slice(0, 3);
         this.cdr.markForCheck();
       },
-      error: () => {},
+      error: () => { this.failedSections.push('Proyectos'); },
       complete: onDone,
     });
     this.api.getPublicTeam().subscribe({
@@ -453,7 +467,7 @@ export class PortfolioComponent implements OnInit {
         this.stats.team = (list || []).length;
         this.cdr.markForCheck();
       },
-      error: () => {},
+      error: () => { this.failedSections.push('Equipo'); },
       complete: onDone,
     });
     this.api.getPublicTechnologies().subscribe({
@@ -461,7 +475,7 @@ export class PortfolioComponent implements OnInit {
         this.technologies = list || [];
         this.cdr.markForCheck();
       },
-      error: () => {},
+      error: () => { this.failedSections.push('Tecnologías'); },
       complete: onDone,
     });
     this.api.getPublicBlog({ limit: 3 }).subscribe({
@@ -469,7 +483,7 @@ export class PortfolioComponent implements OnInit {
         this.recentPosts = (res?.posts || []).slice(0, 3);
         this.cdr.markForCheck();
       },
-      error: () => {},
+      error: () => { this.failedSections.push('Blog'); },
       complete: onDone,
     });
   }

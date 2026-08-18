@@ -46,6 +46,12 @@
   </div>
 </div>
 
+<div *ngIf="error" class="page-error" role="alert">
+  <i class="bi bi-exclamation-triangle" aria-hidden="true"></i>
+  <p>No pudimos cargar los datos. Intenta de nuevo.</p>
+  <button class="btn-retry" (click)="retry()" aria-label="Reintentar">Reintentar</button>
+</div>
+
 <!-- Create role modal -->
 <div class="modal-overlay" *ngIf="showCreate" (click)="showCreate = false">
   <div class="modal-content" (click)="$event.stopPropagation()">

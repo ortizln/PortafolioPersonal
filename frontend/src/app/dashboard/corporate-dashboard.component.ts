@@ -56,17 +56,28 @@ export class CorporateDashboardComponent implements OnInit {
 
   stats: Stats | null = null;
   loading = true;
+  error = false;
 
   get statusLabels(): Record<string, string> {
     return STATUS_LABELS;
   }
 
   ngOnInit(): void {
+    this.loadStats();
+  }
+
+  loadStats(): void {
+    this.loading = true;
+    this.error = false;
     this.apiService.getCorporateStats().subscribe({
       next: (res) => (this.stats = res as Stats),
-      error: () => {},
+      error: () => (this.error = true),
       complete: () => (this.loading = false),
     });
+  }
+
+  retry(): void {
+    this.loadStats();
   }
 
   kpis(): { label: string; value: number; icon: string; link: string }[] {

@@ -19,6 +19,7 @@ export class RoleListComponent implements OnInit {
   roles: Role[] = [];
   permissions: Permission[] = [];
   loading = true;
+  error = false;
   expandedRoleId: string | null = null;
   showCreate = false;
   newRoleName = '';
@@ -45,8 +46,13 @@ export class RoleListComponent implements OnInit {
   loadPermissions(): void {
     this.apiService.getPermissions().subscribe({
       next: (permissions) => (this.permissions = permissions),
-      error: () => {},
+      error: () => (this.error = true),
     });
+  }
+
+  retry(): void {
+    this.error = false;
+    this.loadPermissions();
   }
 
   permissionGroups(): { module: string; items: Permission[] }[] {

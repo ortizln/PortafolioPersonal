@@ -63,6 +63,11 @@ import { environment } from '../../environments/environment';
       .pagination button { width: 36px; height: 36px; border-radius: 10px; border: 1px solid var(--border); background: var(--bg-card); color: var(--text-primary); cursor: pointer; }
       .pagination button:disabled { opacity: 0.4; cursor: not-allowed; }
       .pagination span { font-size: 0.85rem; color: var(--text-secondary); }
+      .page-error { text-align: center; padding: 60px 24px; color: var(--text-muted); }
+      .page-error i { font-size: 2.5rem; color: var(--accent); margin-bottom: 12px; }
+      .page-error p { margin-bottom: 16px; }
+      .btn-retry { background: var(--accent); color: var(--bg-primary); border: none; padding: 10px 24px; border-radius: 8px; cursor: pointer; font-weight: 600; }
+      .btn-retry:hover { opacity: 0.9; }
     `,
   ],
   template: `
@@ -96,6 +101,12 @@ import { environment } from '../../environments/environment';
             </div>
           </div>
         </div>
+      </div>
+
+      <div *ngIf="error" class="page-error" role="alert">
+        <i class="bi bi-exclamation-triangle" aria-hidden="true"></i>
+        <p>No pudimos cargar la información. Intenta de nuevo.</p>
+        <button class="btn-retry" (click)="retry()" aria-label="Reintentar">Reintentar</button>
       </div>
 
       <div *ngIf="!loading && !posts.length" class="page-empty">
@@ -143,6 +154,7 @@ export class BlogPageComponent implements OnInit {
   limit = 9;
   total = 0;
   loading = true;
+  error = false;
 
   get totalPages(): number {
     return Math.max(1, Math.ceil(this.total / this.limit));
@@ -164,6 +176,7 @@ export class BlogPageComponent implements OnInit {
 
   loadPosts(): void {
     this.loading = true;
+    this.error = false;
     this.apiService.getPublicBlog({
       page: this.page,
       limit: this.limit,
@@ -176,7 +189,7 @@ export class BlogPageComponent implements OnInit {
         this.total = res.total;
         this.siteName = 'ALANTEK';
       },
-      error: () => (this.loading = false),
+      error: () => { this.loading = false; this.error = true; },
       complete: () => (this.loading = false),
     });
   }
@@ -203,5 +216,9 @@ export class BlogPageComponent implements OnInit {
     if (!p.coverImage) return null;
     if (p.coverImage.startsWith('http://') || p.coverImage.startsWith('https://') || p.coverImage.startsWith('data:')) return p.coverImage;
     return `${environment.uploadUrl}/${p.coverImage}`;
+  }
+
+  retry(): void {
+    this.loadPosts();
   }
 }

@@ -37,6 +37,7 @@ export class LeadsComponent implements OnInit {
   selectedLead: ContactMessage | null = null;
   loading = true;
   users: { id: string; name: string; email: string }[] = [];
+  usersError = false;
 
   toasts: { message: string; type: 'success' | 'error'; id: number }[] = [];
   private toastId = 0;
@@ -49,7 +50,15 @@ export class LeadsComponent implements OnInit {
     this.loadLeads();
     this.apiService.getUsers({ limit: 100 }).subscribe({
       next: (res) => (this.users = res.users.map((u) => ({ id: u.id, name: u.name, email: u.email }))),
-      error: () => {},
+      error: () => (this.usersError = true),
+    });
+  }
+
+  retryUsers(): void {
+    this.usersError = false;
+    this.apiService.getUsers({ limit: 100 }).subscribe({
+      next: (res) => (this.users = res.users.map((u) => ({ id: u.id, name: u.name, email: u.email }))),
+      error: () => (this.usersError = true),
     });
   }
 
@@ -101,7 +110,7 @@ export class LeadsComponent implements OnInit {
         const idx = this.leads.findIndex((l) => l.id === updated.id);
         if (idx >= 0) this.leads[idx] = updated;
       },
-      error: () => {},
+      error: (err) => console.error('Failed to toggle read status', err),
     });
   }
 

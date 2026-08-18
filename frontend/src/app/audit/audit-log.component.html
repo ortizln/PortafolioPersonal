@@ -17,7 +17,7 @@
   </select>
 </div>
 
-<div class="table-wrap" *ngIf="!loading">
+<div class="table-wrap" *ngIf="!loading && !error">
   <table class="audit-table">
     <thead>
       <tr>
@@ -43,6 +43,12 @@
       </tr>
     </tbody>
   </table>
+</div>
+
+<div *ngIf="error" class="page-error" role="alert">
+  <i class="bi bi-exclamation-triangle" aria-hidden="true"></i>
+  <p>No pudimos cargar los datos. Intenta de nuevo.</p>
+  <button class="btn-retry" (click)="retry()" aria-label="Reintentar">Reintentar</button>
 </div>
 
 <div class="pagination" *ngIf="totalPages() > 1">

@@ -1,5 +1,5 @@
-import { Component, HostListener, inject, OnInit } from '@angular/core';
-import { RouterOutlet, RouterLink, RouterLinkActive } from '@angular/router';
+import { Component, HostListener, inject, OnInit, OnDestroy } from '@angular/core';
+import { RouterOutlet, RouterLink, RouterLinkActive, Router, NavigationEnd } from '@angular/router';
 import { NgIf, NgFor } from '@angular/common';
 import { ApiService } from '../../core/services/api.service';
 import { SeoService } from '../../core/services/seo.service';
@@ -8,6 +8,7 @@ import { applyCompanyBrand } from '../../core/utils/brand.util';
 import { environment } from '../../../environments/environment';
 import { NeonBackgroundComponent } from '../neon-bg.component';
 import { routeAnimations } from '../../core/animations/route.animations';
+import { filter, Subscription } from 'rxjs';
 
 @Component({
   selector: 'app-public-layout',
@@ -108,18 +109,25 @@ import { routeAnimations } from '../../core/animations/route.animations';
         </div>
       </div>
     </footer>
+
+    <button class="back-to-top" [class.visible]="showBackToTop" (click)="scrollToTop()" aria-label="Volver arriba">
+      <i class="bi bi-arrow-up" aria-hidden="true"></i>
+    </button>
   `,
   styleUrls: ['./public-layout.component.scss'],
 })
-export class PublicLayoutComponent implements OnInit {
+export class PublicLayoutComponent implements OnInit, OnDestroy {
   private api = inject(ApiService);
   private seoService = inject(SeoService);
+  private router = inject(Router);
+  private routerSub!: Subscription;
 
   getRouteAnimationData(outlet: RouterOutlet) {
     return outlet?.activatedRouteData?.['animation'];
   }
 
   isScrolled = false;
+  showBackToTop = false;
   isMobileMenuOpen = false;
   isDark = true;
   currentYear = new Date().getFullYear();
@@ -143,6 +151,16 @@ export class PublicLayoutComponent implements OnInit {
   ngOnInit(): void {
     this.loadCompany();
     this.loadServices();
+    this.routerSub = this.router.events.pipe(
+      filter((e) => e instanceof NavigationEnd)
+    ).subscribe(() => {
+      window.scrollTo({ top: 0, behavior: 'instant' });
+      this.isMobileMenuOpen = false;
+    });
+  }
+
+  ngOnDestroy(): void {
+    this.routerSub?.unsubscribe();
   }
 
   private loadCompany(): void {
@@ -207,6 +225,11 @@ export class PublicLayoutComponent implements OnInit {
   @HostListener('window:scroll')
   onScroll(): void {
     this.isScrolled = window.scrollY > 50;
+    this.showBackToTop = window.scrollY > 400;
+  }
+
+  scrollToTop(): void {
+    window.scrollTo({ top: 0, behavior: 'smooth' });
   }
 
   toggleTheme(): void {

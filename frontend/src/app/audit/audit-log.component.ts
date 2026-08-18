@@ -22,6 +22,7 @@ export class AuditLogComponent implements OnInit {
   action = '';
   search = '';
   loading = true;
+  error = false;
 
   get entities(): string[] {
     return ['User', 'Role', 'Project', 'TeamMember', 'Service', 'Client', 'Company', 'ContactMessage', 'MediaFile', 'Auth'];
@@ -37,6 +38,7 @@ export class AuditLogComponent implements OnInit {
 
   loadLogs(): void {
     this.loading = true;
+    this.error = false;
     this.apiService.getAuditLogs({
       page: this.page,
       limit: this.limit,
@@ -48,9 +50,13 @@ export class AuditLogComponent implements OnInit {
         this.logs = res.logs;
         this.total = res.total;
       },
-      error: () => {},
+      error: () => (this.error = true),
       complete: () => (this.loading = false),
     });
+  }
+
+  retry(): void {
+    this.loadLogs();
   }
 
   applyFilters(): void {

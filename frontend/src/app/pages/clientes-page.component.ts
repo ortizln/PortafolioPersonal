@@ -19,6 +19,11 @@ import { environment } from '../../environments/environment';
       </header>
 
       <div *ngIf="loading" class="page-loading"><div class="spinner"></div></div>
+      <div *ngIf="error" class="page-error" role="alert">
+        <i class="bi bi-exclamation-triangle" aria-hidden="true"></i>
+        <p>No pudimos cargar la información. Intenta de nuevo.</p>
+        <button class="btn-retry" (click)="retry()" aria-label="Reintentar">Reintentar</button>
+      </div>
       <div *ngIf="!loading && !clients.length" class="page-empty">Aún no hay clientes publicados.</div>
 
       <section class="container section" *ngIf="!loading && clients.length">
@@ -50,21 +55,33 @@ import { environment } from '../../environments/environment';
     .client-card:hover img { filter: grayscale(0); opacity: 1; }
     .client-fallback { font-weight: 700; color: var(--text-secondary); }
     .client-industry { margin-top: 10px; font-size: 0.76rem; color: var(--text-muted); }
+    .page-error { text-align: center; padding: 60px 24px; color: var(--text-muted); }
+    .page-error i { font-size: 2.5rem; color: var(--accent); margin-bottom: 12px; }
+    .page-error p { margin-bottom: 16px; }
+    .btn-retry { background: var(--accent); color: var(--bg-primary); border: none; padding: 10px 24px; border-radius: 8px; cursor: pointer; font-weight: 600; }
+    .btn-retry:hover { opacity: 0.9; }
   `],
 })
 export class ClientesPageComponent implements OnInit {
   private api = inject(ApiService);
   clients: Client[] = [];
   loading = true;
+  error = false;
 
   ngOnInit(): void {
+    this.loadClients();
+  }
+
+  loadClients(): void {
+    this.loading = true;
+    this.error = false;
     this.api.getPublicClients().subscribe({
       next: (list) => {
         this.clients = list || [];
         this.loading = false;
         setTimeout(() => this.initAOS(), 100);
       },
-      error: () => { this.loading = false; },
+      error: () => { this.loading = false; this.error = true; },
     });
   }
 
@@ -77,5 +94,9 @@ export class ClientesPageComponent implements OnInit {
   private initAOS(): void {
     const aos = (window as any).AOS;
     if (aos) aos.init({ duration: 800, easing: 'ease-out-cubic', once: true, offset: 80 });
+  }
+
+  retry(): void {
+    this.loadClients();
   }
 }

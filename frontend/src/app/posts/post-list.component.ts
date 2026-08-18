@@ -95,8 +95,8 @@ export class PostListComponent implements OnInit {
   }
 
   loadTaxonomies(): void {
-    this.apiService.getPostCategories().subscribe({ next: (c) => (this.categories = c), error: () => {} });
-    this.apiService.getPostTags().subscribe({ next: (t) => (this.tags = t), error: () => {} });
+    this.apiService.getPostCategories().subscribe({ next: (c) => (this.categories = c), error: (err) => console.error('Failed to load categories', err) });
+    this.apiService.getPostTags().subscribe({ next: (t) => (this.tags = t), error: (err) => console.error('Failed to load tags', err) });
   }
 
   applyFilters(): void {

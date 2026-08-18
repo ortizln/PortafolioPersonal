@@ -22,6 +22,12 @@ import { environment } from '../../environments/environment';
 
       <div *ngIf="loading" class="page-loading"><div class="spinner"></div></div>
 
+      <div *ngIf="error" class="page-error" role="alert">
+        <i class="bi bi-exclamation-triangle" aria-hidden="true"></i>
+        <p>No pudimos cargar la información. Intenta de nuevo.</p>
+        <button class="btn-retry" (click)="retry()" aria-label="Reintentar">Reintentar</button>
+      </div>
+
       <ng-container *ngIf="!loading">
         <section class="container section" data-aos="fade-up">
           <p class="intro">{{ company?.description || company?.shortDescription }}</p>
@@ -89,6 +95,11 @@ import { environment } from '../../environments/environment';
     .team-photo img { width: 100%; height: 100%; object-fit: cover; }
     .team-name { font-size: 1rem; color: var(--white); margin: 0 0 4px; }
     .team-title { font-size: 0.8rem; color: var(--accent); }
+    .page-error { text-align: center; padding: 60px 24px; color: var(--text-muted); }
+    .page-error i { font-size: 2.5rem; color: var(--accent); margin-bottom: 12px; }
+    .page-error p { margin-bottom: 16px; }
+    .btn-retry { background: var(--accent); color: var(--bg-primary); border: none; padding: 10px 24px; border-radius: 8px; cursor: pointer; font-weight: 600; }
+    .btn-retry:hover { opacity: 0.9; }
   `],
 })
 export class NosotrosPageComponent implements OnInit {
@@ -99,8 +110,11 @@ export class NosotrosPageComponent implements OnInit {
   companyName = 'ALANTEK';
   team: TeamMember[] = [];
   loading = true;
+  error = false;
 
   ngOnInit(): void {
+    this.loading = true;
+    this.error = false;
     this.seoService.setSeo({
       title: 'Nosotros | ALANTEK',
       description: 'Conoce la historia, misión y visión de ALANTEK.',
@@ -115,11 +129,11 @@ export class NosotrosPageComponent implements OnInit {
         this.loading = false;
         setTimeout(() => this.initAOS(), 100);
       },
-      error: () => { this.loading = false; },
+      error: () => { this.loading = false; this.error = true; },
     });
     this.api.getPublicTeam().subscribe({
       next: (list) => (this.team = (list || []).slice(0, 8)),
-      error: () => {},
+      error: () => { this.error = true; },
     });
   }
 
@@ -132,5 +146,24 @@ export class NosotrosPageComponent implements OnInit {
   private initAOS(): void {
     const aos = (window as any).AOS;
     if (aos) aos.init({ duration: 800, easing: 'ease-out-cubic', once: true, offset: 80 });
+  }
+
+  retry(): void {
+    this.loading = true;
+    this.error = false;
+    this.api.getPublicCompany().subscribe({
+      next: (c) => {
+        this.company = c;
+        if (c?.name) this.companyName = c.name;
+        applyCompanyBrand(c);
+        this.loading = false;
+        setTimeout(() => this.initAOS(), 100);
+      },
+      error: () => { this.loading = false; this.error = true; },
+    });
+    this.api.getPublicTeam().subscribe({
+      next: (list) => (this.team = (list || []).slice(0, 8)),
+      error: () => { this.error = true; },
+    });
   }
 }

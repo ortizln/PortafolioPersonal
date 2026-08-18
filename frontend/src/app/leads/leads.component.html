@@ -31,6 +31,12 @@
   </div>
 </div>
 
+<div *ngIf="usersError" class="page-error" role="alert">
+  <i class="bi bi-exclamation-triangle" aria-hidden="true"></i>
+  <p>No pudimos cargar los usuarios. Intenta de nuevo.</p>
+  <button class="btn-retry" (click)="retryUsers()" aria-label="Reintentar">Reintentar</button>
+</div>
+
 <div class="leads-table-wrap" *ngIf="!loading">
   <table class="leads-table">
     <thead>
