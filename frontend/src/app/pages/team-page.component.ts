@@ -19,7 +19,17 @@ import { environment } from '../../environments/environment';
         </div>
       </header>
 
-      <div *ngIf="loading" class="page-loading"><div class="spinner"></div></div>
+      <div class="container" *ngIf="loading">
+        <div class="skeleton-grid">
+          <div class="skeleton-card" *ngFor="let i of [1,2,3,4]">
+            <div class="sk-img sk-avatar"></div>
+            <div class="sk-body">
+              <div class="sk-line w-40"></div>
+              <div class="sk-line w-60"></div>
+            </div>
+          </div>
+        </div>
+      </div>
       <div *ngIf="!loading && !members.length" class="page-empty">No hay miembros publicados aún.</div>
 
       <section class="container section" *ngIf="!loading && members.length">
@@ -42,10 +52,16 @@ import { environment } from '../../environments/environment';
     .page-hero { background: linear-gradient(160deg, var(--bg-secondary), var(--bg-primary)); border-bottom: 1px solid var(--border); padding: 48px 0; text-align: center; }
     .page-hero h1 { font-size: 2.2rem; margin: 0 0 8px; }
     .page-hero p { color: var(--text-secondary); margin: 0; }
-    .page-loading { display: flex; justify-content: center; padding: 100px 0; }
     .page-empty { text-align: center; padding: 100px 24px; color: var(--text-muted); }
-    .spinner { width: 40px; height: 40px; border: 3px solid var(--border); border-top-color: var(--accent); border-radius: 50%; animation: spin 0.8s linear infinite; }
-    @keyframes spin { to { transform: rotate(360deg); } }
+    .skeleton-grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(230px, 1fr)); gap: 22px; padding: 2rem 0; }
+    .skeleton-card { background: var(--bg-card); border: 1px solid var(--border); border-radius: 16px; padding: 26px 20px; text-align: center; }
+    .sk-img { width: 110px; height: 110px; border-radius: 50%; margin: 0 auto 16px; background: linear-gradient(90deg, var(--bg-card) 25%, var(--bg-card-hover) 50%, var(--bg-card) 75%); background-size: 200% 100%; animation: shimmer 1.5s infinite; }
+    .sk-body { display: flex; flex-direction: column; gap: 10px; align-items: center; }
+    .sk-line { height: 14px; border-radius: 6px; background: linear-gradient(90deg, var(--bg-card) 25%, var(--bg-card-hover) 50%, var(--bg-card) 75%); background-size: 200% 100%; animation: shimmer 1.5s infinite; }
+    .sk-line.w-40 { width: 40%; }
+    .sk-line.w-60 { width: 60%; }
+    .sk-line.w-80 { width: 80%; }
+    @keyframes shimmer { 0% { background-position: 200% 0; } 100% { background-position: -200% 0; } }
     .section { padding: 70px 0; }
     .team-grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(230px, 1fr)); gap: 22px; }
     .team-card { text-align: center; background: var(--bg-card); border: 1px solid var(--border); border-radius: 16px; padding: 26px 20px; text-decoration: none; transition: var(--transition); display: block; }

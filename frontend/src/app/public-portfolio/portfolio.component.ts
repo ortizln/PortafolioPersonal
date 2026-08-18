@@ -1,4 +1,4 @@
-import { Component, OnInit, inject } from '@angular/core';
+import { Component, ChangeDetectionStrategy, ChangeDetectorRef, OnInit, inject } from '@angular/core';
 import { NgIf, NgFor, NgClass, DatePipe } from '@angular/common';
 import { RouterLink } from '@angular/router';
 import { forkJoin } from 'rxjs';
@@ -11,6 +11,7 @@ import { environment } from '../../environments/environment';
   selector: 'app-portfolio',
   standalone: true,
   imports: [NgIf, NgFor, NgClass, DatePipe, RouterLink],
+  changeDetection: ChangeDetectionStrategy.OnPush,
   template: `
     <div class="corp-wrapper">
       <div *ngIf="loading" class="skeleton-wrapper" aria-label="Cargando sitio" aria-busy="true">
@@ -52,7 +53,7 @@ import { environment } from '../../environments/environment';
             <h2 class="section-title">Nuestros servicios</h2>
             <p class="section-subtitle">Soluciones integrales para cada etapa de tu proyecto digital.</p>
             <div class="services-grid">
-              <a class="service-card" *ngFor="let s of services.slice(0, 6)" [routerLink]="['/servicios', s.slug]" data-aos="fade-up">
+              <a class="service-card" *ngFor="let s of services.slice(0, 6); trackBy: trackByService" [routerLink]="['/servicios', s.slug]" data-aos="fade-up">
                 <span class="service-icon"><i [class]="s.icon || 'bi bi-code-slash'" aria-hidden="true"></i></span>
                 <h3 class="service-name">{{ s.name }}</h3>
                 <p class="service-desc">{{ s.shortDescription || s.description }}</p>
@@ -97,7 +98,7 @@ import { environment } from '../../environments/environment';
             <h2 class="section-title">Proyectos destacados</h2>
             <p class="section-subtitle">Algunos de los trabajos que hemos entregado a nuestros clientes.</p>
             <div class="projects-grid">
-              <a class="project-card" *ngFor="let p of featuredProjects" [routerLink]="['/proyectos', p.slug]" data-aos="fade-up">
+              <a class="project-card" *ngFor="let p of featuredProjects; trackBy: trackByProject" [routerLink]="['/proyectos', p.slug]" data-aos="fade-up">
                 <div class="project-banner">
                   <img [src]="getPrimaryImage(p) || 'assets/project-placeholder.svg'" [alt]="'Portada de ' + p.title" loading="lazy" />
                   <span class="project-badge" *ngIf="p.isCaseStudy"><i class="bi bi-graph-up-arrow" aria-hidden="true"></i> Caso de éxito</span>
@@ -106,7 +107,7 @@ import { environment } from '../../environments/environment';
                   <h3 class="project-name">{{ p.title }}</h3>
                   <p class="project-desc">{{ p.summary || p.description }}</p>
                   <div class="project-techs">
-                    <span class="project-tech" *ngFor="let t of p.technologies?.slice(0, 3)">{{ t.name }}</span>
+                    <span class="project-tech" *ngFor="let t of p.technologies?.slice(0, 3); trackBy: trackByTech">{{ t.name }}</span>
                   </div>
                 </div>
               </a>
@@ -123,7 +124,7 @@ import { environment } from '../../environments/environment';
             <h2 class="section-title">Nuestros clientes</h2>
             <p class="section-subtitle">Empresas que confían en nuestro trabajo.</p>
             <div class="clients-grid">
-              <a class="client-card" *ngFor="let c of clients" [href]="c.website || null" [attr.target]="c.website ? '_blank' : null" [attr.tabindex]="c.website ? null : -1" [attr.aria-hidden]="!c.website" rel="noopener">
+              <a class="client-card" *ngFor="let c of clients; trackBy: trackByClient" [href]="c.website || null" [attr.target]="c.website ? '_blank' : null" [attr.tabindex]="c.website ? null : -1" [attr.aria-hidden]="!c.website" rel="noopener">
                 <img *ngIf="getClientLogo(c)" [src]="getClientLogo(c)" [alt]="c.name" loading="lazy" />
                 <span *ngIf="!getClientLogo(c)" class="client-fallback">{{ c.name }}</span>
               </a>
@@ -137,9 +138,9 @@ import { environment } from '../../environments/environment';
             <h2 class="section-title">Testimonios</h2>
             <p class="section-subtitle">Lo que dicen nuestros clientes.</p>
             <div class="testimonials-grid">
-              <div class="testimonial-card" *ngFor="let t of testimonials" data-aos="fade-up">
+              <div class="testimonial-card" *ngFor="let t of testimonials; trackBy: trackByTestimonial" data-aos="fade-up">
                 <span class="stars" *ngIf="t.rating" role="img" [attr.aria-label]="t.rating + ' de 5 estrellas'">
-                  <i class="bi bi-star-fill" *ngFor="let _ of [].constructor(t.rating)" aria-hidden="true"></i>
+                  <i class="bi bi-star-fill" *ngFor="let _ of [].constructor(t.rating); trackBy: trackByStar" aria-hidden="true"></i>
                 </span>
                 <blockquote class="testimonial-text">"{{ t.content }}"</blockquote>
                 <div class="testimonial-author">
@@ -157,7 +158,7 @@ import { environment } from '../../environments/environment';
             <h2 class="section-title">Nuestro equipo</h2>
             <p class="section-subtitle">Profesionales comprometidos con la excelencia.</p>
             <div class="team-grid">
-              <a class="team-card" *ngFor="let m of teamMembers" [routerLink]="['/equipo', m.slug]" data-aos="fade-up">
+              <a class="team-card" *ngFor="let m of teamMembers; trackBy: trackByTeam" [routerLink]="['/equipo', m.slug]" data-aos="fade-up">
                 <div class="team-avatar">
                   <img *ngIf="m.photoUrl" [src]="resolveAsset(m.photoUrl)" [alt]="m.fullName" loading="lazy" />
                   <i *ngIf="!m.photoUrl" class="bi bi-person-circle" aria-hidden="true"></i>
@@ -179,7 +180,7 @@ import { environment } from '../../environments/environment';
             <h2 class="section-title">Tecnologías</h2>
             <p class="section-subtitle">Stack tecnológico que dominamos.</p>
             <div class="tech-grid">
-              <div class="tech-card" *ngFor="let t of technologies" data-aos="fade-up">
+              <div class="tech-card" *ngFor="let t of technologies; trackBy: trackByTech" data-aos="fade-up">
                 <span class="tech-dot" [style.background]="t.color || '#888'"></span>
                 <span class="tech-name">{{ t.name }}</span>
                 <span class="tech-category">{{ t.category }}</span>
@@ -194,7 +195,7 @@ import { environment } from '../../environments/environment';
             <h2 class="section-title">Últimas publicaciones</h2>
             <p class="section-subtitle">Artículos y novedades de nuestro blog.</p>
             <div class="blog-grid">
-              <a class="blog-card" *ngFor="let p of recentPosts" [routerLink]="['/blog', p.slug]" data-aos="fade-up">
+              <a class="blog-card" *ngFor="let p of recentPosts; trackBy: trackByPost" [routerLink]="['/blog', p.slug]" data-aos="fade-up">
                 <div class="blog-body">
                   <span class="blog-date"><i class="bi bi-calendar3" aria-hidden="true"></i> {{ p.publishedAt | date: "dd 'de' MMM, yyyy" }}</span>
                   <h3 class="blog-title">{{ p.title }}</h3>
@@ -358,6 +359,7 @@ import { environment } from '../../environments/environment';
 })
 export class PortfolioComponent implements OnInit {
   private api = inject(ApiService);
+  private cdr = inject(ChangeDetectorRef);
 
   company: Company | null = null;
   companyName = 'ALANTEK';
@@ -389,6 +391,7 @@ export class PortfolioComponent implements OnInit {
       if (completed >= totalCalls) {
         this.loading = false;
         this.initAOS();
+        this.cdr.markForCheck();
       }
     };
 
@@ -398,12 +401,16 @@ export class PortfolioComponent implements OnInit {
         if (c?.name) this.companyName = c.name;
         this.heroImage = this.resolveAsset(c?.heroImageUrl);
         applyCompanyBrand(c);
+        this.cdr.markForCheck();
       },
       error: () => {},
       complete: onDone,
     });
     this.api.getPublicServices().subscribe({
-      next: (list) => (this.services = (list || []).slice(0, 6)),
+      next: (list) => {
+        this.services = (list || []).slice(0, 6);
+        this.cdr.markForCheck();
+      },
       error: () => {},
       complete: onDone,
     });
@@ -411,12 +418,16 @@ export class PortfolioComponent implements OnInit {
       next: (list) => {
         this.clients = list || [];
         this.stats.clients = this.clients.length;
+        this.cdr.markForCheck();
       },
       error: () => {},
       complete: onDone,
     });
     this.api.getPublicTestimonials().subscribe({
-      next: (list) => (this.testimonials = (list || []).slice(0, 3)),
+      next: (list) => {
+        this.testimonials = (list || []).slice(0, 3);
+        this.cdr.markForCheck();
+      },
       error: () => {},
       complete: onDone,
     });
@@ -431,6 +442,7 @@ export class PortfolioComponent implements OnInit {
         this.stats.projects = this.projects.length;
         const featured = this.projects.filter((p) => p.isFeatured);
         this.featuredProjects = (featured.length ? featured : this.projects).slice(0, 3);
+        this.cdr.markForCheck();
       },
       error: () => {},
       complete: onDone,
@@ -439,17 +451,24 @@ export class PortfolioComponent implements OnInit {
       next: (list) => {
         this.teamMembers = (list || []).slice(0, 4);
         this.stats.team = (list || []).length;
+        this.cdr.markForCheck();
       },
       error: () => {},
       complete: onDone,
     });
     this.api.getPublicTechnologies().subscribe({
-      next: (list) => (this.technologies = list || []),
+      next: (list) => {
+        this.technologies = list || [];
+        this.cdr.markForCheck();
+      },
       error: () => {},
       complete: onDone,
     });
     this.api.getPublicBlog({ limit: 3 }).subscribe({
-      next: (res) => (this.recentPosts = (res?.posts || []).slice(0, 3)),
+      next: (res) => {
+        this.recentPosts = (res?.posts || []).slice(0, 3);
+        this.cdr.markForCheck();
+      },
       error: () => {},
       complete: onDone,
     });
@@ -488,4 +507,14 @@ export class PortfolioComponent implements OnInit {
     const aos = (window as any).AOS;
     if (aos) aos.init({ duration: 800, easing: 'ease-out-cubic', once: true, offset: 80 });
   }
+
+  trackByService = (i: number, s: any) => s.id || i;
+  trackByProject = (i: number, p: any) => p.id || i;
+  trackByClient = (i: number, c: any) => c.id || i;
+  trackByTestimonial = (i: number, t: any) => t.id || i;
+  trackByTeam = (i: number, m: any) => m.id || m.slug || i;
+  trackByTech = (i: number, t: any) => t.id || i;
+  trackByPost = (i: number, p: any) => p.id || p.slug || i;
+  trackByStar = (i: number) => i;
+  trackByServiceFooter = (i: number, s: any) => s.id || i;
 }

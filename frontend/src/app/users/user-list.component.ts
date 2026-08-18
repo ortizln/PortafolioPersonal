@@ -3,7 +3,7 @@ import { CommonModule } from '@angular/common';
 import { FormsModule } from '@angular/forms';
 import { ApiService } from '../core/services/api.service';
 import { ConfirmService } from '../core/services/confirm.service';
-import { User, Role } from '../core/models';
+import { User, Role, Permission } from '../core/models';
 
 @Component({
   selector: 'app-user-list',
@@ -18,6 +18,7 @@ export class UserListComponent implements OnInit {
 
   users: User[] = [];
   roles: Role[] = [];
+  allPermissions: Permission[] = [];
   total = 0;
   page = 1;
   limit = 15;
@@ -25,18 +26,39 @@ export class UserListComponent implements OnInit {
   roleFilter = '';
   loading = true;
 
+  selectedUser: User | null = null;
+  userRolePermissions: Permission[] = [];
+  loadingPermissions = false;
+
   toasts: { message: string; type: 'success' | 'error'; id: number }[] = [];
   private toastId = 0;
+
+  readonly ROLE_COLORS: Record<string, string> = {
+    SUPER_ADMIN: '#ef4444',
+    ADMIN: '#f59e0b',
+    CONTENT_MANAGER: '#8b5cf6',
+    PROJECT_MANAGER: '#3b82f6',
+    TEAM_MEMBER: '#10b981',
+    VIEWER: '#6b7280',
+  };
 
   ngOnInit(): void {
     this.loadRoles();
     this.loadUsers();
+    this.loadPermissions();
   }
 
   loadRoles(): void {
     this.apiService.getRoles().subscribe({
       next: (roles) => (this.roles = roles),
       error: () => this.showToast('No se pudieron cargar los roles', 'error'),
+    });
+  }
+
+  loadPermissions(): void {
+    this.apiService.getPermissions().subscribe({
+      next: (perms) => (this.allPermissions = perms),
+      error: () => {},
     });
   }
 
@@ -61,6 +83,11 @@ export class UserListComponent implements OnInit {
     return user.rbacRole?.name || user.userRoles?.[0]?.role?.name || user.role || 'VIEWER';
   }
 
+  roleColor(user: User): string {
+    const name = this.userRoleName(user);
+    return this.ROLE_COLORS[name] || '#6b7280';
+  }
+
   changeRole(user: User, roleId: string): void {
     if (!roleId) return;
     this.apiService.assignUserRole(user.id, roleId).subscribe({
@@ -82,6 +109,38 @@ export class UserListComponent implements OnInit {
       },
       error: () => this.showToast('Error al actualizar el usuario', 'error'),
     });
+  }
+
+  openPermissions(user: User): void {
+    this.selectedUser = user;
+    this.loadingPermissions = true;
+    this.userRolePermissions = [];
+    const roleId = user.rbacRole?.id || user.userRoles?.[0]?.role?.id;
+    if (roleId) {
+      const role = this.roles.find((r) => r.id === roleId);
+      if (role?.permissions) {
+        this.userRolePermissions = role.permissions;
+        this.loadingPermissions = false;
+      } else {
+        this.loadingPermissions = false;
+      }
+    } else {
+      this.loadingPermissions = false;
+    }
+  }
+
+  closePermissions(): void {
+    this.selectedUser = null;
+    this.userRolePermissions = [];
+  }
+
+  permissionModules(): string[] {
+    const modules = new Set(this.userRolePermissions.map((p) => p.module || 'other'));
+    return Array.from(modules).sort();
+  }
+
+  permissionsByModule(module: string): Permission[] {
+    return this.userRolePermissions.filter((p) => (p.module || 'other') === module);
   }
 
   async deleteUser(user: User): Promise<void> {

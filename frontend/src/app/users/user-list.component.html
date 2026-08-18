@@ -27,6 +27,7 @@
       <tr>
         <th>Usuario</th>
         <th>Rol</th>
+        <th>Permisos</th>
         <th>Estado</th>
         <th>Último acceso</th>
         <th>Acciones</th>
@@ -44,10 +45,18 @@
           </div>
         </td>
         <td>
+          <span class="role-badge" [style.background]="roleColor(user) + '20'" [style.color]="roleColor(user)" [style.border-color]="roleColor(user) + '40'">
+            {{ userRoleName(user) }}
+          </span>
           <select class="role-select" [value]="user.roleId || ''" (change)="changeRole(user, $any($event.target).value)">
-            <option value="" disabled>Seleccionar...</option>
+            <option value="" disabled>Cambiar...</option>
             <option *ngFor="let r of roles" [value]="r.id">{{ r.name }}</option>
           </select>
+        </td>
+        <td>
+          <button class="perms-btn" (click)="openPermissions(user)" [attr.aria-label]="'Ver permisos de ' + user.name">
+            <i class="bi bi-key" aria-hidden="true"></i> Ver
+          </button>
         </td>
         <td>
           <button class="active-toggle" [class.active]="user.isActive" (click)="toggleActive(user)">
@@ -60,7 +69,7 @@
         </td>
       </tr>
       <tr *ngIf="users.length === 0">
-        <td colspan="5" class="empty-row">No hay usuarios.</td>
+        <td colspan="6" class="empty-row">No hay usuarios.</td>
       </tr>
     </tbody>
   </table>
@@ -70,4 +79,44 @@
   <button [disabled]="page === 1" (click)="goPage(page - 1)"><i class="bi bi-chevron-left"></i></button>
   <span>Página {{ page }} de {{ totalPages() }} · {{ total }} usuarios</span>
   <button [disabled]="page === totalPages()" (click)="goPage(page + 1)"><i class="bi bi-chevron-right"></i></button>
+</div>
+
+<!-- Permissions Modal -->
+<div class="modal-overlay" *ngIf="selectedUser" (click)="closePermissions()" (keydown.escape)="closePermissions()">
+  <div class="modal-content" (click)="$event.stopPropagation()">
+    <div class="modal-header">
+      <div>
+        <h3>Permisos de {{ selectedUser.name }}</h3>
+        <span class="role-badge modal-role" [style.background]="roleColor(selectedUser) + '20'" [style.color]="roleColor(selectedUser)" [style.border-color]="roleColor(selectedUser) + '40'">
+          {{ userRoleName(selectedUser) }}
+        </span>
+      </div>
+      <button class="modal-close" (click)="closePermissions()" aria-label="Cerrar">
+        <i class="bi bi-x-lg"></i>
+      </button>
+    </div>
+
+    <div class="modal-body" *ngIf="!loadingPermissions">
+      <div *ngIf="userRolePermissions.length === 0" class="no-perms">
+        <i class="bi bi-shield-lock"></i>
+        <p>No hay permisos asignados a este rol.</p>
+      </div>
+
+      <div class="perm-module" *ngFor="let mod of permissionModules()">
+        <h4 class="module-title">{{ mod }}</h4>
+        <div class="perm-list">
+          <span class="perm-chip" *ngFor="let perm of permissionsByModule(mod)">
+            <i class="bi bi-check2-circle"></i> {{ perm.name }}
+          </span>
+        </div>
+      </div>
+    </div>
+
+    <div class="modal-body" *ngIf="loadingPermissions">
+      <div class="loading-perms">
+        <div class="spinner-sm"></div>
+        <span>Cargando permisos...</span>
+      </div>
+    </div>
+  </div>
 </div>

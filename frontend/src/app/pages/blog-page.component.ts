@@ -32,9 +32,15 @@ import { environment } from '../../environments/environment';
         background: var(--bg-card); color: var(--text-secondary); font-size: 0.8rem; cursor: pointer;
       }
       .category-chip.active, .category-chip:hover { color: var(--accent); border-color: var(--accent); }
-      .page-loading { display: flex; justify-content: center; padding: 4rem; }
-      .spinner { width: 38px; height: 38px; border: 3px solid rgba(255,255,255,0.12); border-top-color: var(--accent); border-radius: 50%; animation: spin 0.8s linear infinite; }
-      @keyframes spin { to { transform: rotate(360deg); } }
+      .skeleton-grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(320px, 1fr)); gap: 1.5rem; padding: 2rem 0; }
+      .skeleton-card { background: var(--bg-card); border: 1px solid var(--border); border-radius: 16px; overflow: hidden; }
+      .sk-img { height: 190px; background: linear-gradient(90deg, var(--bg-card) 25%, var(--bg-card-hover) 50%, var(--bg-card) 75%); background-size: 200% 100%; animation: shimmer 1.5s infinite; }
+      .sk-body { padding: 1.2rem; display: flex; flex-direction: column; gap: 10px; }
+      .sk-line { height: 14px; border-radius: 6px; background: linear-gradient(90deg, var(--bg-card) 25%, var(--bg-card-hover) 50%, var(--bg-card) 75%); background-size: 200% 100%; animation: shimmer 1.5s infinite; }
+      .sk-line.w-40 { width: 40%; }
+      .sk-line.w-60 { width: 60%; }
+      .sk-line.w-80 { width: 80%; }
+      @keyframes shimmer { 0% { background-position: 200% 0; } 100% { background-position: -200% 0; } }
       .page-empty { text-align: center; padding: 4rem 1rem; color: var(--text-secondary); }
       .page-empty i { font-size: 2.5rem; opacity: 0.4; display: block; margin-bottom: 0.75rem; }
       .blog-grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(320px, 1fr)); gap: 1.5rem; padding: 1rem 0 3rem; }
@@ -79,7 +85,18 @@ import { environment } from '../../environments/environment';
         </div>
       </div>
 
-      <div *ngIf="loading" class="page-loading"><div class="spinner"></div></div>
+      <div class="container" *ngIf="loading">
+        <div class="skeleton-grid">
+          <div class="skeleton-card" *ngFor="let i of [1,2,3,4,5,6]">
+            <div class="sk-img"></div>
+            <div class="sk-body">
+              <div class="sk-line w-40"></div>
+              <div class="sk-line w-80"></div>
+              <div class="sk-line w-60"></div>
+            </div>
+          </div>
+        </div>
+      </div>
 
       <div *ngIf="!loading && !posts.length" class="page-empty">
         <i class="bi bi-journal-text"></i>

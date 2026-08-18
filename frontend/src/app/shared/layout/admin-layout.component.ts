@@ -4,6 +4,7 @@ import { NgFor, NgIf, DatePipe } from '@angular/common';
 import { AuthService } from '../../core/services/auth.service';
 import { ApiService } from '../../core/services/api.service';
 import { Notification } from '../../core/models';
+import { routeAnimations } from '../../core/animations/route.animations';
 
 interface NavItem {
   label: string;
@@ -22,6 +23,7 @@ interface NavGroup {
   selector: 'app-admin-layout',
   standalone: true,
   imports: [RouterOutlet, NgFor, NgIf, DatePipe, RouterLink, RouterLinkActive],
+  animations: [routeAnimations],
   template: `
     <div class="admin-shell" [class.sidebar-collapsed]="isSidebarCollapsed">
       <aside class="sidebar" [class.open]="isMobileSidebarOpen">
@@ -135,7 +137,7 @@ interface NavGroup {
         </header>
 
         <main class="content">
-          <router-outlet></router-outlet>
+          <router-outlet #outlet="outlet" [@routeAnimations]="getRouteAnimationData(outlet)"></router-outlet>
         </main>
       </div>
     </div>
@@ -146,6 +148,10 @@ export class AdminLayoutComponent implements OnInit, OnDestroy {
   private authService = inject(AuthService);
   private apiService = inject(ApiService);
   private router = inject(Router);
+
+  getRouteAnimationData(outlet: RouterOutlet) {
+    return outlet?.activatedRouteData?.['animation'];
+  }
 
   isSidebarCollapsed = false;
   isMobileSidebarOpen = false;

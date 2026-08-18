@@ -50,7 +50,18 @@ import { environment } from '../../environments/environment';
         </div>
       </div>
 
-      <div *ngIf="loading" class="page-loading"><div class="spinner"></div></div>
+      <div class="container" *ngIf="loading">
+        <div class="skeleton-grid">
+          <div class="skeleton-card" *ngFor="let i of [1,2,3,4,5,6]">
+            <div class="sk-img"></div>
+            <div class="sk-body">
+              <div class="sk-line w-40"></div>
+              <div class="sk-line w-80"></div>
+              <div class="sk-line w-60"></div>
+            </div>
+          </div>
+        </div>
+      </div>
 
       <div *ngIf="!loading && error" class="page-error">
         <i class="bi bi-exclamation-triangle"></i>
@@ -208,15 +219,22 @@ import { environment } from '../../environments/environment';
     .category-chip:hover { border-color: var(--accent); color: var(--accent); }
     .category-chip.active { background: linear-gradient(135deg, var(--accent), var(--accent-secondary)); color: var(--bg-primary); border-color: transparent; font-weight: 600; }
     .container { max-width: 1200px; margin: 0 auto; padding: 0 24px; }
-    .page-loading { display: flex; justify-content: center; padding: 120px 0; }
+    .skeleton-grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(320px, 1fr)); gap: 1.5rem; padding: 2rem 0; }
+    .skeleton-card { background: var(--bg-card); border: 1px solid var(--border); border-radius: 16px; overflow: hidden; }
+    .sk-img { height: 190px; background: linear-gradient(90deg, var(--bg-card) 25%, var(--bg-card-hover) 50%, var(--bg-card) 75%); background-size: 200% 100%; animation: shimmer 1.5s infinite; }
+    .sk-body { padding: 1.2rem; display: flex; flex-direction: column; gap: 10px; }
+    .sk-line { height: 14px; border-radius: 6px; background: linear-gradient(90deg, var(--bg-card) 25%, var(--bg-card-hover) 50%, var(--bg-card) 75%); background-size: 200% 100%; animation: shimmer 1.5s infinite; }
+    .sk-line.w-40 { width: 40%; }
+    .sk-line.w-60 { width: 60%; }
+    .sk-line.w-80 { width: 80%; }
+    @keyframes shimmer { 0% { background-position: 200% 0; } 100% { background-position: -200% 0; } }
     .page-error { text-align: center; padding: 120px 24px; color: var(--text-muted); }
     .page-error i { font-size: 3rem; color: var(--accent); margin-bottom: 16px; }
     .page-empty { text-align: center; padding: 120px 24px; color: var(--text-muted); }
     .page-empty i { font-size: 4rem; color: var(--accent); opacity: 0.5; margin-bottom: 16px; }
     .btn-retry { background: var(--accent); color: var(--bg-primary); border: none; padding: 10px 24px; border-radius: 8px; cursor: pointer; font-weight: 600; }
     .btn-retry:hover { opacity: 0.9; }
-    .spinner { width: 40px; height: 40px; border: 3px solid var(--border); border-top-color: var(--accent); border-radius: 50%; animation: spin 0.8s linear infinite; margin: 0 auto; }
-    @keyframes spin { to { transform: rotate(360deg); } }
+
     .page-content { padding: 60px 0; }
     .projects-grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(320px, 1fr)); gap: 24px; }
     .project-card { background: var(--bg-card); border: 1px solid var(--border); border-radius: 16px; overflow: hidden; cursor: pointer; transition: var(--transition); }

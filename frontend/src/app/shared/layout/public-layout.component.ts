@@ -7,11 +7,13 @@ import { Company, Service } from '../../core/models';
 import { applyCompanyBrand } from '../../core/utils/brand.util';
 import { environment } from '../../../environments/environment';
 import { NeonBackgroundComponent } from '../neon-bg.component';
+import { routeAnimations } from '../../core/animations/route.animations';
 
 @Component({
   selector: 'app-public-layout',
   standalone: true,
   imports: [RouterOutlet, NgIf, NgFor, RouterLink, RouterLinkActive, NeonBackgroundComponent],
+  animations: [routeAnimations],
   template: `
     <app-neon-bg></app-neon-bg>
     <a class="skip-link" href="#main-content">Saltar al contenido</a>
@@ -49,7 +51,7 @@ import { NeonBackgroundComponent } from '../neon-bg.component';
     </header>
 
     <main id="main-content" role="main">
-      <router-outlet></router-outlet>
+      <router-outlet #outlet="outlet" [@routeAnimations]="getRouteAnimationData(outlet)"></router-outlet>
     </main>
 
     <footer class="footer" role="contentinfo">
@@ -112,6 +114,10 @@ import { NeonBackgroundComponent } from '../neon-bg.component';
 export class PublicLayoutComponent implements OnInit {
   private api = inject(ApiService);
   private seoService = inject(SeoService);
+
+  getRouteAnimationData(outlet: RouterOutlet) {
+    return outlet?.activatedRouteData?.['animation'];
+  }
 
   isScrolled = false;
   isMobileMenuOpen = false;
