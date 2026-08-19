@@ -757,6 +757,12 @@ export class ApiService {
     return this.http.get<any>(`${this.apiUrl}/users`, { params: httpParams });
   }
 
+  createUser(data: { email: string; password: string; name: string; roleId?: string; teamMemberId?: string }): Observable<User> {
+    return this.http.post<{ user: User }>(`${this.apiUrl}/users`, data).pipe(
+      map((res) => res.user)
+    );
+  }
+
   assignUserRole(userId: string, roleId: string): Observable<User> {
     return this.http.put<{ user: User }>(`${this.apiUrl}/users/${userId}/role`, { roleId }).pipe(
       map((res) => res.user)

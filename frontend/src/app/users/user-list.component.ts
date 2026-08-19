@@ -3,7 +3,7 @@ import { CommonModule } from '@angular/common';
 import { FormsModule } from '@angular/forms';
 import { ApiService } from '../core/services/api.service';
 import { ConfirmService } from '../core/services/confirm.service';
-import { User, Role, Permission } from '../core/models';
+import { User, Role, Permission, TeamMember } from '../core/models';
 
 @Component({
   selector: 'app-user-list',
@@ -29,6 +29,16 @@ export class UserListComponent implements OnInit {
   selectedUser: User | null = null;
   userRolePermissions: Permission[] = [];
   loadingPermissions = false;
+
+  showCreateModal = false;
+  creating = false;
+  createError = '';
+  teamMembers: TeamMember[] = [];
+  newEmail = '';
+  newPassword = '';
+  newName = '';
+  newRoleId = '';
+  newTeamMemberId = '';
 
   toasts: { message: string; type: 'success' | 'error'; id: number }[] = [];
   private toastId = 0;
@@ -59,6 +69,67 @@ export class UserListComponent implements OnInit {
     this.apiService.getPermissions().subscribe({
       next: (perms) => (this.allPermissions = perms),
       error: () => {},
+    });
+  }
+
+  loadTeamMembers(): void {
+    this.apiService.getPublicTeam().subscribe({
+      next: (list) => {
+        const linkedIds = new Set(this.users.filter(u => u.teamMemberId).map(u => u.teamMemberId));
+        this.teamMembers = (list || []).filter(m => !linkedIds.has(m.id));
+      },
+      error: () => {},
+    });
+  }
+
+  openCreateModal(): void {
+    this.showCreateModal = true;
+    this.createError = '';
+    this.newEmail = '';
+    this.newPassword = '';
+    this.newName = '';
+    this.newRoleId = '';
+    this.newTeamMemberId = '';
+    this.loadTeamMembers();
+  }
+
+  closeCreateModal(): void {
+    this.showCreateModal = false;
+    this.createError = '';
+  }
+
+  onTeamMemberSelect(): void {
+    const member = this.teamMembers.find(m => m.id === this.newTeamMemberId);
+    if (member) {
+      this.newName = member.fullName;
+      if (member.email) this.newEmail = member.email;
+    }
+  }
+
+  submitCreate(): void {
+    if (!this.newEmail || !this.newPassword || !this.newName) {
+      this.createError = 'Email, contraseña y nombre son requeridos';
+      return;
+    }
+    this.creating = true;
+    this.createError = '';
+    this.apiService.createUser({
+      email: this.newEmail,
+      password: this.newPassword,
+      name: this.newName,
+      roleId: this.newRoleId || undefined,
+      teamMemberId: this.newTeamMemberId || undefined,
+    }).subscribe({
+      next: (user) => {
+        this.showToast(`Usuario ${user.name} creado correctamente`, 'success');
+        this.closeCreateModal();
+        this.loadUsers();
+      },
+      error: (err) => {
+        this.creating = false;
+        this.createError = err?.error?.error || 'Error al crear el usuario';
+      },
+      complete: () => { this.creating = false; },
     });
   }
 

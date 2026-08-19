@@ -4,6 +4,7 @@ export interface User {
   name: string;
   role: string;
   roleId?: string;
+  teamMemberId?: string;
   isActive: boolean;
   lastLogin?: string;
   createdAt: string;
@@ -13,6 +14,7 @@ export interface User {
   permissions?: string[];
   rbacRole?: Role;
   userRoles?: { role: Role }[];
+  teamMember?: { id: string; fullName: string; professionalTitle: string; photoUrl?: string };
 }
 
 export interface Role {

@@ -9,12 +9,14 @@ const userSelect = {
   name: true,
   role: true,
   roleId: true,
+  teamMemberId: true,
   isActive: true,
   lastLogin: true,
   createdAt: true,
   updatedAt: true,
   rbacRole: { select: { id: true, name: true } },
-  userRoles: { select: { role: { select: { id: true, name: true } } } }
+  userRoles: { select: { role: { select: { id: true, name: true } } } },
+  teamMember: { select: { id: true, fullName: true, professionalTitle: true, photoUrl: true } }
 };
 
 const userController = {
@@ -46,6 +48,52 @@ const userController = {
       ]);
 
       res.json({ users, total, page: parseInt(page), limit: parseInt(limit), totalPages: Math.ceil(total / limit) });
+    } catch (error) {
+      next(error);
+    }
+  },
+
+  async create(req, res, next) {
+    try {
+      const { email, password, name, roleId, teamMemberId } = req.body;
+
+      if (!email || !password || !name) {
+        throw new AppError('Email, password y name son requeridos', 400);
+      }
+
+      const existing = await prisma.user.findUnique({ where: { email: email.toLowerCase() } });
+      if (existing) throw new AppError('El email ya está registrado', 409);
+
+      if (teamMemberId) {
+        const member = await prisma.teamMember.findUnique({ where: { id: teamMemberId } });
+        if (!member) throw new AppError('Miembro del equipo no encontrado', 404);
+
+        const linked = await prisma.user.findUnique({ where: { teamMemberId } });
+        if (linked) throw new AppError('Este miembro del equipo ya tiene una cuenta de usuario', 409);
+      }
+
+      const hashedPassword = await bcrypt.hash(password, 12);
+
+      const user = await prisma.user.create({
+        data: {
+          email: email.toLowerCase(),
+          password: hashedPassword,
+          name,
+          roleId: roleId || null,
+          teamMemberId: teamMemberId || null,
+        },
+        select: userSelect,
+      });
+
+      if (roleId) {
+        await prisma.userRole.create({
+          data: { userId: user.id, roleId }
+        });
+      }
+
+      audit(req, 'USER_CREATED', { userId: user.id, email: user.email, teamMemberId });
+
+      res.status(201).json({ user });
     } catch (error) {
       next(error);
     }

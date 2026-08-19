@@ -63,6 +63,7 @@ model User {
   name          String
   role          LegacyRole @default(USER)
   roleId        String?
+  teamMemberId  String? @unique
   isActive      Boolean  @default(true)
   refreshToken  String?
   lastLogin     DateTime?
@@ -75,6 +76,7 @@ model User {
   deletedAt     DateTime?
 
   profile       Profile?
+  teamMember    TeamMember? @relation("TeamMemberUser", fields: [teamMemberId], references: [id])
   experiences   Experience[]
   educations    Education[]
   certifications Certification[]
@@ -833,6 +835,7 @@ model TeamMember {
   languages        Language[]
   socialLinks      SocialLink[]
   projects         ProjectMember[]
+  user             User?    @relation("TeamMemberUser")
 
   @@index([isActive])
   @@index([order])
