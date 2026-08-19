@@ -41,8 +41,8 @@ import { environment } from '../../environments/environment';
             <h1 class="hero-title">{{ companyName }}</h1>
             <p class="hero-subtitle">{{ company?.shortDescription || company?.description || 'Desarrollamos software a medida y soluciones digitales para empresas.' }}</p>
             <div class="hero-actions">
-              <a class="btn-hero primary" routerLink="/servicios">Ver servicios</a>
-              <a class="btn-hero" routerLink="/contacto">Contáctanos</a>
+              <a class="btn-hero primary btn-press" routerLink="/servicios">Ver servicios</a>
+              <a class="btn-hero btn-press" routerLink="/contacto">Contáctanos</a>
             </div>
             <div class="hero-stats" *ngIf="hasStats">
               <div class="hero-stat" *ngIf="stats.projects"><span class="stat-value">{{ stats.projects }}+</span><span class="stat-label">Proyectos</span></div>
@@ -67,7 +67,7 @@ import { environment } from '../../environments/environment';
               </a>
             </div>
             <div class="section-cta">
-              <a class="btn-outline-accent" routerLink="/servicios">Ver todos los servicios</a>
+              <a class="btn-outline-accent link-underline" routerLink="/servicios">Ver todos los servicios</a>
             </div>
           </div>
         </section>
@@ -104,8 +104,8 @@ import { environment } from '../../environments/environment';
             <h2 class="section-title">Proyectos destacados</h2>
             <p class="section-subtitle">Algunos de los trabajos que hemos entregado a nuestros clientes.</p>
             <div class="projects-grid">
-              <a class="project-card" *ngFor="let p of featuredProjects; trackBy: trackByProject" [routerLink]="['/proyectos', p.slug]" data-aos="fade-up">
-                <div class="project-banner">
+              <a class="project-card card-glow" *ngFor="let p of featuredProjects; trackBy: trackByProject" [routerLink]="['/proyectos', p.slug]" data-aos="fade-up">
+                <div class="project-banner img-hover-zoom">
                   <img [src]="getPrimaryImage(p) || 'assets/project-placeholder.svg'" [alt]="'Portada de ' + p.title" loading="lazy" />
                   <span class="project-badge" *ngIf="p.isCaseStudy"><i class="bi bi-graph-up-arrow" aria-hidden="true"></i> Caso de éxito</span>
                 </div>
@@ -119,7 +119,7 @@ import { environment } from '../../environments/environment';
               </a>
             </div>
             <div class="section-cta">
-              <a class="btn-outline-accent" routerLink="/portafolio">Ver portafolio completo</a>
+              <a class="btn-outline-accent link-underline" routerLink="/portafolio">Ver portafolio completo</a>
             </div>
           </div>
         </section>
@@ -131,7 +131,7 @@ import { environment } from '../../environments/environment';
             <p class="section-subtitle">Empresas que confían en nuestro trabajo.</p>
             <div class="clients-grid">
               <a class="client-card" *ngFor="let c of clients; trackBy: trackByClient" [href]="c.website || null" [attr.target]="c.website ? '_blank' : null" [attr.tabindex]="c.website ? null : -1" [attr.aria-hidden]="!c.website" rel="noopener">
-                <img *ngIf="getClientLogo(c)" [src]="getClientLogo(c)" [alt]="c.name" loading="lazy" />
+                <div class="img-hover-zoom"><img *ngIf="getClientLogo(c)" [src]="getClientLogo(c)" [alt]="c.name" loading="lazy" /></div>
                 <span *ngIf="!getClientLogo(c)" class="client-fallback">{{ c.name }}</span>
               </a>
             </div>
@@ -165,7 +165,7 @@ import { environment } from '../../environments/environment';
             <p class="section-subtitle">Profesionales comprometidos con la excelencia.</p>
             <div class="team-grid">
               <a class="team-card" *ngFor="let m of teamMembers; trackBy: trackByTeam" [routerLink]="['/equipo', m.slug]" data-aos="fade-up">
-                <div class="team-avatar">
+                <div class="team-avatar img-hover-zoom">
                   <img *ngIf="m.photoUrl" [src]="resolveAsset(m.photoUrl)" [alt]="m.fullName" loading="lazy" />
                   <i *ngIf="!m.photoUrl" class="bi bi-person-circle" aria-hidden="true"></i>
                 </div>
@@ -175,7 +175,7 @@ import { environment } from '../../environments/environment';
               </a>
             </div>
             <div class="section-cta">
-              <a class="btn-outline-accent" routerLink="/equipo">Conoce al equipo</a>
+              <a class="btn-outline-accent link-underline" routerLink="/equipo">Conoce al equipo</a>
             </div>
           </div>
         </section>

@@ -27,7 +27,7 @@ import { filter, Subscription } from 'rxjs';
             <span *ngIf="!companyLogo" class="logo-text" aria-hidden="true">{{ companyName }}</span>
           </a>
 
-          <button class="hamburger" (click)="isMobileMenuOpen = !isMobileMenuOpen" [class.active]="isMobileMenuOpen"
+          <button class="hamburger btn-press" (click)="isMobileMenuOpen = !isMobileMenuOpen" [class.active]="isMobileMenuOpen"
             [attr.aria-expanded]="isMobileMenuOpen" aria-controls="nav-menu" aria-label="Menú de navegación">
             <span></span><span></span><span></span>
           </button>
@@ -36,12 +36,12 @@ import { filter, Subscription } from 'rxjs';
             <ul class="nav-links">
               <li *ngFor="let link of navLinks">
                 <a [routerLink]="link.href" routerLinkActive="active-link" [routerLinkActiveOptions]="{exact: link.href === '/'}"
-                  (click)="isMobileMenuOpen = false">{{ link.label }}</a>
+                  (click)="isMobileMenuOpen = false" class="nav-link-animated">{{ link.label }}</a>
               </li>
             </ul>
             <div class="nav-actions">
               <a class="navbar-cta" routerLink="/contacto" (click)="isMobileMenuOpen = false">Cotizar</a>
-              <button class="theme-toggle" (click)="toggleTheme()"
+              <button class="theme-toggle btn-press" (click)="toggleTheme()"
                 [attr.aria-label]="isDark ? 'Cambiar a modo claro' : 'Cambiar a modo oscuro'">
                 <i class="bi" [class.bi-sun]="isDark" [class.bi-moon]="!isDark" aria-hidden="true"></i>
               </button>

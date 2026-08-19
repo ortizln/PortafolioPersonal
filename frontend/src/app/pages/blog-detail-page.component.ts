@@ -72,7 +72,7 @@ import { environment } from '../../environments/environment';
             </div>
           </header>
 
-          <img *ngIf="coverUrl" class="post-cover" [src]="coverUrl" [alt]="post.title" loading="lazy" decoding="async" />
+          <div class="img-hover-zoom"><img *ngIf="coverUrl" class="post-cover" [src]="coverUrl" [alt]="post.title" loading="lazy" decoding="async" /></div>
 
           <div class="post-content" [innerHTML]="post.content || '<p>Sin contenido.</p>'"></div>
 
@@ -83,7 +83,7 @@ import { environment } from '../../environments/environment';
           <section class="related" *ngIf="related.length">
             <h3>Artículos relacionados</h3>
             <div class="related-grid">
-              <a class="rel-card" *ngFor="let r of related" [routerLink]="['/blog', r.slug]">
+              <a class="rel-card link-underline" *ngFor="let r of related" [routerLink]="['/blog', r.slug]">
                 <span class="rel-title">{{ r.title }}</span>
                 <span class="rel-date">{{ r.publishedAt | date: 'dd/MM/yyyy' }}</span>
               </a>

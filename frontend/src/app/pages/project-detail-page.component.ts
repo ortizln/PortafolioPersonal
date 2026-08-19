@@ -36,10 +36,10 @@ import { environment } from '../../environments/environment';
               <span *ngIf="project.startDate"><i class="bi bi-calendar"></i> {{ project.startDate | date: 'MMM yyyy' }}</span>
             </div>
             <div class="hero-actions" *ngIf="project.demoUrl || project.githubUrl || project.gitlabUrl || project.videoUrl">
-              <a *ngIf="project.demoUrl" class="btn-hero primary" [href]="project.demoUrl" target="_blank" rel="noopener"><i class="bi bi-box-arrow-up-right"></i> Demo</a>
-              <a *ngIf="project.githubUrl" class="btn-hero" [href]="project.githubUrl" target="_blank" rel="noopener"><i class="bi bi-github"></i> GitHub</a>
-              <a *ngIf="project.gitlabUrl" class="btn-hero" [href]="project.gitlabUrl" target="_blank" rel="noopener"><i class="bi bi-gitlab"></i> GitLab</a>
-              <a *ngIf="project.videoUrl" class="btn-hero" [href]="project.videoUrl" target="_blank" rel="noopener"><i class="bi bi-play-circle"></i> Video</a>
+              <a *ngIf="project.demoUrl" class="btn-hero primary btn-press" [href]="project.demoUrl" target="_blank" rel="noopener"><i class="bi bi-box-arrow-up-right"></i> Demo</a>
+              <a *ngIf="project.githubUrl" class="btn-hero btn-press" [href]="project.githubUrl" target="_blank" rel="noopener"><i class="bi bi-github"></i> GitHub</a>
+              <a *ngIf="project.gitlabUrl" class="btn-hero btn-press" [href]="project.gitlabUrl" target="_blank" rel="noopener"><i class="bi bi-gitlab"></i> GitLab</a>
+              <a *ngIf="project.videoUrl" class="btn-hero btn-press" [href]="project.videoUrl" target="_blank" rel="noopener"><i class="bi bi-play-circle"></i> Video</a>
             </div>
           </div>
         </div>
@@ -79,7 +79,7 @@ import { environment } from '../../environments/environment';
           <section class="section" *ngIf="project.images?.length">
             <h2>Galería</h2>
             <div class="gallery">
-              <img class="gallery-item" *ngFor="let img of project.images" [src]="getImageUrl(img)" [alt]="img.alt || 'Imagen del proyecto'" loading="lazy" decoding="async" />
+              <div class="img-hover-zoom" *ngFor="let img of project.images"><img class="gallery-item" [src]="getImageUrl(img)" [alt]="img.alt || 'Imagen del proyecto'" loading="lazy" decoding="async" /></div>
             </div>
           </section>
 
@@ -113,7 +113,7 @@ import { environment } from '../../environments/environment';
             <h2>Proyectos relacionados</h2>
             <div class="related-grid">
               <a class="related-card" *ngFor="let p of related" [routerLink]="'/proyectos/' + p.slug">
-                <img class="related-image" [src]="getPrimaryImage(p) || 'assets/project-placeholder.svg'" [alt]="p.title" loading="lazy" decoding="async" />
+                <div class="img-hover-zoom"><img class="related-image" [src]="getPrimaryImage(p) || 'assets/project-placeholder.svg'" [alt]="p.title" loading="lazy" decoding="async" /></div>
                 <div class="related-body">
                   <h3>{{ p.title }}</h3>
                   <p>{{ p.summary || p.description }}</p>
