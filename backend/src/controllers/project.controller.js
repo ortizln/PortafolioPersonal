@@ -7,7 +7,7 @@ const projectInclude = {
   images: true,
   technologies: { include: { technology: true } },
   categories: { include: { category: true } },
-  client: true,
+  clientRel: true,
   service: true,
   members: { include: { teamMember: true }, orderBy: { isLead: 'desc' } }
 };
