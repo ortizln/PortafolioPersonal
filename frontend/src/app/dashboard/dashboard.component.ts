@@ -1,163 +1,472 @@
 import { Component, OnInit, inject } from '@angular/core';
-import { RouterLink } from '@angular/router';
-import { NgFor, NgIf, AsyncPipe, KeyValuePipe } from '@angular/common';
-import { DomSanitizer, SafeHtml } from '@angular/platform-browser';
+import { CommonModule } from '@angular/common';
+import { FormsModule } from '@angular/forms';
 import { ApiService } from '../core/services/api.service';
-import { Observable } from 'rxjs';
+import { ConfirmService } from '../core/services/confirm.service';
+import { AuthService } from '../core/services/auth.service';
+import { Experience, Education, Certification, Skill, Language, SocialLink, Profile } from '../core/models';
+
+type Tab = 'profile' | 'experience' | 'education' | 'certificates' | 'skills' | 'languages' | 'social';
 
 @Component({
   selector: 'app-dashboard',
   standalone: true,
-  imports: [NgFor, NgIf, AsyncPipe, KeyValuePipe, RouterLink],
-  template: `
-    <div class="dashboard">
-      <header class="dashboard-header">
-        <div>
-          <h1>Dashboard</h1>
-          <p>Overview of your portfolio</p>
-        </div>
-        <div class="header-actions">
-          <a routerLink="/admin/profile" class="btn-outline-accent">Edit Profile</a>
-          <a routerLink="/admin/projects/new" class="btn-gradient">New Project</a>
-        </div>
-      </header>
-
-      <section class="stats-grid">
-        <div class="stat-card" *ngFor="let stat of stats | keyvalue">
-          <div class="stat-icon" [class]="'icon-' + stat.key">
-            <span [innerHTML]="icons[stat.key]"></span>
-          </div>
-          <div class="stat-info">
-            <span class="stat-value" [attr.data-target]="stat.value">{{ stat.value }}</span>
-            <span class="stat-label">{{ labels[stat.key] || stat.key }}</span>
-          </div>
-        </div>
-      </section>
-
-      <div class="dashboard-grid">
-        <section class="card-modern quick-actions">
-          <h2>Quick Actions</h2>
-          <div class="actions-list">
-            <a *ngFor="let action of quickActions" [routerLink]="action.link" class="action-item">
-              <span class="action-icon" [innerHTML]="action.icon"></span>
-              <span class="action-text">{{ action.label }}</span>
-            </a>
-          </div>
-        </section>
-
-        <section class="card-modern recent-messages">
-          <h2>Recent Messages</h2>
-          <div *ngIf="(messages$ | async)?.length === 0" class="empty-state">No messages yet</div>
-          <div *ngFor="let msg of messages$ | async" class="message-item">
-            <div class="message-header">
-              <strong>{{ msg.name }}</strong>
-              <span class="message-date">{{ msg.createdAt | date:'short' }}</span>
-            </div>
-            <p class="message-subject">{{ msg.subject }}</p>
-            <span class="badge-tech" [class.unread]="!msg.isRead">{{ msg.isRead ? 'Read' : 'New' }}</span>
-          </div>
-        </section>
-      </div>
-
-      <section class="card-modern project-status">
-        <h2>Project Status</h2>
-        <div class="status-summary">
-          <span class="status-total">Total: {{ projectStats.total || 0 }}</span>
-        </div>
-        <div class="status-chart" *ngIf="projectStats.byStatus">
-          <h3>By Status</h3>
-          <div *ngFor="let entry of (projectStats.byStatus || {}) | keyvalue" class="status-bar-item">
-            <div class="status-bar-label">
-              <span>{{ statusLabel(entry.key) }}</span>
-              <span>{{ entry.value }}</span>
-            </div>
-            <div class="status-bar-track">
-              <div class="status-bar-fill" [style.width.%]="barPercent(entry.value)"></div>
-            </div>
-          </div>
-        </div>
-        <div class="tech-chart" *ngIf="projectStats.technologyCounts">
-          <h3>Technologies</h3>
-          <div *ngFor="let entry of (projectStats.technologyCounts || {}) | keyvalue" class="tech-item">
-            <span class="tech-name">{{ entry.key }}</span>
-            <span class="tech-count">{{ entry.value }}</span>
-          </div>
-        </div>
-      </section>
-    </div>
-  `,
+  imports: [CommonModule, FormsModule],
+  templateUrl: './dashboard.component.html',
   styleUrls: ['./dashboard.component.scss'],
 })
 export class DashboardComponent implements OnInit {
-  private apiService = inject(ApiService);
-  private sanitizer = inject(DomSanitizer);
+  private api = inject(ApiService);
+  private confirm = inject(ConfirmService);
+  private auth = inject(AuthService);
 
-  stats: Record<string, number> = {};
-  projectStats: Record<string, number> = {};
-  messages$: Observable<any[]> = this.apiService.getContactMessagesAll();
+  activeTab: Tab = 'profile';
+  loading = true;
 
-  labels: Record<string, string> = {
-    projects: 'Projects',
-    experiences: 'Experiences',
-    education: 'Education',
-    certifications: 'Certifications',
-    skills: 'Skills',
-    languages: 'Languages',
-    unreadMessages: 'Unread Messages',
-    totalMessages: 'Total Messages',
-  };
+  // Profile
+  profile: Profile | null = null;
+  profileForm: any = {};
+  savingProfile = false;
+  cvFile: File | null = null;
+  photoFile: File | null = null;
+  uploadingCv = false;
+  uploadingPhoto = false;
 
-  icons: Record<string, SafeHtml> = {};
-  quickActions: { icon: SafeHtml; label: string; link: string }[] = [];
+  // Experience
+  experiences: Experience[] = [];
+  expForm: any = this.emptyExp();
+  editingExpId: number | null = null;
+  showExpForm = false;
+  savingExp = false;
 
-  private iconSvgs: Record<string, string> = {
-    projects: `<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="2" y="3" width="20" height="14" rx="2"/><path d="M8 21h8"/><path d="M12 17v4"/></svg>`,
-    experiences: `<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="2" y="7" width="20" height="14" rx="2"/><path d="M16 7V5a2 2 0 0 0-2-2h-4a2 2 0 0 0-2 2v2"/></svg>`,
-    education: `<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M22 10v6M2 10l10-5 10 5-10 5z"/><path d="M6 12v5c3 3 9 3 12 0v-5"/></svg>`,
-    certifications: `<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="8" r="5"/><path d="M12 13v8l-2-2-2 2"/></svg>`,
-    skills: `<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M12 2L2 7l10 5 10-5-10-5z"/><path d="M2 17l10 5 10-5"/><path d="M2 12l10 5 10-5"/></svg>`,
-    languages: `<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="10"/><path d="M2 12h20"/><path d="M12 2a15.3 15.3 0 0 1 4 10 15.3 15.3 0 0 1-4 10 15.3 15.3 0 0 1-4-10 15.3 15.3 0 0 1 4-10z"/></svg>`,
-    unreadMessages: `<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M4 4h16c1.1 0 2 .9 2 2v12c0 1.1-.9 2-2 2H4c-1.1 0-2-.9-2-2V6c0-1.1.9-2 2-2z"/><polyline points="22,6 12,13 2,6"/></svg>`,
-    totalMessages: `<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M21 15a2 2 0 0 1-2 2H7l-4 4V5a2 2 0 0 1 2-2h14a2 2 0 0 1 2 2z"/></svg>`,
-  };
+  // Education
+  educations: Education[] = [];
+  eduForm: any = this.emptyEdu();
+  editingEduId: number | null = null;
+  showEduForm = false;
+  savingEdu = false;
 
-  private actionSvgs: { icon: string; label: string; link: string }[] = [
-    { icon: `<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="2" y="3" width="20" height="14" rx="2"/><path d="M8 21h8"/><path d="M12 17v4"/></svg>`, label: 'Manage Projects', link: '/admin/projects' },
-    { icon: `<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="2" y="7" width="20" height="14" rx="2"/><path d="M16 7V5a2 2 0 0 0-2-2h-4a2 2 0 0 0-2 2v2"/></svg>`, label: 'Manage Experiences', link: '/admin/experiences' },
-    { icon: `<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M22 10v6M2 10l10-5 10 5-10 5z"/><path d="M6 12v5c3 3 9 3 12 0v-5"/></svg>`, label: 'Manage Education', link: '/admin/education' },
-    { icon: `<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="8" r="5"/><path d="M12 13v8l-2-2-2 2"/></svg>`, label: 'Manage Certifications', link: '/admin/certificates' },
-    { icon: `<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M12 2L2 7l10 5 10-5-10-5z"/><path d="M2 17l10 5 10-5"/><path d="M2 12l10 5 10-5"/></svg>`, label: 'Manage Skills', link: '/admin/skills' },
-    { icon: `<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M4 4h16c1.1 0 2 .9 2 2v12c0 1.1-.9 2-2 2H4c-1.1 0-2-.9-2-2V6c0-1.1.9-2 2-2z"/><polyline points="22,6 12,13 2,6"/></svg>`, label: 'View Messages', link: '/admin/messages' },
+  // Certificates
+  certificates: Certification[] = [];
+  certForm: any = this.emptyCert();
+  editingCertId: number | null = null;
+  showCertForm = false;
+  savingCert = false;
+  certImageFile: File | null = null;
+  certFile: File | null = null;
+
+  // Skills
+  skills: Skill[] = [];
+  skillForm: any = this.emptySkill();
+  editingSkillId: string | null = null;
+  showSkillForm = false;
+  savingSkill = false;
+
+  // Languages
+  languages: Language[] = [];
+  langForm: any = this.emptyLang();
+  editingLangId: string | null = null;
+  showLangForm = false;
+  savingLang = false;
+
+  // Social Links
+  socialLinks: SocialLink[] = [];
+  socialForm: any = this.emptySocial();
+  editingSocialId: string | null = null;
+  showSocialForm = false;
+  savingSocial = false;
+
+  toasts: { message: string; type: 'success' | 'error'; id: number }[] = [];
+  private toastId = 0;
+
+  readonly SKILL_CATEGORIES = ['FRONTEND', 'BACKEND', 'DEVOPS', 'DATABASE', 'DESIGN', 'CLOUD', 'MOBILE', 'OTHER'];
+  readonly SOCIAL_PLATFORMS = [
+    { name: 'GitHub', icon: 'bi-github' },
+    { name: 'LinkedIn', icon: 'bi-linkedin' },
+    { name: 'Twitter/X', icon: 'bi-twitter-x' },
+    { name: 'YouTube', icon: 'bi-youtube' },
+    { name: 'Instagram', icon: 'bi-instagram' },
+    { name: 'Facebook', icon: 'bi-facebook' },
+    { name: 'Website', icon: 'bi-globe' },
+    { name: 'Email', icon: 'bi-envelope' },
+    { name: 'Otro', icon: 'bi-link-45deg' },
   ];
 
-  constructor() {
-    Object.keys(this.iconSvgs).forEach(key => {
-      this.icons[key] = this.sanitizer.bypassSecurityTrustHtml(this.iconSvgs[key]);
-    });
-    this.quickActions = this.actionSvgs.map(a => ({
-      ...a,
-      icon: this.sanitizer.bypassSecurityTrustHtml(a.icon),
-    }));
-  }
-
   ngOnInit(): void {
-    this.apiService.getStats().subscribe((s) => this.stats = s);
-    this.apiService.getProjectStats().subscribe((s) => this.projectStats = s);
+    this.loadTab(this.activeTab);
   }
 
-  barPercent(value: number): number {
-    const max = Math.max(...Object.values(this.projectStats.byStatus || {}), 1);
-    return (value / max) * 100;
+  switchTab(tab: Tab): void {
+    this.activeTab = tab;
+    this.loadTab(tab);
   }
 
-  statusLabel(status: string): string {
-    const map: Record<string, string> = {
-      DRAFT: 'Borrador',
-      IN_PROGRESS: 'En Progreso',
-      COMPLETED: 'Completado',
-      ARCHIVED: 'Archivado',
-      UNKNOWN: 'Desconocido',
-    };
-    return map[status] || status;
+  private loadTab(tab: Tab): void {
+    this.loading = true;
+    switch (tab) {
+      case 'profile': this.loadProfile(); break;
+      case 'experience': this.loadExperiences(); break;
+      case 'education': this.loadEducations(); break;
+      case 'certificates': this.loadCertificates(); break;
+      case 'skills': this.loadSkills(); break;
+      case 'languages': this.loadLanguages(); break;
+      case 'social': this.loadSocialLinks(); break;
+    }
+  }
+
+  // ─── PROFILE ─────────────────────────────────────────────
+  private loadProfile(): void {
+    this.api.getProfile().subscribe({
+      next: (p) => { this.profile = p; this.profileForm = { ...p }; },
+      error: () => { this.profileForm = {}; },
+      complete: () => this.loading = false,
+    });
+  }
+
+  saveProfile(): void {
+    this.savingProfile = true;
+    this.api.updateProfile(this.profileForm).subscribe({
+      next: (p) => { this.profile = p; this.toast('Perfil actualizado', 'success'); },
+      error: (e) => this.toast(e?.error?.error || 'Error al guardar', 'error'),
+      complete: () => this.savingProfile = false,
+    });
+  }
+
+  onPhotoSelect(event: Event): void {
+    const file = (event.target as HTMLInputElement).files?.[0];
+    if (!file) return;
+    this.photoFile = file;
+    this.uploadingPhoto = true;
+    this.api.uploadPhoto(file).subscribe({
+      next: (res) => { this.profileForm.profileImage = res.profileImage; this.toast('Foto actualizada', 'success'); },
+      error: (e) => this.toast(e?.error?.error || 'Error al subir foto', 'error'),
+      complete: () => { this.uploadingPhoto = false; this.photoFile = null; },
+    });
+  }
+
+  onCvSelect(event: Event): void {
+    const file = (event.target as HTMLInputElement).files?.[0];
+    if (!file) return;
+    this.cvFile = file;
+    this.uploadingCv = true;
+    this.api.uploadCV(file).subscribe({
+      next: (res) => { this.profileForm.cvFile = res.cvFile; this.toast('CV actualizado', 'success'); },
+      error: (e) => this.toast(e?.error?.error || 'Error al subir CV', 'error'),
+      complete: () => { this.uploadingCv = false; this.cvFile = null; },
+    });
+  }
+
+  // ─── EXPERIENCE ──────────────────────────────────────────
+  private loadExperiences(): void {
+    this.api.getExperiencesAll().subscribe({
+      next: (list) => this.experiences = list,
+      complete: () => this.loading = false,
+    });
+  }
+
+  private emptyExp(): any {
+    return { company: '', position: '', description: '', startDate: '', endDate: '', current: false, location: '' };
+  }
+
+  openExpForm(exp?: Experience): void {
+    if (exp) {
+      this.editingExpId = exp.id;
+      this.expForm = { ...exp, startDate: exp.startDate?.slice(0, 10) || '', endDate: exp.endDate?.slice(0, 10) || '' };
+    } else {
+      this.editingExpId = null;
+      this.expForm = this.emptyExp();
+    }
+    this.showExpForm = true;
+  }
+
+  saveExp(): void {
+    if (!this.expForm.company || !this.expForm.position) return;
+    this.savingExp = true;
+    const obs = this.editingExpId
+      ? this.api.updateExperience(this.editingExpId, this.expForm)
+      : this.api.createExperience(this.expForm);
+    obs.subscribe({
+      next: () => { this.toast(this.editingExpId ? 'Experiencia actualizada' : 'Experiencia creada', 'success'); this.showExpForm = false; this.loadExperiences(); },
+      error: (e) => this.toast(e?.error?.error || 'Error', 'error'),
+      complete: () => this.savingExp = false,
+    });
+  }
+
+  async deleteExp(id: number): Promise<void> {
+    if (!await this.confirm.confirm({ message: '¿Eliminar esta experiencia?' })) return;
+    this.api.deleteExperience(id).subscribe({
+      next: () => { this.toast('Experiencia eliminada', 'success'); this.loadExperiences(); },
+      error: (e) => this.toast(e?.error?.error || 'Error', 'error'),
+    });
+  }
+
+  // ─── EDUCATION ───────────────────────────────────────────
+  private loadEducations(): void {
+    this.api.getEducationAll().subscribe({
+      next: (list) => this.educations = list,
+      complete: () => this.loading = false,
+    });
+  }
+
+  private emptyEdu(): any {
+    return { institution: '', degree: '', field: '', level: '', description: '', startDate: '', endDate: '', current: false, grade: '' };
+  }
+
+  openEduForm(edu?: Education): void {
+    if (edu) {
+      this.editingEduId = edu.id;
+      this.eduForm = { ...edu, startDate: edu.startDate?.slice(0, 10) || '', endDate: edu.endDate?.slice(0, 10) || '' };
+    } else {
+      this.editingEduId = null;
+      this.eduForm = this.emptyEdu();
+    }
+    this.showEduForm = true;
+  }
+
+  saveEdu(): void {
+    if (!this.eduForm.institution || !this.eduForm.degree) return;
+    this.savingEdu = true;
+    const obs = this.editingEduId
+      ? this.api.updateEducation(this.editingEduId, this.eduForm)
+      : this.api.createEducation(this.eduForm);
+    obs.subscribe({
+      next: () => { this.toast(this.editingEduId ? 'Educación actualizada' : 'Educación creada', 'success'); this.showEduForm = false; this.loadEducations(); },
+      error: (e) => this.toast(e?.error?.error || 'Error', 'error'),
+      complete: () => this.savingEdu = false,
+    });
+  }
+
+  async deleteEdu(id: number): Promise<void> {
+    if (!await this.confirm.confirm({ message: '¿Eliminar esta educación?' })) return;
+    this.api.deleteEducation(id).subscribe({
+      next: () => { this.toast('Educación eliminada', 'success'); this.loadEducations(); },
+      error: (e) => this.toast(e?.error?.error || 'Error', 'error'),
+    });
+  }
+
+  // ─── CERTIFICATES ────────────────────────────────────────
+  private loadCertificates(): void {
+    this.api.getCertificationsAll().subscribe({
+      next: (list) => this.certificates = list,
+      complete: () => this.loading = false,
+    });
+  }
+
+  private emptyCert(): any {
+    return { name: '', issuingOrganization: '', description: '', issueDate: '', expiryDate: '', credentialId: '', credentialUrl: '', category: '' };
+  }
+
+  openCertForm(cert?: Certification): void {
+    if (cert) {
+      this.editingCertId = cert.id;
+      this.certForm = { ...cert, issueDate: cert.issueDate?.slice(0, 10) || '', expiryDate: cert.expiryDate?.slice(0, 10) || '' };
+    } else {
+      this.editingCertId = null;
+      this.certForm = this.emptyCert();
+    }
+    this.showCertForm = true;
+  }
+
+  saveCert(): void {
+    if (!this.certForm.name || !this.certForm.issuingOrganization) return;
+    this.savingCert = true;
+    const obs = this.editingCertId
+      ? this.api.updateCertification(this.editingCertId, this.certForm)
+      : this.api.createCertification(this.certForm);
+    obs.subscribe({
+      next: (res: any) => {
+        const certId = this.editingCertId || res?.certification?.id || res?.id;
+        const uploads: Promise<any>[] = [];
+        if (this.certImageFile && certId) uploads.push(this.api.uploadCertificationImage(certId, this.certImageFile).toPromise());
+        if (this.certFile && certId) uploads.push(this.api.uploadCertificationFile(certId, this.certFile).toPromise());
+        Promise.all(uploads).then(() => {
+          this.toast(this.editingCertId ? 'Certificado actualizado' : 'Certificado creado', 'success');
+          this.showCertForm = false;
+          this.certImageFile = null;
+          this.certFile = null;
+          this.loadCertificates();
+        }).catch(() => {
+          this.toast('Certificado guardado pero error subiendo archivos', 'error');
+          this.showCertForm = false;
+          this.loadCertificates();
+        });
+      },
+      error: (e) => { this.savingCert = false; this.toast(e?.error?.error || 'Error', 'error'); },
+      complete: () => this.savingCert = false,
+    });
+  }
+
+  async deleteCert(id: number): Promise<void> {
+    if (!await this.confirm.confirm({ message: '¿Eliminar este certificado?' })) return;
+    this.api.deleteCertification(id).subscribe({
+      next: () => { this.toast('Certificado eliminado', 'success'); this.loadCertificates(); },
+      error: (e) => this.toast(e?.error?.error || 'Error', 'error'),
+    });
+  }
+
+  onCertImageSelect(event: Event): void {
+    this.certImageFile = (event.target as HTMLInputElement).files?.[0] || null;
+  }
+
+  onCertFileSelect(event: Event): void {
+    this.certFile = (event.target as HTMLInputElement).files?.[0] || null;
+  }
+
+  // ─── SKILLS ──────────────────────────────────────────────
+  private loadSkills(): void {
+    this.api.getSkillsAll().subscribe({
+      next: (list) => this.skills = list.sort((a, b) => (a.order || 0) - (b.order || 0)),
+      complete: () => this.loading = false,
+    });
+  }
+
+  private emptySkill(): any {
+    return { name: '', percentage: 50, level: '', icon: '', color: '#64ffda', order: 0, category: 'OTHER' };
+  }
+
+  openSkillForm(skill?: Skill): void {
+    if (skill) {
+      this.editingSkillId = skill.id;
+      this.skillForm = { ...skill };
+    } else {
+      this.editingSkillId = null;
+      this.skillForm = this.emptySkill();
+    }
+    this.showSkillForm = true;
+  }
+
+  saveSkill(): void {
+    if (!this.skillForm.name) return;
+    this.savingSkill = true;
+    const obs = this.editingSkillId
+      ? this.api.updateSkill(this.editingSkillId, this.skillForm)
+      : this.api.createSkill(this.skillForm);
+    obs.subscribe({
+      next: () => { this.toast(this.editingSkillId ? 'Habilidad actualizada' : 'Habilidad creada', 'success'); this.showSkillForm = false; this.loadSkills(); },
+      error: (e) => this.toast(e?.error?.error || 'Error', 'error'),
+      complete: () => this.savingSkill = false,
+    });
+  }
+
+  async deleteSkill(id: string): Promise<void> {
+    if (!await this.confirm.confirm({ message: '¿Eliminar esta habilidad?' })) return;
+    this.api.deleteSkill(id).subscribe({
+      next: () => { this.toast('Habilidad eliminada', 'success'); this.loadSkills(); },
+      error: (e) => this.toast(e?.error?.error || 'Error', 'error'),
+    });
+  }
+
+  skillLevel(pct: number): string {
+    if (pct >= 90) return 'Experto';
+    if (pct >= 75) return 'Avanzado';
+    if (pct >= 50) return 'Intermedio';
+    if (pct >= 25) return 'Básico';
+    return 'Aprendiz';
+  }
+
+  // ─── LANGUAGES ───────────────────────────────────────────
+  private loadLanguages(): void {
+    this.api.getLanguagesAll().subscribe({
+      next: (list) => this.languages = list,
+      complete: () => this.loading = false,
+    });
+  }
+
+  private emptyLang(): any {
+    return { name: '', level: 'Intermediate', percentage: 50, certification: '' };
+  }
+
+  openLangForm(lang?: Language): void {
+    if (lang) {
+      this.editingLangId = lang.id;
+      this.langForm = { ...lang };
+    } else {
+      this.editingLangId = null;
+      this.langForm = this.emptyLang();
+    }
+    this.showLangForm = true;
+  }
+
+  saveLang(): void {
+    if (!this.langForm.name) return;
+    this.savingLang = true;
+    const obs = this.editingLangId
+      ? this.api.updateLanguage(this.editingLangId, this.langForm)
+      : this.api.createLanguage(this.langForm);
+    obs.subscribe({
+      next: () => { this.toast(this.editingLangId ? 'Idioma actualizado' : 'Idioma creado', 'success'); this.showLangForm = false; this.loadLanguages(); },
+      error: (e) => this.toast(e?.error?.error || 'Error', 'error'),
+      complete: () => this.savingLang = false,
+    });
+  }
+
+  async deleteLang(id: string): Promise<void> {
+    if (!await this.confirm.confirm({ message: '¿Eliminar este idioma?' })) return;
+    this.api.deleteLanguage(id).subscribe({
+      next: () => { this.toast('Idioma eliminado', 'success'); this.loadLanguages(); },
+      error: (e) => this.toast(e?.error?.error || 'Error', 'error'),
+    });
+  }
+
+  // ─── SOCIAL LINKS ────────────────────────────────────────
+  private loadSocialLinks(): void {
+    this.api.getSocialLinksAll().subscribe({
+      next: (list) => this.socialLinks = list,
+      complete: () => this.loading = false,
+    });
+  }
+
+  private emptySocial(): any {
+    return { platform: '', url: '', icon: 'bi-link-45deg', order: this.socialLinks.length + 1, isActive: true };
+  }
+
+  openSocialForm(link?: SocialLink): void {
+    if (link) {
+      this.editingSocialId = link.id;
+      this.socialForm = { ...link };
+    } else {
+      this.editingSocialId = null;
+      this.socialForm = this.emptySocial();
+    }
+    this.showSocialForm = true;
+  }
+
+  onPlatformChange(platform: string): void {
+    const found = this.SOCIAL_PLATFORMS.find(p => p.name === platform);
+    if (found) this.socialForm.icon = found.icon;
+  }
+
+  saveSocial(): void {
+    if (!this.socialForm.url) return;
+    this.savingSocial = true;
+    const obs = this.editingSocialId
+      ? this.api.updateSocialLink(this.editingSocialId, this.socialForm)
+      : this.api.createSocialLink(this.socialForm);
+    obs.subscribe({
+      next: () => { this.toast(this.editingSocialId ? 'Red actualizada' : 'Red creada', 'success'); this.showSocialForm = false; this.loadSocialLinks(); },
+      error: (e) => this.toast(e?.error?.error || 'Error', 'error'),
+      complete: () => this.savingSocial = false,
+    });
+  }
+
+  async deleteSocial(id: string): Promise<void> {
+    if (!await this.confirm.confirm({ message: '¿Eliminar esta red social?' })) return;
+    this.api.deleteSocialLink(id).subscribe({
+      next: () => { this.toast('Red social eliminada', 'success'); this.loadSocialLinks(); },
+      error: (e) => this.toast(e?.error?.error || 'Error', 'error'),
+    });
+  }
+
+  // ─── UTILS ───────────────────────────────────────────────
+  getUploadUrl(path: string): string {
+    if (!path) return '';
+    if (path.startsWith('http')) return path;
+    return this.api.getUploadUrl(path);
+  }
+
+  private toast(message: string, type: 'success' | 'error'): void {
+    const id = ++this.toastId;
+    this.toasts.push({ message, type, id });
+    setTimeout(() => this.toasts = this.toasts.filter(t => t.id !== id), 3500);
   }
 }

@@ -1,0 +1,433 @@
+<div class="dashboard">
+  <div class="dash-header">
+    <h1>Mi Perfil</h1>
+    <p>Gestiona tu información profesional</p>
+  </div>
+
+  <!-- Toast -->
+  <div class="toast-stack">
+    <div class="toast" *ngFor="let t of toasts" [class.error]="t.type === 'error'">
+      <i class="bi" [ngClass]="t.type === 'success' ? 'bi-check-circle' : 'bi-exclamation-circle'"></i>
+      {{ t.message }}
+    </div>
+  </div>
+
+  <!-- Tabs -->
+  <nav class="tabs">
+    <button [class.active]="activeTab === 'profile'" (click)="switchTab('profile')"><i class="bi bi-person"></i> Perfil</button>
+    <button [class.active]="activeTab === 'experience'" (click)="switchTab('experience')"><i class="bi bi-briefcase"></i> Experiencia</button>
+    <button [class.active]="activeTab === 'education'" (click)="switchTab('education')"><i class="bi bi-mortarboard"></i> Educación</button>
+    <button [class.active]="activeTab === 'certificates'" (click)="switchTab('certificates')"><i class="bi bi-award"></i> Certificados</button>
+    <button [class.active]="activeTab === 'skills'" (click)="switchTab('skills')"><i class="bi bi-bar-chart"></i> Habilidades</button>
+    <button [class.active]="activeTab === 'languages'" (click)="switchTab('languages')"><i class="bi bi-translate"></i> Idiomas</button>
+    <button [class.active]="activeTab === 'social'" (click)="switchTab('social')"><i class="bi bi-share"></i> Redes</button>
+  </nav>
+
+  <!-- Loading -->
+  <div class="loading" *ngIf="loading">
+    <div class="spinner"></div>
+    <span>Cargando...</span>
+  </div>
+
+  <!-- ═══════════ PROFILE TAB ═══════════ -->
+  <section class="tab-content" *ngIf="activeTab === 'profile' && !loading">
+    <div class="profile-grid">
+      <div class="profile-media">
+        <div class="avatar-wrap">
+          <img *ngIf="profileForm.profileImage" [src]="getUploadUrl(profileForm.profileImage)" alt="Foto" class="avatar" />
+          <div *ngIf="!profileForm.profileImage" class="avatar-placeholder"><i class="bi bi-person"></i></div>
+          <label class="upload-btn">
+            <i class="bi bi-camera"></i>
+            <input type="file" accept="image/*" (change)="onPhotoSelect($event)" hidden />
+          </label>
+        </div>
+        <div class="cv-section">
+          <i class="bi bi-file-earmark-pdf"></i>
+          <span *ngIf="profileForm.cvFile">{{ profileForm.cvFile }}</span>
+          <span *ngIf="!profileForm.cvFile" class="muted">Sin CV</span>
+          <label class="upload-cv-btn">
+            {{ profileForm.cvFile ? 'Cambiar CV' : 'Subir CV' }}
+            <input type="file" accept=".pdf,.doc,.docx" (change)="onCvSelect($event)" hidden />
+          </label>
+          <span class="upload-hint" *ngIf="uploadingCv">Subiendo...</span>
+        </div>
+      </div>
+
+      <div class="profile-fields">
+        <div class="field">
+          <label>Nombre completo</label>
+          <input type="text" [(ngModel)]="profileForm.fullName" placeholder="Tu nombre" />
+        </div>
+        <div class="field">
+          <label>Título profesional</label>
+          <input type="text" [(ngModel)]="profileForm.professionalTitle" placeholder="Ej: Full Stack Developer" />
+        </div>
+        <div class="field">
+          <label>Email</label>
+          <input type="email" [(ngModel)]="profileForm.email" placeholder="tu@email.com" />
+        </div>
+        <div class="field">
+          <label>Teléfono</label>
+          <input type="text" [(ngModel)]="profileForm.phone" placeholder="+57 300 123 4567" />
+        </div>
+        <div class="field">
+          <label>Ubicación</label>
+          <input type="text" [(ngModel)]="profileForm.location" placeholder="Ciudad, País" />
+        </div>
+        <div class="field">
+          <label>Sitio web</label>
+          <input type="url" [(ngModel)]="profileForm.website" placeholder="https://..." />
+        </div>
+        <div class="field full">
+          <label>Descripción corta</label>
+          <textarea [(ngModel)]="profileForm.description" rows="2" placeholder="Una línea sobre ti"></textarea>
+        </div>
+        <div class="field full">
+          <label>Sobre mí</label>
+          <textarea [(ngModel)]="profileForm.aboutMe" rows="4" placeholder="Cuéntanos sobre ti..."></textarea>
+        </div>
+      </div>
+    </div>
+    <div class="tab-actions">
+      <button class="btn-save" (click)="saveProfile()" [disabled]="savingProfile">
+        <span *ngIf="savingProfile" class="spinner-sm"></span>
+        {{ savingProfile ? 'Guardando...' : 'Guardar perfil' }}
+      </button>
+    </div>
+  </section>
+
+  <!-- ═══════════ EXPERIENCE TAB ═══════════ -->
+  <section class="tab-content" *ngIf="activeTab === 'experience' && !loading">
+    <div class="section-header">
+      <h2>Experiencia Laboral</h2>
+      <button class="btn-add" (click)="openExpForm()"><i class="bi bi-plus-lg"></i> Agregar</button>
+    </div>
+
+    <div class="item-list" *ngIf="experiences.length > 0">
+      <div class="item-card" *ngFor="let exp of experiences">
+        <div class="item-header">
+          <div>
+            <h3>{{ exp.position }}</h3>
+            <span class="company">{{ exp.company }}</span>
+          </div>
+          <div class="item-dates">{{ exp.startDate | date:'MMM yyyy' }} — {{ exp.current ? 'Presente' : (exp.endDate | date:'MMM yyyy') }}</div>
+        </div>
+        <p *ngIf="exp.description" class="item-desc">{{ exp.description }}</p>
+        <div class="item-footer">
+          <span *ngIf="exp.location" class="location"><i class="bi bi-geo-alt"></i> {{ exp.location }}</span>
+          <span *ngIf="exp.current" class="badge-current">Actual</span>
+          <div class="item-actions">
+            <button class="btn-icon" (click)="openExpForm(exp)"><i class="bi bi-pencil"></i></button>
+            <button class="btn-icon danger" (click)="deleteExp(exp.id)"><i class="bi bi-trash"></i></button>
+          </div>
+        </div>
+      </div>
+    </div>
+    <div class="empty" *ngIf="experiences.length === 0"><i class="bi bi-briefcase"></i><p>Sin experiencia registrada</p></div>
+
+    <!-- Exp Form Modal -->
+    <div class="modal-overlay" *ngIf="showExpForm" (click)="showExpForm = false" (keydown.escape)="showExpForm = false">
+      <div class="modal" (click)="$event.stopPropagation()">
+        <div class="modal-head"><h3>{{ editingExpId ? 'Editar' : 'Nueva' }} Experiencia</h3><button (click)="showExpForm = false"><i class="bi bi-x-lg"></i></button></div>
+        <div class="modal-body">
+          <div class="field"><label>Empresa *</label><input type="text" [(ngModel)]="expForm.company" /></div>
+          <div class="field"><label>Cargo *</label><input type="text" [(ngModel)]="expForm.position" /></div>
+          <div class="field full"><label>Descripción</label><textarea [(ngModel)]="expForm.description" rows="3"></textarea></div>
+          <div class="field-row">
+            <div class="field"><label>Fecha inicio *</label><input type="date" [(ngModel)]="expForm.startDate" /></div>
+            <div class="field"><label>Fecha fin</label><input type="date" [(ngModel)]="expForm.endDate" [disabled]="expForm.current" /></div>
+            <div class="field check"><label><input type="checkbox" [(ngModel)]="expForm.current" /> Actual</label></div>
+          </div>
+          <div class="field"><label>Ubicación</label><input type="text" [(ngModel)]="expForm.location" /></div>
+        </div>
+        <div class="modal-foot">
+          <button class="btn-cancel" (click)="showExpForm = false">Cancelar</button>
+          <button class="btn-save" (click)="saveExp()" [disabled]="savingExp">
+            <span *ngIf="savingExp" class="spinner-sm"></span> {{ savingExp ? 'Guardando...' : 'Guardar' }}
+          </button>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <!-- ═══════════ EDUCATION TAB ═══════════ -->
+  <section class="tab-content" *ngIf="activeTab === 'education' && !loading">
+    <div class="section-header">
+      <h2>Educación</h2>
+      <button class="btn-add" (click)="openEduForm()"><i class="bi bi-plus-lg"></i> Agregar</button>
+    </div>
+
+    <div class="item-list" *ngIf="educations.length > 0">
+      <div class="item-card" *ngFor="let edu of educations">
+        <div class="item-header">
+          <div>
+            <h3>{{ edu.degree }} — {{ edu.field }}</h3>
+            <span class="company">{{ edu.institution }}</span>
+          </div>
+          <div class="item-dates">{{ edu.startDate | date:'MMM yyyy' }} — {{ edu.current ? 'Presente' : (edu.endDate | date:'MMM yyyy') }}</div>
+        </div>
+        <p *ngIf="edu.description" class="item-desc">{{ edu.description }}</p>
+        <div class="item-footer">
+          <span *ngIf="edu.grade" class="badge">{{ edu.grade }}</span>
+          <span *ngIf="edu.level" class="badge">{{ edu.level }}</span>
+          <span *ngIf="edu.current" class="badge-current">Actual</span>
+          <div class="item-actions">
+            <button class="btn-icon" (click)="openEduForm(edu)"><i class="bi bi-pencil"></i></button>
+            <button class="btn-icon danger" (click)="deleteEdu(edu.id)"><i class="bi bi-trash"></i></button>
+          </div>
+        </div>
+      </div>
+    </div>
+    <div class="empty" *ngIf="educations.length === 0"><i class="bi bi-mortarboard"></i><p>Sin educación registrada</p></div>
+
+    <!-- Edu Form Modal -->
+    <div class="modal-overlay" *ngIf="showEduForm" (click)="showEduForm = false" (keydown.escape)="showEduForm = false">
+      <div class="modal" (click)="$event.stopPropagation()">
+        <div class="modal-head"><h3>{{ editingEduId ? 'Editar' : 'Nueva' }} Educación</h3><button (click)="showEduForm = false"><i class="bi bi-x-lg"></i></button></div>
+        <div class="modal-body">
+          <div class="field"><label>Institución *</label><input type="text" [(ngModel)]="eduForm.institution" /></div>
+          <div class="field-row">
+            <div class="field"><label>Título *</label><input type="text" [(ngModel)]="eduForm.degree" /></div>
+            <div class="field"><label>Campo *</label><input type="text" [(ngModel)]="eduForm.field" /></div>
+          </div>
+          <div class="field-row">
+            <div class="field"><label>Nivel</label><input type="text" [(ngModel)]="eduForm.level" placeholder="Pregrado, Postgrado..." /></div>
+            <div class="field"><label>Nota/Grado</label><input type="text" [(ngModel)]="eduForm.grade" /></div>
+          </div>
+          <div class="field-row">
+            <div class="field"><label>Fecha inicio *</label><input type="date" [(ngModel)]="eduForm.startDate" /></div>
+            <div class="field"><label>Fecha fin</label><input type="date" [(ngModel)]="eduForm.endDate" [disabled]="eduForm.current" /></div>
+            <div class="field check"><label><input type="checkbox" [(ngModel)]="eduForm.current" /> Actual</label></div>
+          </div>
+          <div class="field full"><label>Descripción</label><textarea [(ngModel)]="eduForm.description" rows="3"></textarea></div>
+        </div>
+        <div class="modal-foot">
+          <button class="btn-cancel" (click)="showEduForm = false">Cancelar</button>
+          <button class="btn-save" (click)="saveEdu()" [disabled]="savingEdu">
+            <span *ngIf="savingEdu" class="spinner-sm"></span> {{ savingEdu ? 'Guardando...' : 'Guardar' }}
+          </button>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <!-- ═══════════ CERTIFICATES TAB ═══════════ -->
+  <section class="tab-content" *ngIf="activeTab === 'certificates' && !loading">
+    <div class="section-header">
+      <h2>Certificados</h2>
+      <button class="btn-add" (click)="openCertForm()"><i class="bi bi-plus-lg"></i> Agregar</button>
+    </div>
+
+    <div class="item-list" *ngIf="certificates.length > 0">
+      <div class="item-card" *ngFor="let cert of certificates">
+        <div class="item-header">
+          <div>
+            <h3>{{ cert.name }}</h3>
+            <span class="company">{{ cert.issuingOrganization }}</span>
+          </div>
+          <div class="item-dates">{{ cert.issueDate | date:'MMM yyyy' }}<span *ngIf="cert.expiryDate"> — {{ cert.expiryDate | date:'MMM yyyy' }}</span></div>
+        </div>
+        <p *ngIf="cert.description" class="item-desc">{{ cert.description }}</p>
+        <div class="item-footer">
+          <span *ngIf="cert.category" class="badge">{{ cert.category }}</span>
+          <a *ngIf="cert.credentialUrl" [href]="cert.credentialUrl" target="_blank" class="link"><i class="bi bi-box-arrow-up-right"></i> Credencial</a>
+          <div class="item-actions">
+            <button class="btn-icon" (click)="openCertForm(cert)"><i class="bi bi-pencil"></i></button>
+            <button class="btn-icon danger" (click)="deleteCert(cert.id)"><i class="bi bi-trash"></i></button>
+          </div>
+        </div>
+      </div>
+    </div>
+    <div class="empty" *ngIf="certificates.length === 0"><i class="bi bi-award"></i><p>Sin certificados registrados</p></div>
+
+    <!-- Cert Form Modal -->
+    <div class="modal-overlay" *ngIf="showCertForm" (click)="showCertForm = false" (keydown.escape)="showCertForm = false">
+      <div class="modal" (click)="$event.stopPropagation()">
+        <div class="modal-head"><h3>{{ editingCertId ? 'Editar' : 'Nuevo' }} Certificado</h3><button (click)="showCertForm = false"><i class="bi bi-x-lg"></i></button></div>
+        <div class="modal-body">
+          <div class="field"><label>Nombre *</label><input type="text" [(ngModel)]="certForm.name" /></div>
+          <div class="field"><label>Organización *</label><input type="text" [(ngModel)]="certForm.issuingOrganization" /></div>
+          <div class="field-row">
+            <div class="field"><label>Fecha emisión *</label><input type="date" [(ngModel)]="certForm.issueDate" /></div>
+            <div class="field"><label>Fecha expiración</label><input type="date" [(ngModel)]="certForm.expiryDate" /></div>
+          </div>
+          <div class="field-row">
+            <div class="field"><label>ID credencial</label><input type="text" [(ngModel)]="certForm.credentialId" /></div>
+            <div class="field"><label>URL credencial</label><input type="url" [(ngModel)]="certForm.credentialUrl" /></div>
+          </div>
+          <div class="field"><label>Categoría</label><input type="text" [(ngModel)]="certForm.category" /></div>
+          <div class="field full"><label>Descripción</label><textarea [(ngModel)]="certForm.description" rows="3"></textarea></div>
+          <div class="field-row">
+            <div class="field"><label>Imagen del certificado</label><input type="file" accept="image/*" (change)="onCertImageSelect($event)" /></div>
+            <div class="field"><label>Archivo (PDF/img)</label><input type="file" accept=".pdf,.png,.jpg,.jpeg,.webp" (change)="onCertFileSelect($event)" /></div>
+          </div>
+        </div>
+        <div class="modal-foot">
+          <button class="btn-cancel" (click)="showCertForm = false">Cancelar</button>
+          <button class="btn-save" (click)="saveCert()" [disabled]="savingCert">
+            <span *ngIf="savingCert" class="spinner-sm"></span> {{ savingCert ? 'Guardando...' : 'Guardar' }}
+          </button>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <!-- ═══════════ SKILLS TAB ═══════════ -->
+  <section class="tab-content" *ngIf="activeTab === 'skills' && !loading">
+    <div class="section-header">
+      <h2>Habilidades</h2>
+      <button class="btn-add" (click)="openSkillForm()"><i class="bi bi-plus-lg"></i> Agregar</button>
+    </div>
+
+    <div class="skills-grid" *ngIf="skills.length > 0">
+      <div class="skill-item" *ngFor="let s of skills" (click)="openSkillForm(s)">
+        <div class="skill-top">
+          <span class="skill-name">{{ s.icon }} {{ s.name }}</span>
+          <span class="skill-pct">{{ s.percentage }}%</span>
+        </div>
+        <div class="skill-bar"><div class="skill-fill" [style.width.%]="s.percentage" [style.background]="s.color || 'var(--accent)'"></div></div>
+        <div class="skill-bottom">
+          <span class="skill-level">{{ skillLevel(s.percentage) }}</span>
+          <span class="skill-cat">{{ s.category }}</span>
+          <button class="btn-icon sm" (click)="$event.stopPropagation(); deleteSkill(s.id)"><i class="bi bi-trash"></i></button>
+        </div>
+      </div>
+    </div>
+    <div class="empty" *ngIf="skills.length === 0"><i class="bi bi-bar-chart"></i><p>Sin habilidades registradas</p></div>
+
+    <!-- Skill Form Modal -->
+    <div class="modal-overlay" *ngIf="showSkillForm" (click)="showSkillForm = false" (keydown.escape)="showSkillForm = false">
+      <div class="modal" (click)="$event.stopPropagation()">
+        <div class="modal-head"><h3>{{ editingSkillId ? 'Editar' : 'Nueva' }} Habilidad</h3><button (click)="showSkillForm = false"><i class="bi bi-x-lg"></i></button></div>
+        <div class="modal-body">
+          <div class="field-row">
+            <div class="field"><label>Nombre *</label><input type="text" [(ngModel)]="skillForm.name" /></div>
+            <div class="field"><label>Icono</label><input type="text" [(ngModel)]="skillForm.icon" placeholder="emoji o clase CSS" /></div>
+          </div>
+          <div class="field">
+            <label>Porcentaje: {{ skillForm.percentage }}%</label>
+            <input type="range" min="0" max="100" [(ngModel)]="skillForm.percentage" class="range" />
+          </div>
+          <div class="field-row">
+            <div class="field"><label>Categoría</label>
+              <select [(ngModel)]="skillForm.category"><option *ngFor="let c of SKILL_CATEGORIES" [value]="c">{{ c }}</option></select>
+            </div>
+            <div class="field"><label>Color</label><input type="color" [(ngModel)]="skillForm.color" /></div>
+            <div class="field"><label>Orden</label><input type="number" [(ngModel)]="skillForm.order" /></div>
+          </div>
+        </div>
+        <div class="modal-foot">
+          <button class="btn-cancel" (click)="showSkillForm = false">Cancelar</button>
+          <button class="btn-save" (click)="saveSkill()" [disabled]="savingSkill">
+            <span *ngIf="savingSkill" class="spinner-sm"></span> {{ savingSkill ? 'Guardando...' : 'Guardar' }}
+          </button>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <!-- ═══════════ LANGUAGES TAB ═══════════ -->
+  <section class="tab-content" *ngIf="activeTab === 'languages' && !loading">
+    <div class="section-header">
+      <h2>Idiomas</h2>
+      <button class="btn-add" (click)="openLangForm()"><i class="bi bi-plus-lg"></i> Agregar</button>
+    </div>
+
+    <div class="item-list" *ngIf="languages.length > 0">
+      <div class="item-card lang-card" *ngFor="let lang of languages">
+        <div class="lang-info">
+          <h3>{{ lang.name }}</h3>
+          <span class="badge" [ngClass]="'badge-' + lang.level?.toLowerCase()">{{ lang.level }}</span>
+          <span *ngIf="lang.certification" class="cert-label"><i class="bi bi-award"></i> {{ lang.certification }}</span>
+        </div>
+        <div class="lang-bar-wrap">
+          <div class="skill-bar"><div class="skill-fill" [style.width.%]="lang.percentage" style="background: var(--accent)"></div></div>
+          <span class="skill-pct">{{ lang.percentage }}%</span>
+        </div>
+        <div class="item-actions">
+          <button class="btn-icon" (click)="openLangForm(lang)"><i class="bi bi-pencil"></i></button>
+          <button class="btn-icon danger" (click)="deleteLang(lang.id)"><i class="bi bi-trash"></i></button>
+        </div>
+      </div>
+    </div>
+    <div class="empty" *ngIf="languages.length === 0"><i class="bi bi-translate"></i><p>Sin idiomas registrados</p></div>
+
+    <!-- Lang Form Modal -->
+    <div class="modal-overlay" *ngIf="showLangForm" (click)="showLangForm = false" (keydown.escape)="showLangForm = false">
+      <div class="modal" (click)="$event.stopPropagation()">
+        <div class="modal-head"><h3>{{ editingLangId ? 'Editar' : 'Nuevo' }} Idioma</h3><button (click)="showLangForm = false"><i class="bi bi-x-lg"></i></button></div>
+        <div class="modal-body">
+          <div class="field"><label>Idioma *</label><input type="text" [(ngModel)]="langForm.name" placeholder="Ej: Inglés, Español..." /></div>
+          <div class="field-row">
+            <div class="field"><label>Nivel</label>
+              <select [(ngModel)]="langForm.level">
+                <option value="Beginner">Básico</option>
+                <option value="Intermediate">Intermedio</option>
+                <option value="Advanced">Avanzado</option>
+                <option value="Native">Nativo</option>
+              </select>
+            </div>
+            <div class="field"><label>Porcentaje: {{ langForm.percentage }}%</label>
+              <input type="range" min="0" max="100" [(ngModel)]="langForm.percentage" class="range" />
+            </div>
+          </div>
+          <div class="field"><label>Certificación (opcional)</label><input type="text" [(ngModel)]="langForm.certification" placeholder="Ej: TOEFL, DELE..." /></div>
+        </div>
+        <div class="modal-foot">
+          <button class="btn-cancel" (click)="showLangForm = false">Cancelar</button>
+          <button class="btn-save" (click)="saveLang()" [disabled]="savingLang">
+            <span *ngIf="savingLang" class="spinner-sm"></span> {{ savingLang ? 'Guardando...' : 'Guardar' }}
+          </button>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <!-- ═══════════ SOCIAL LINKS TAB ═══════════ -->
+  <section class="tab-content" *ngIf="activeTab === 'social' && !loading">
+    <div class="section-header">
+      <h2>Redes Sociales</h2>
+      <button class="btn-add" (click)="openSocialForm()"><i class="bi bi-plus-lg"></i> Agregar</button>
+    </div>
+
+    <div class="social-grid" *ngIf="socialLinks.length > 0">
+      <div class="social-card" *ngFor="let link of socialLinks" [class.inactive]="!link.isActive">
+        <i class="bi" [ngClass]="link.icon || 'bi-link-45deg'" [style.color]="link.isActive ? 'var(--accent)' : 'var(--text-muted)'"></i>
+        <div class="social-info">
+          <span class="social-platform">{{ link.platform }}</span>
+          <a [href]="link.url" target="_blank" class="social-url">{{ link.url }}</a>
+        </div>
+        <div class="item-actions">
+          <button class="btn-icon" (click)="openSocialForm(link)"><i class="bi bi-pencil"></i></button>
+          <button class="btn-icon danger" (click)="deleteSocial(link.id)"><i class="bi bi-trash"></i></button>
+        </div>
+      </div>
+    </div>
+    <div class="empty" *ngIf="socialLinks.length === 0"><i class="bi bi-share"></i><p>Sin redes sociales registradas</p></div>
+
+    <!-- Social Form Modal -->
+    <div class="modal-overlay" *ngIf="showSocialForm" (click)="showSocialForm = false" (keydown.escape)="showSocialForm = false">
+      <div class="modal" (click)="$event.stopPropagation()">
+        <div class="modal-head"><h3>{{ editingSocialId ? 'Editar' : 'Nueva' }} Red Social</h3><button (click)="showSocialForm = false"><i class="bi bi-x-lg"></i></button></div>
+        <div class="modal-body">
+          <div class="field">
+            <label>Plataforma</label>
+            <select [(ngModel)]="socialForm.platform" (ngModelChange)="onPlatformChange($event)">
+              <option value="">Seleccionar...</option>
+              <option *ngFor="let p of SOCIAL_PLATFORMS" [value]="p.name">{{ p.name }}</option>
+            </select>
+          </div>
+          <div class="field"><label>URL *</label><input type="url" [(ngModel)]="socialForm.url" placeholder="https://..." /></div>
+          <div class="field"><label>Ícono (clase CSS)</label><input type="text" [(ngModel)]="socialForm.icon" placeholder="bi-github" /></div>
+          <div class="field"><label><input type="checkbox" [(ngModel)]="socialForm.isActive" /> Activa</label></div>
+        </div>
+        <div class="modal-foot">
+          <button class="btn-cancel" (click)="showSocialForm = false">Cancelar</button>
+          <button class="btn-save" (click)="saveSocial()" [disabled]="savingSocial">
+            <span *ngIf="savingSocial" class="spinner-sm"></span> {{ savingSocial ? 'Guardando...' : 'Guardar' }}
+          </button>
+        </div>
+      </div>
+    </div>
+  </section>
+</div>

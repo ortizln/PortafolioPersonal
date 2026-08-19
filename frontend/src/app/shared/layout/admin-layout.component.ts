@@ -12,6 +12,7 @@ interface NavItem {
   icon: string;
   permission?: string;
   permissions?: string[];
+  adminOnly?: boolean;
 }
 
 interface NavGroup {
@@ -166,57 +167,62 @@ export class AdminLayoutComponent implements OnInit, OnDestroy {
 
   menuGroups: NavGroup[] = [
     {
+      title: 'MI CUENTA',
+      items: [
+        { label: 'Mi Perfil', route: '/dashboard', icon: 'bi-person-circle', permission: '__all__' },
+      ],
+    },
+    {
       title: 'EMPRESA',
       items: [
-        { label: 'Información corporativa', route: '/admin/company', icon: 'bi-building', permission: 'company.read' },
-        { label: 'Servicios', route: '/admin/services', icon: 'bi-grid', permission: 'services.manage' },
-        { label: 'Clientes', route: '/admin/clients', icon: 'bi-people', permission: 'clients.manage' },
-        { label: 'Testimonios', route: '/admin/testimonials', icon: 'bi-chat-quote', permission: 'testimonials.manage' },
+        { label: 'Información corporativa', route: '/admin/company', icon: 'bi-building', permission: 'company.read', adminOnly: true },
+        { label: 'Servicios', route: '/admin/services', icon: 'bi-grid', permission: 'services.manage', adminOnly: true },
+        { label: 'Clientes', route: '/admin/clients', icon: 'bi-people', permission: 'clients.manage', adminOnly: true },
+        { label: 'Testimonios', route: '/admin/testimonials', icon: 'bi-chat-quote', permission: 'testimonials.manage', adminOnly: true },
       ],
     },
     {
       title: 'PORTAFOLIO',
       items: [
-        { label: 'Proyectos', route: '/admin/projects', icon: 'bi-folder2', permission: 'projects.read' },
-        { label: 'Categorías', route: '/admin/categories', icon: 'bi-tags', permission: 'categories.manage' },
-        { label: 'Tecnologías', route: '/admin/technologies', icon: 'bi-cpu', permission: 'technologies.manage' },
-        { label: 'Repositorios', route: '/admin/repositories', icon: 'bi-git', permission: 'projects.read' },
+        { label: 'Proyectos', route: '/admin/projects', icon: 'bi-folder2', permission: 'projects.read', adminOnly: true },
+        { label: 'Categorías', route: '/admin/categories', icon: 'bi-tags', permission: 'categories.manage', adminOnly: true },
+        { label: 'Tecnologías', route: '/admin/technologies', icon: 'bi-cpu', permission: 'technologies.manage', adminOnly: true },
+        { label: 'Repositorios', route: '/admin/repositories', icon: 'bi-git', permission: 'projects.read', adminOnly: true },
       ],
     },
     {
       title: 'EQUIPO',
       items: [
-        { label: 'Miembros', route: '/admin/team', icon: 'bi-person-badge', permission: 'team.read' },
-        { label: 'Experiencia', route: '/admin/experiences', icon: 'bi-briefcase', permissions: ['team.update', 'team.read'] },
-        { label: 'Educación', route: '/admin/education', icon: 'bi-book', permissions: ['team.update', 'team.read'] },
-        { label: 'Certificaciones', route: '/admin/certificates', icon: 'bi-patch-check', permissions: ['team.update', 'team.read'] },
-        { label: 'Habilidades', route: '/admin/skills', icon: 'bi-gear', permissions: ['team.update', 'team.read'] },
-        { label: 'Redes sociales', route: '/admin/social-links', icon: 'bi-link-45deg', permissions: ['team.update', 'team.read'] },
+        { label: 'Miembros', route: '/admin/team', icon: 'bi-person-badge', permission: 'team.read', adminOnly: true },
+        { label: 'Experiencia', route: '/admin/experiences', icon: 'bi-briefcase', permissions: ['team.update', 'team.read'], adminOnly: true },
+        { label: 'Educación', route: '/admin/education', icon: 'bi-book', permissions: ['team.update', 'team.read'], adminOnly: true },
+        { label: 'Certificaciones', route: '/admin/certificates', icon: 'bi-patch-check', permissions: ['team.update', 'team.read'], adminOnly: true },
+        { label: 'Habilidades', route: '/admin/skills', icon: 'bi-gear', permissions: ['team.update', 'team.read'], adminOnly: true },
+        { label: 'Redes sociales', route: '/admin/social-links', icon: 'bi-link-45deg', permissions: ['team.update', 'team.read'], adminOnly: true },
       ],
     },
     {
       title: 'CONTENIDO',
       items: [
-        { label: 'Blog', route: '/admin/posts', icon: 'bi-journal-text', permission: 'posts.manage' },
-        { label: 'Multimedia', route: '/admin/media', icon: 'bi-images', permissions: ['media.manage', 'media.upload'] },
-        { label: 'SEO', route: '/admin/settings', icon: 'bi-search', permission: 'settings.manage' },
+        { label: 'Blog', route: '/admin/posts', icon: 'bi-journal-text', permission: 'posts.manage', adminOnly: true },
+        { label: 'Multimedia', route: '/admin/media', icon: 'bi-images', permissions: ['media.manage', 'media.upload'], adminOnly: true },
+        { label: 'SEO', route: '/admin/settings', icon: 'bi-search', permission: 'settings.manage', adminOnly: true },
       ],
     },
     {
       title: 'COMERCIAL',
       items: [
-        { label: 'Contactos / Leads', route: '/admin/leads', icon: 'bi-envelope-open', permission: 'messages.read' },
-        { label: 'Mensajes', route: '/admin/messages', icon: 'bi-envelope', permission: 'messages.read' },
+        { label: 'Contactos / Leads', route: '/admin/leads', icon: 'bi-envelope-open', permission: 'messages.read', adminOnly: true },
+        { label: 'Mensajes', route: '/admin/messages', icon: 'bi-envelope', permission: 'messages.read', adminOnly: true },
       ],
     },
     {
       title: 'SISTEMA',
       items: [
-        { label: 'Mi perfil', route: '/admin/profile', icon: 'bi-person-circle', permission: 'users.manage' },
-        { label: 'Usuarios', route: '/admin/users', icon: 'bi-people-fill', permission: 'users.manage' },
-        { label: 'Roles y permisos', route: '/admin/roles', icon: 'bi-shield-lock', permission: 'roles.manage' },
-        { label: 'Configuración', route: '/admin/settings', icon: 'bi-sliders', permission: 'settings.manage' },
-        { label: 'Auditoría', route: '/admin/audit', icon: 'bi-clipboard-data', permission: 'audit.read' },
+        { label: 'Usuarios', route: '/admin/users', icon: 'bi-people-fill', permission: 'users.manage', adminOnly: true },
+        { label: 'Roles y permisos', route: '/admin/roles', icon: 'bi-shield-lock', permission: 'roles.manage', adminOnly: true },
+        { label: 'Configuración', route: '/admin/settings', icon: 'bi-sliders', permission: 'settings.manage', adminOnly: true },
+        { label: 'Auditoría', route: '/admin/audit', icon: 'bi-clipboard-data', permission: 'audit.read', adminOnly: true },
       ],
     },
   ];
@@ -227,6 +233,17 @@ export class AdminLayoutComponent implements OnInit, OnDestroy {
   }
 
   private _filteredGroups: NavGroup[] | null = null;
+  private _isAdmin: boolean | null = null;
+
+  get isAdmin(): boolean {
+    if (this._isAdmin === null) {
+      const user = this.authService.getCurrentUser();
+      if (!user) { this._isAdmin = false; return false; }
+      const ADMIN_ROLES = ['SUPER_ADMIN', 'ADMIN', 'CONTENT_MANAGER', 'PROJECT_MANAGER'];
+      this._isAdmin = user.role === 'ADMIN' || user.roles?.some((r: string) => ADMIN_ROLES.includes(r)) || false;
+    }
+    return this._isAdmin;
+  }
 
   private buildNavGroups(): NavGroup[] {
     return this.menuGroups
@@ -238,6 +255,8 @@ export class AdminLayoutComponent implements OnInit, OnDestroy {
   }
 
   canSee(item: NavItem): boolean {
+    if (item.permission === '__all__') return true;
+    if (item.adminOnly && !this.isAdmin) return false;
     if (item.permission) return this.authService.hasPermission(item.permission);
     if (item.permissions?.length) return this.authService.hasAnyPermission(item.permissions);
     return true;

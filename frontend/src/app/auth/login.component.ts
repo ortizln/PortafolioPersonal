@@ -73,7 +73,12 @@ export class LoginComponent {
     this.error = '';
     const { email, password } = this.form.getRawValue();
     this.authService.login(email, password).subscribe({
-      next: () => this.router.navigate(['/admin/dashboard']),
+      next: () => {
+        const user = this.authService.getCurrentUser();
+        const ADMIN_ROLES = ['SUPER_ADMIN', 'ADMIN', 'CONTENT_MANAGER', 'PROJECT_MANAGER'];
+        const isAdmin = user?.role === 'ADMIN' || user?.roles?.some((r: string) => ADMIN_ROLES.includes(r));
+        this.router.navigate(isAdmin ? ['/admin/dashboard'] : ['/dashboard']);
+      },
       error: (err) => {
         this.loading = false;
         this.error = err.status === 401 ? 'Invalid credentials' : (err.error?.message || 'An error occurred');

@@ -30,6 +30,17 @@ export const routes: Routes = [
     ],
   },
   {
+    path: 'dashboard',
+    loadComponent: () =>
+      import('./shared/layout/admin-layout.component').then(
+        (m) => m.AdminLayoutComponent
+      ),
+    canActivate: [authGuard],
+    children: [
+      { path: '', loadComponent: () => import('./dashboard/dashboard.component').then((m) => m.DashboardComponent), data: { animation: 'page' } },
+    ],
+  },
+  {
     path: 'admin',
     loadComponent: () =>
       import('./shared/layout/admin-layout.component').then(
