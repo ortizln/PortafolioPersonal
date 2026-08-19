@@ -22,10 +22,16 @@ const userSelect = {
 const userController = {
   async getAll(req, res, next) {
     try {
-      const { page = 1, limit = 10, search, role, isActive } = req.query;
+      const { page = 1, limit = 10, search, role, isActive, deleted } = req.query;
       const skip = (page - 1) * limit;
 
-      const where = { deletedAt: null };
+      const where = {};
+
+      if (deleted === 'true') {
+        where.deletedAt = { not: null };
+      } else {
+        where.deletedAt = null;
+      }
 
       if (search) {
         where.OR = [
@@ -119,10 +125,20 @@ const userController = {
 
   async update(req, res, next) {
     try {
-      const { password, roleId, ...data } = req.body;
+      const { password, roleId, teamMemberId, ...data } = req.body;
 
       if (password) {
         data.password = await bcrypt.hash(password, 12);
+      }
+
+      if (teamMemberId !== undefined) {
+        if (teamMemberId) {
+          const member = await prisma.teamMember.findUnique({ where: { id: teamMemberId } });
+          if (!member) throw new AppError('Miembro del equipo no encontrado', 404);
+          const linked = await prisma.user.findFirst({ where: { teamMemberId, id: { not: req.params.id } } });
+          if (linked) throw new AppError('Este miembro del equipo ya tiene otra cuenta vinculada', 409);
+        }
+        data.teamMemberId = teamMemberId || null;
       }
 
       if (roleId !== undefined) {
