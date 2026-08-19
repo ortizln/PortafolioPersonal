@@ -14,6 +14,7 @@ router.get('/:id', idParam, projectController.getById);
 router.post('/', projectValidation, projectController.create);
 router.put('/:id', idParam, projectController.update);
 router.delete('/:id', idParam, projectController.delete);
+router.put('/:id/restore', idParam, projectController.restore);
 router.post('/:id/images', idParam, upload.single('project'), projectController.addImage);
 router.delete('/:id/images/:imageId', idParam, projectController.removeImage);
 

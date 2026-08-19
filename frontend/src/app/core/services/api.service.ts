@@ -157,8 +157,14 @@ export class ApiService {
   }
 
   // Projects
-  getProjectsAll(): Observable<Project[]> {
-    return this.http.get<Project[]>(`${this.apiUrl}/projects`);
+  getProjectsAll(params?: { search?: string; status?: string; visibility?: string; deleted?: boolean }): Observable<Project[]> {
+    let httpParams: any = {};
+    if (params?.search) httpParams.search = params.search;
+    if (params?.status) httpParams.status = params.status;
+    if (params?.visibility) httpParams.visibility = params.visibility;
+    if (params?.deleted) httpParams.deleted = 'true';
+    const qs = Object.keys(httpParams).length ? '?' + new URLSearchParams(httpParams).toString() : '';
+    return this.http.get<Project[]>(`${this.apiUrl}/projects${qs}`);
   }
 
   getProjectById(id: string): Observable<Project> {
@@ -181,6 +187,12 @@ export class ApiService {
 
   deleteProject(id: string): Observable<void> {
     return this.http.delete<void>(`${this.apiUrl}/projects/${id}`);
+  }
+
+  restoreProject(id: string): Observable<Project> {
+    return this.http.put<{ project: Project }>(`${this.apiUrl}/projects/${id}/restore`, {}).pipe(
+      map(r => r.project)
+    );
   }
 
   addProjectImage(projectId: string, file: File, isPrimary?: boolean): Observable<ProjectImage> {

@@ -204,7 +204,15 @@ export class ProjectDetailPageComponent implements OnInit {
       this.error = false;
       this.api.getPublicProjectBySlug(slug).subscribe({
         next: (res) => {
-          this.project = res.project;
+          this.project = {
+            ...res.project,
+            technologies: (res.project.technologies as any[] | undefined)?.map((t: any) =>
+              t.technology ? { ...t.technology, id: t.technology.id } : t
+            ) || [],
+            categories: (res.project.categories as any[] | undefined)?.map((c: any) =>
+              c.category ? { ...c.category, id: c.category.id } : c
+            ) || [],
+          };
           this.related = (res.related || []).map((p) => ({
             ...p,
             technologies: (p.technologies as any[] | undefined)?.map((t: any) =>

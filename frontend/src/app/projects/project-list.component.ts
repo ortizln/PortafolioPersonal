@@ -1,6 +1,7 @@
 import { Component, OnInit, inject } from '@angular/core';
-import { ReactiveFormsModule, FormBuilder, FormGroup } from '@angular/forms';
+import { ReactiveFormsModule, FormBuilder, FormGroup, Validators } from '@angular/forms';
 import { NgFor, NgIf, NgClass, NgStyle, DatePipe } from '@angular/common';
+import { FormsModule } from '@angular/forms';
 import { ApiService } from '../core/services/api.service';
 import { ConfirmService } from '../core/services/confirm.service';
 import { Project, ProjectImage, Technology, Category, Client, Service, TeamMember } from '../core/models';
@@ -9,7 +10,7 @@ import { environment } from '../../environments/environment';
 @Component({
   selector: 'app-project-list',
   standalone: true,
-  imports: [ReactiveFormsModule, NgFor, NgIf, NgClass, NgStyle, DatePipe],
+  imports: [ReactiveFormsModule, FormsModule, NgFor, NgIf, NgClass, NgStyle, DatePipe],
   templateUrl: './project-list.component.html',
   styleUrls: ['./project-list.component.scss'],
 })
@@ -41,6 +42,11 @@ export class ProjectListComponent implements OnInit {
   toasts: { message: string; type: 'success' | 'error'; id: number }[] = [];
   private toastId = 0;
 
+  filterSearch = '';
+  filterStatus = '';
+  filterVisibility = '';
+  showDeleted = false;
+
   ngOnInit(): void {
     this.buildForm();
     this.loadProjects();
@@ -53,7 +59,7 @@ export class ProjectListComponent implements OnInit {
 
   private buildForm(): void {
     this.projectForm = this.fb.group({
-      title: [''],
+      title: ['', Validators.required],
       description: [''],
       summary: [''],
       client: [''],
@@ -83,7 +89,12 @@ export class ProjectListComponent implements OnInit {
   }
 
   private loadProjects(): void {
-    this.apiService.getProjectsAll().subscribe({
+    this.apiService.getProjectsAll({
+      search: this.filterSearch || undefined,
+      status: this.filterStatus || undefined,
+      visibility: this.filterVisibility || undefined,
+      deleted: this.showDeleted || undefined,
+    }).subscribe({
       next: (list) => (this.projects = (list as any[]).map((p) => ({
         ...p,
         technologies: (p.technologies || []).map((t: any) =>
@@ -125,6 +136,37 @@ export class ProjectListComponent implements OnInit {
   private loadTeamMembers(): void {
     this.apiService.getTeamAll().subscribe({
       next: (list) => (this.teamMembers = list),
+    });
+  }
+
+  applyFilters(): void {
+    this.loading = true;
+    this.loadProjects();
+  }
+
+  resetFilters(): void {
+    this.filterSearch = '';
+    this.filterStatus = '';
+    this.filterVisibility = '';
+    this.loading = true;
+    this.loadProjects();
+  }
+
+  toggleDeletedView(): void {
+    this.showDeleted = !this.showDeleted;
+    this.loading = true;
+    this.loadProjects();
+  }
+
+  async restoreProject(id: string): Promise<void> {
+    const ok = await this.confirmService.confirm({ message: '¿Restaurar este proyecto?' });
+    if (!ok) return;
+    this.apiService.restoreProject(id).subscribe({
+      next: () => {
+        this.showToast('Proyecto restaurado', 'success');
+        this.loadProjects();
+      },
+      error: () => this.showToast('Error al restaurar proyecto', 'error'),
     });
   }
 
@@ -197,7 +239,10 @@ export class ProjectListComponent implements OnInit {
   }
 
   save(): void {
-    if (this.projectForm.invalid) return;
+    if (this.projectForm.invalid) {
+      this.projectForm.markAllAsTouched();
+      return;
+    }
     this.saving = true;
     const form = this.projectForm.value;
 
@@ -222,26 +267,24 @@ export class ProjectListComponent implements OnInit {
     const payload: any = {
       title: form.title,
       description: form.description,
-      content: form.summary,
       summary: form.summary,
-      demoUrl: form.demoUrl,
-      githubUrl: form.githubUrl,
-      startDate: form.startDate,
+      demoUrl: form.demoUrl || null,
+      githubUrl: form.githubUrl || null,
+      startDate: form.startDate || null,
       endDate: form.endDate || null,
       isFeatured: form.isFeatured,
       isCaseStudy: form.isCaseStudy,
       order: form.order,
-      categoryId: this.selectedCategoryIds[0] || null,
       categoryIds: this.selectedCategoryIds,
-      client: form.client,
+      client: form.client || null,
       clientId: form.clientId || null,
       serviceId: form.serviceId || null,
       status: form.status,
       projectType: form.projectType || null,
       visibility: form.visibility || 'PUBLIC',
-      gitlabUrl: form.gitlabUrl,
-      videoUrl: form.videoUrl,
-      architecture: form.architecture,
+      gitlabUrl: form.gitlabUrl || null,
+      videoUrl: form.videoUrl || null,
+      architecture: form.architecture || null,
       challenge: form.challenge || null,
       solution: form.solution || null,
       results: form.results || null,
@@ -281,14 +324,14 @@ export class ProjectListComponent implements OnInit {
           }));
         });
 
-        Promise.all(uploads).then(() => {
-          this.cancelForm();
-          this.loadProjects();
-        });
-
         if (uploads.length === 0) {
           this.cancelForm();
           this.loadProjects();
+        } else {
+          Promise.all(uploads).then(() => {
+            this.cancelForm();
+            this.loadProjects();
+          });
         }
       },
       error: () => this.showToast('Error al guardar proyecto', 'error'),

@@ -1,11 +1,21 @@
 const prisma = require('../config/database');
 const { AppError } = require('../middlewares/errorHandler');
 
+function isRepoAdmin(user) {
+  return ['SUPER_ADMIN', 'ADMIN'].includes(user?.rbacRole?.name) ||
+    user?.userRoles?.some(ur => ['SUPER_ADMIN', 'ADMIN'].includes(ur.role?.name));
+}
+
 const repositoryController = {
   async getAll(req, res, next) {
     try {
+      const where = { deletedAt: null };
+      if (!isRepoAdmin(req.user)) {
+        where.userId = req.user.id;
+      }
+
       const repositories = await prisma.repository.findMany({
-        where: { userId: req.user.id, deletedAt: null },
+        where,
         orderBy: { stars: 'desc' }
       });
 
@@ -21,7 +31,10 @@ const repositoryController = {
         where: { id: req.params.id }
       });
 
-      if (!repository || repository.deletedAt || repository.userId !== req.user.id) {
+      if (!repository || repository.deletedAt) {
+        throw new AppError('Repository not found', 404);
+      }
+      if (!isRepoAdmin(req.user) && repository.userId !== req.user.id) {
         throw new AppError('Repository not found', 404);
       }
 
@@ -65,7 +78,10 @@ const repositoryController = {
         where: { id: req.params.id }
       });
 
-      if (!existing || existing.deletedAt || existing.userId !== req.user.id) {
+      if (!existing || existing.deletedAt) {
+        throw new AppError('Repository not found', 404);
+      }
+      if (!isRepoAdmin(req.user) && existing.userId !== req.user.id) {
         throw new AppError('Repository not found', 404);
       }
 
@@ -101,7 +117,10 @@ const repositoryController = {
         where: { id: req.params.id }
       });
 
-      if (!existing || existing.deletedAt || existing.userId !== req.user.id) {
+      if (!existing || existing.deletedAt) {
+        throw new AppError('Repository not found', 404);
+      }
+      if (!isRepoAdmin(req.user) && existing.userId !== req.user.id) {
         throw new AppError('Repository not found', 404);
       }
 

@@ -4,8 +4,38 @@
       <h1>Proyectos</h1>
       <p>Gestiona los proyectos de tu portafolio</p>
     </div>
-    <button type="button" class="btn-gradient" (click)="openAdd()">+ Nuevo Proyecto</button>
+    <div class="header-actions">
+      <button type="button" class="btn-secondary" (click)="toggleDeletedView()">
+        {{ showDeleted ? 'Ver activos' : 'Ver eliminados' }}
+      </button>
+      <button type="button" class="btn-gradient" (click)="openAdd()">+ Nuevo Proyecto</button>
+    </div>
   </header>
+
+  <div class="filters-bar" *ngIf="!showForm">
+    <div class="filters-row">
+      <div class="filter-group">
+        <input type="text" class="form-control" placeholder="Buscar proyectos..." [(ngModel)]="filterSearch" (keyup.enter)="applyFilters()" />
+      </div>
+      <div class="filter-group">
+        <select class="form-control" [(ngModel)]="filterStatus" (change)="applyFilters()">
+          <option value="">Todos los estados</option>
+          <option value="draft">Borrador</option>
+          <option value="in_progress">En Progreso</option>
+          <option value="completed">Completado</option>
+          <option value="archived">Archivado</option>
+        </select>
+      </div>
+      <div class="filter-group">
+        <select class="form-control" [(ngModel)]="filterVisibility" (change)="applyFilters()">
+          <option value="">Toda visibilidad</option>
+          <option value="PUBLIC">Público</option>
+          <option value="PRIVATE">Privado</option>
+        </select>
+      </div>
+      <button type="button" class="btn-secondary btn-sm" (click)="resetFilters()" *ngIf="filterSearch || filterStatus || filterVisibility">Limpiar</button>
+    </div>
+  </div>
 
   <div class="loading-state" *ngIf="loading">Cargando proyectos...</div>
 
@@ -21,6 +51,7 @@
           <div class="form-group">
             <label for="title">Título</label>
             <input id="title" class="form-control" formControlName="title" placeholder="Título del proyecto" />
+            <small class="field-error" *ngIf="projectForm.get('title')?.touched && projectForm.get('title')?.invalid">El título es requerido</small>
           </div>
           <div class="form-group">
             <label for="client">Cliente (texto libre)</label>
@@ -214,7 +245,7 @@
 
           <div class="form-actions">
             <button type="button" class="btn-secondary" (click)="cancelForm()">Cancelar</button>
-            <button type="submit" class="btn-primary" [disabled]="saving">
+            <button type="submit" class="btn-primary" [disabled]="saving || projectForm.invalid">
               <span class="spinner" *ngIf="saving"></span>
               {{ saving ? 'Guardando...' : (editingId ? 'Actualizar' : 'Crear') }}
             </button>
@@ -237,8 +268,8 @@
         <span class="project-status badge-draft">Borrador</span>
       </div>
       <div class="project-body">
-        <div class="project-category" *ngIf="project.category">
-          <span class="badge-category">{{ project.category.name }}</span>
+        <div class="project-category" *ngIf="project.categories?.length">
+          <span class="badge-category">{{ project.categories[0]?.name }}</span>
         </div>
         <h3 class="project-title">{{ project.title }}</h3>
         <p class="project-summary">{{ project.summary || project.description }}</p>
@@ -263,8 +294,9 @@
         <span *ngIf="project.images.length > 4" class="more-count">+{{ project.images.length - 4 }}</span>
       </div>
       <div class="project-actions">
-        <button type="button" class="btn-accent" (click)="openEdit(project)">Editar</button>
-        <button type="button" class="btn-danger" (click)="deleteProject(project.id)">Eliminar</button>
+        <button type="button" class="btn-accent" (click)="openEdit(project)" *ngIf="!showDeleted">Editar</button>
+        <button type="button" class="btn-danger" (click)="deleteProject(project.id)" *ngIf="!showDeleted">Eliminar</button>
+        <button type="button" class="btn-accent" (click)="restoreProject(project.id)" *ngIf="showDeleted">Restaurar</button>
       </div>
     </div>
   </div>

@@ -13,8 +13,17 @@ const projectInclude = {
 };
 
 function buildListWhere(req) {
-  const where = { userId: req.user.id, deletedAt: null };
-  const { search, status, visibility, caseStudy, category } = req.query;
+  const isAdmin = ['SUPER_ADMIN', 'ADMIN'].includes(req.user?.rbacRole?.name) ||
+    req.user?.userRoles?.some(ur => ['SUPER_ADMIN', 'ADMIN'].includes(ur.role?.name));
+  const where = {};
+
+  if (!isAdmin) {
+    where.userId = req.user.id;
+  }
+
+  const { search, status, visibility, caseStudy, category, deleted } = req.query;
+  where.deletedAt = deleted === 'true' ? { not: null } : null;
+
   if (search) {
     where.OR = [
       { title: { contains: search, mode: 'insensitive' } },
@@ -52,7 +61,12 @@ const projectController = {
         include: projectInclude
       });
 
-      if (!project || project.deletedAt || project.userId !== req.user.id) {
+      if (!project || project.deletedAt) {
+        throw new AppError('Project not found', 404);
+      }
+      const isProjectAdmin = ['SUPER_ADMIN', 'ADMIN'].includes(req.user?.rbacRole?.name) ||
+        req.user?.userRoles?.some(ur => ['SUPER_ADMIN', 'ADMIN'].includes(ur.role?.name));
+      if (!isProjectAdmin && project.userId !== req.user.id) {
         throw new AppError('Project not found', 404);
       }
 
@@ -66,7 +80,7 @@ const projectController = {
   async getBySlug(req, res, next) {
     try {
       const project = await prisma.project.findFirst({
-        where: { slug: req.params.slug, deletedAt: null, userId: req.user.id },
+        where: { slug: req.params.slug, deletedAt: null },
         include: projectInclude
       });
 
@@ -157,7 +171,12 @@ const projectController = {
         where: { id: req.params.id }
       });
 
-      if (!existing || existing.deletedAt || existing.userId !== req.user.id) {
+      if (!existing || existing.deletedAt) {
+        throw new AppError('Project not found', 404);
+      }
+      const canEdit = ['SUPER_ADMIN', 'ADMIN'].includes(req.user?.rbacRole?.name) ||
+        req.user?.userRoles?.some(ur => ['SUPER_ADMIN', 'ADMIN'].includes(ur.role?.name));
+      if (!canEdit && existing.userId !== req.user.id) {
         throw new AppError('Project not found', 404);
       }
 
@@ -255,7 +274,12 @@ const projectController = {
         where: { id: req.params.id }
       });
 
-      if (!existing || existing.deletedAt || existing.userId !== req.user.id) {
+      if (!existing || existing.deletedAt) {
+        throw new AppError('Project not found', 404);
+      }
+      const canDelete = ['SUPER_ADMIN', 'ADMIN'].includes(req.user?.rbacRole?.name) ||
+        req.user?.userRoles?.some(ur => ['SUPER_ADMIN', 'ADMIN'].includes(ur.role?.name));
+      if (!canDelete && existing.userId !== req.user.id) {
         throw new AppError('Project not found', 404);
       }
 
@@ -280,13 +304,58 @@ const projectController = {
     }
   },
 
+  async restore(req, res, next) {
+    try {
+      const existing = await prisma.project.findUnique({
+        where: { id: req.params.id }
+      });
+
+      if (!existing) {
+        throw new AppError('Project not found', 404);
+      }
+      if (!existing.deletedAt) {
+        throw new AppError('Project is not deleted', 400);
+      }
+      const canRestore = ['SUPER_ADMIN', 'ADMIN'].includes(req.user?.rbacRole?.name) ||
+        req.user?.userRoles?.some(ur => ['SUPER_ADMIN', 'ADMIN'].includes(ur.role?.name));
+      if (!canRestore && existing.userId !== req.user.id) {
+        throw new AppError('Project not found', 404);
+      }
+
+      const project = await prisma.project.update({
+        where: { id: req.params.id },
+        data: { deletedAt: null },
+        include: projectInclude
+      });
+
+      await audit({
+        userId: req.user?.id,
+        action: 'UPDATE',
+        entity: 'Project',
+        entityId: project.id,
+        description: `Proyecto restaurado: ${project.title}`,
+        req
+      });
+
+      res.json({ project });
+    } catch (error) {
+      if (error.code === 'P2025') return next(new AppError('Project not found', 404));
+      next(error);
+    }
+  },
+
   async addImage(req, res, next) {
     try {
       const project = await prisma.project.findUnique({
         where: { id: req.params.id }
       });
 
-      if (!project || project.deletedAt || project.userId !== req.user.id) {
+      if (!project || project.deletedAt) {
+        throw new AppError('Project not found', 404);
+      }
+      const canEditImage = ['SUPER_ADMIN', 'ADMIN'].includes(req.user?.rbacRole?.name) ||
+        req.user?.userRoles?.some(ur => ['SUPER_ADMIN', 'ADMIN'].includes(ur.role?.name));
+      if (!canEditImage && project.userId !== req.user.id) {
         throw new AppError('Project not found', 404);
       }
 
@@ -316,7 +385,12 @@ const projectController = {
         where: { id: req.params.id }
       });
 
-      if (!project || project.deletedAt || project.userId !== req.user.id) {
+      if (!project || project.deletedAt) {
+        throw new AppError('Project not found', 404);
+      }
+      const canEditImage = ['SUPER_ADMIN', 'ADMIN'].includes(req.user?.rbacRole?.name) ||
+        req.user?.userRoles?.some(ur => ['SUPER_ADMIN', 'ADMIN'].includes(ur.role?.name));
+      if (!canEditImage && project.userId !== req.user.id) {
         throw new AppError('Project not found', 404);
       }
 
