@@ -744,7 +744,7 @@ export class ApiService {
   }
 
   // FASE 5 — Users
-  getUsers(params?: { page?: number; limit?: number; search?: string; role?: string }): Observable<{
+  getUsers(params?: { page?: number; limit?: number; search?: string; role?: string; deleted?: boolean }): Observable<{
     users: User[];
     total: number;
     totalPages: number;
@@ -754,6 +754,7 @@ export class ApiService {
     if (params?.limit) httpParams = httpParams.set('limit', String(params.limit));
     if (params?.search) httpParams = httpParams.set('search', params.search);
     if (params?.role) httpParams = httpParams.set('role', params.role);
+    if (params?.deleted) httpParams = httpParams.set('deleted', 'true');
     return this.http.get<any>(`${this.apiUrl}/users`, { params: httpParams });
   }
 
@@ -777,6 +778,12 @@ export class ApiService {
 
   deleteUser(id: string): Observable<void> {
     return this.http.delete<void>(`${this.apiUrl}/users/${id}`);
+  }
+
+  restoreUser(id: string): Observable<User> {
+    return this.http.put<{ user: User }>(`${this.apiUrl}/users/${id}/restore`, {}).pipe(
+      map((res) => res.user)
+    );
   }
 
   // FASE 5 — Audit

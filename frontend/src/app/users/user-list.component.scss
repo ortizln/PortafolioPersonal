@@ -11,6 +11,34 @@
   }
 }
 
+.header-actions {
+  display: flex;
+  gap: 8px;
+  align-items: center;
+}
+
+.btn-deleted-toggle {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  padding: 8px 14px;
+  background: var(--bg-secondary);
+  color: var(--text-secondary);
+  border: 1px solid var(--border);
+  border-radius: 8px;
+  font-size: 0.85rem;
+  font-weight: 500;
+  cursor: pointer;
+  transition: var(--transition);
+
+  &:hover { border-color: var(--text-muted); }
+  &.active {
+    background: rgba(239, 68, 68, 0.1);
+    color: #ef4444;
+    border-color: rgba(239, 68, 68, 0.3);
+  }
+}
+
 .btn-create {
   display: inline-flex;
   align-items: center;
@@ -83,6 +111,28 @@
     color: var(--text-primary);
     font-size: 0.85rem;
   }
+}
+
+.deleted-banner {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  padding: 10px 16px;
+  margin-bottom: 1rem;
+  background: rgba(239, 68, 68, 0.08);
+  border: 1px solid rgba(239, 68, 68, 0.2);
+  border-radius: 10px;
+  color: #ef4444;
+  font-size: 0.85rem;
+}
+
+.loading-state {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 10px;
+  padding: 3rem;
+  color: var(--text-secondary);
 }
 
 .table-wrap {
@@ -199,15 +249,74 @@
     white-space: nowrap;
   }
 
+  .actions-cell {
+    display: flex;
+    gap: 4px;
+    align-items: center;
+  }
+
+  .edit-btn {
+    background: none;
+    border: none;
+    color: var(--text-secondary);
+    cursor: pointer;
+    padding: 4px 6px;
+    border-radius: 6px;
+    transition: var(--transition);
+
+    &:hover {
+      color: var(--accent);
+      background: rgba(var(--accent-rgb), 0.1);
+    }
+  }
+
   .delete-btn {
     background: none;
     border: none;
     color: var(--text-secondary);
     cursor: pointer;
+    padding: 4px 6px;
+    border-radius: 6px;
+    transition: var(--transition);
 
     &:hover {
       color: #ef4444;
+      background: rgba(239, 68, 68, 0.1);
     }
+  }
+
+  .restore-btn {
+    display: inline-flex;
+    align-items: center;
+    gap: 4px;
+    padding: 5px 12px;
+    background: rgba(16, 185, 129, 0.1);
+    color: #10b981;
+    border: 1px solid rgba(16, 185, 129, 0.3);
+    border-radius: 8px;
+    font-size: 0.78rem;
+    font-weight: 500;
+    cursor: pointer;
+    transition: var(--transition);
+
+    &:hover {
+      background: rgba(16, 185, 129, 0.2);
+      border-color: #10b981;
+    }
+  }
+
+  .deleted-label {
+    display: inline-block;
+    padding: 3px 10px;
+    background: rgba(239, 68, 68, 0.1);
+    color: #ef4444;
+    border-radius: 6px;
+    font-size: 0.75rem;
+    font-weight: 500;
+  }
+
+  .deleted-row {
+    opacity: 0.7;
   }
 
   .empty-row {
@@ -429,6 +538,11 @@
     font-weight: 600;
     color: var(--text-secondary);
     margin-bottom: 4px;
+  }
+
+  .required {
+    color: #ef4444;
+    margin-left: 2px;
   }
 
   input, select {

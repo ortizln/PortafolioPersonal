@@ -13,5 +13,6 @@ router.get('/:id', requirePermission('users.manage'), idParam, userController.ge
 router.put('/:id', requirePermission('users.manage'), idParam, userController.update);
 router.put('/:id/role', requirePermission('users.manage', 'roles.manage'), idParam, userController.updateRole);
 router.delete('/:id', requirePermission('users.manage'), idParam, userController.delete);
+router.put('/:id/restore', requirePermission('users.manage'), idParam, userController.restore);
 
 module.exports = router;

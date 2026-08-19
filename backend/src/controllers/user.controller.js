@@ -268,6 +268,27 @@ const userController = {
       if (error.code === 'P2025') return next(new AppError('User not found', 404));
       next(error);
     }
+  },
+
+  async restore(req, res, next) {
+    try {
+      const target = await prisma.user.findUnique({ where: { id: req.params.id } });
+      if (!target) throw new AppError('User not found', 404);
+      if (!target.deletedAt) throw new AppError('El usuario no está eliminado', 400);
+
+      const user = await prisma.user.update({
+        where: { id: req.params.id },
+        data: { deletedAt: null, isActive: true },
+        select: userSelect,
+      });
+
+      audit(req, 'USER_RESTORED', { userId: user.id, email: user.email });
+
+      res.json({ user });
+    } catch (error) {
+      if (error.code === 'P2025') return next(new AppError('User not found', 404));
+      next(error);
+    }
   }
 };
 

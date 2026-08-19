@@ -40,6 +40,21 @@ export class UserListComponent implements OnInit {
   newRoleId = '';
   newTeamMemberId = '';
 
+  showEditModal = false;
+  editing = false;
+  editError = '';
+  editUserId = '';
+  editEmail = '';
+  editName = '';
+  editRoleId = '';
+  editTeamMemberId = '';
+  editNewPassword = '';
+
+  showDeleted = false;
+  showDeletedList = false;
+  deletedUsers: User[] = [];
+  loadingDeleted = false;
+
   toasts: { message: string; type: 'success' | 'error'; id: number }[] = [];
   private toastId = 0;
 
@@ -107,8 +122,8 @@ export class UserListComponent implements OnInit {
   }
 
   submitCreate(): void {
-    if (!this.newEmail || !this.newPassword || !this.newName) {
-      this.createError = 'Email, contraseña y nombre son requeridos';
+    if (!this.newEmail || !this.newPassword || !this.newName || !this.newRoleId) {
+      this.createError = 'Email, contraseña, nombre y rol son requeridos';
       return;
     }
     this.creating = true;
@@ -135,7 +150,7 @@ export class UserListComponent implements OnInit {
 
   loadUsers(): void {
     this.loading = true;
-    this.apiService.getUsers({ page: this.page, limit: this.limit, search: this.search || undefined, role: this.roleFilter || undefined }).subscribe({
+    this.apiService.getUsers({ page: this.page, limit: this.limit, search: this.search || undefined, role: this.roleFilter || undefined, deleted: this.showDeleted }).subscribe({
       next: (res) => {
         this.users = res.users;
         this.total = res.total;
@@ -223,6 +238,71 @@ export class UserListComponent implements OnInit {
         this.showToast('Usuario eliminado', 'success');
       },
       error: (err) => this.showToast(err?.error?.error || 'Error al eliminar', 'error'),
+    });
+  }
+
+  openEditModal(user: User): void {
+    this.editUserId = user.id;
+    this.editEmail = user.email;
+    this.editName = user.name;
+    this.editRoleId = user.rbacRole?.id || user.userRoles?.[0]?.role?.id || '';
+    this.editTeamMemberId = user.teamMemberId || '';
+    this.editNewPassword = '';
+    this.editError = '';
+    this.showEditModal = true;
+    this.loadTeamMembers();
+  }
+
+  closeEditModal(): void {
+    this.showEditModal = false;
+    this.editError = '';
+  }
+
+  submitEdit(): void {
+    if (!this.editEmail || !this.editName) {
+      this.editError = 'Email y nombre son requeridos';
+      return;
+    }
+    this.editing = true;
+    this.editError = '';
+    const data: any = {
+      email: this.editEmail,
+      name: this.editName,
+      roleId: this.editRoleId || null,
+      teamMemberId: this.editTeamMemberId || null,
+    };
+    if (this.editNewPassword) data.password = this.editNewPassword;
+
+    this.apiService.updateUser(this.editUserId, data).subscribe({
+      next: (updated) => {
+        const idx = this.users.findIndex((u) => u.id === updated.id);
+        if (idx >= 0) this.users[idx] = updated;
+        this.showToast(`Usuario ${updated.name} actualizado`, 'success');
+        this.closeEditModal();
+      },
+      error: (err) => {
+        this.editing = false;
+        this.editError = err?.error?.error || 'Error al actualizar el usuario';
+      },
+      complete: () => { this.editing = false; },
+    });
+  }
+
+  toggleShowDeleted(): void {
+    this.showDeleted = !this.showDeleted;
+    this.page = 1;
+    this.loadUsers();
+  }
+
+  async restoreUser(user: User): Promise<void> {
+    const ok = await this.confirmService.confirm({ message: `¿Restaurar a ${user.name}?` });
+    if (!ok) return;
+    this.apiService.restoreUser(user.id).subscribe({
+      next: () => {
+        this.users = this.users.filter((u) => u.id !== user.id);
+        this.showToast(`Usuario ${user.name} restaurado`, 'success');
+      },
+      error: (err) => this.showToast(err?.error?.error || 'Error al restaurar', 'error'),
     });
   }
 
