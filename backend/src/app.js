@@ -12,6 +12,7 @@ const { errorHandler } = require('./middlewares/errorHandler');
 const swaggerSpec = require('./swagger/swagger');
 
 const app = express();
+app.set('trust proxy', 1);
 
 const limiter = rateLimit({
   windowMs: parseInt(process.env.RATE_LIMIT_WINDOW) * 60 * 1000,

@@ -145,7 +145,7 @@ const userController = {
         const role = await prisma.role.findUnique({ where: { id: roleId } });
         if (!role) throw new AppError('Role not found', 404);
 
-        await this.assertNotLastSuperAdmin(req.params.id, role.name, req.user);
+        await userController.assertNotLastSuperAdmin(req.params.id, role.name, req.user);
         data.roleId = roleId;
         await prisma.userRole.deleteMany({ where: { userId: req.params.id } });
         if (role.name !== 'VIEWER') {
@@ -176,7 +176,7 @@ const userController = {
       const role = await prisma.role.findUnique({ where: { id: roleId } });
       if (!role) throw new AppError('Role not found', 404);
 
-      await this.assertNotLastSuperAdmin(req.params.id, role.name, req.user);
+      await userController.assertNotLastSuperAdmin(req.params.id, role.name, req.user);
 
       await prisma.$transaction(async (tx) => {
         await tx.userRole.deleteMany({ where: { userId: req.params.id } });
