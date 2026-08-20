@@ -25,6 +25,12 @@ const authLimiter = rateLimit({
   message: { error: 'Too many auth attempts, please try again later.' }
 });
 
+const contactLimiter = rateLimit({
+  windowMs: 15 * 60 * 1000,
+  max: 5,
+  message: { error: 'Too many contact submissions, please try again later.' }
+});
+
 app.use(helmet({
   crossOriginResourcePolicy: { policy: 'cross-origin' },
   contentSecurityPolicy: {
@@ -111,7 +117,7 @@ app.use('/api/languages', languageRoutes);
 app.use('/api/social-links', socialLinkRoutes);
 app.use('/api/repositories', repositoryRoutes);
 app.use('/api/categories', categoryRoutes);
-app.use('/api/contact', contactRoutes);
+app.use('/api/contact', contactLimiter, contactRoutes);
 app.use('/api/uploads', uploadRoutes);
 app.use('/api/media', mediaRoutes);
 app.use('/api/settings', settingRoutes);
@@ -134,6 +140,10 @@ app.get('/robots.txt', publicController.getRobots);
 
 app.get('/api/health', (req, res) => {
   res.json({ status: 'ok', timestamp: new Date().toISOString() });
+});
+
+app.all('/api/*', (req, res) => {
+  res.status(404).json({ error: 'API route not found' });
 });
 
 app.use(errorHandler);

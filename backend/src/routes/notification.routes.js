@@ -8,7 +8,7 @@ const router = Router();
 router.use(authenticate, requirePermission('notifications.read', 'messages.read'));
 
 router.get('/', notificationController.getAll);
-router.put('/:id/read', idParam, notificationController.markRead);
 router.put('/read-all', notificationController.markAllRead);
+router.put('/:id/read', idParam, notificationController.markRead);
 
 module.exports = router;

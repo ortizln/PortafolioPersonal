@@ -361,9 +361,9 @@ export class ApiService {
   }
 
   // Contact
-  getContactMessagesAll(params?: { read?: boolean }): Observable<ContactMessage[]> {
+  getContactMessagesAll(params?: { unreadOnly?: boolean }): Observable<ContactMessage[]> {
     let httpParams = new HttpParams();
-    if (params?.read != null) httpParams = httpParams.set('read', String(params.read));
+    if (params?.unreadOnly) httpParams = httpParams.set('unreadOnly', 'true');
     return this.http.get<any>(`${this.apiUrl}/contact`, { params: httpParams }).pipe(
       map((res) => (Array.isArray(res) ? res : (res.contacts || [])))
     );

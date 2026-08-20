@@ -87,10 +87,14 @@ export class UserListComponent implements OnInit {
     });
   }
 
-  loadTeamMembers(): void {
-    this.apiService.getPublicTeam().subscribe({
+  loadTeamMembers(excludeUserId?: string): void {
+    this.apiService.getTeamAll().subscribe({
       next: (list) => {
-        const linkedIds = new Set(this.users.filter(u => u.teamMemberId).map(u => u.teamMemberId));
+        const linkedIds = new Set(
+          this.users
+            .filter(u => u.teamMemberId && u.id !== excludeUserId)
+            .map(u => u.teamMemberId)
+        );
         this.teamMembers = (list || []).filter(m => !linkedIds.has(m.id));
       },
       error: () => {},
@@ -250,7 +254,7 @@ export class UserListComponent implements OnInit {
     this.editNewPassword = '';
     this.editError = '';
     this.showEditModal = true;
-    this.loadTeamMembers();
+    this.loadTeamMembers(user.id);
   }
 
   closeEditModal(): void {
