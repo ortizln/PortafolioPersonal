@@ -19,7 +19,7 @@ $topbar-height: 64px;
   bottom: 0;
   width: $sidebar-width;
   z-index: 1040;
-  background: rgba(15, 15, 25, 0.85);
+  background: var(--glass-bg);
   backdrop-filter: blur(20px);
   -webkit-backdrop-filter: blur(20px);
   border-right: 1px solid var(--border);
@@ -79,7 +79,7 @@ $topbar-height: 64px;
     }
 
     &::-webkit-scrollbar-thumb {
-      background: rgba(255, 255, 255, 0.1);
+      background: var(--border);
       border-radius: 4px;
     }
 
@@ -125,7 +125,7 @@ $topbar-height: 64px;
 
       &:hover {
         color: var(--text-primary);
-        background: rgba(255, 255, 255, 0.05);
+        background: var(--bg-card-hover);
       }
 
       &.active {
@@ -219,7 +219,7 @@ $topbar-height: 64px;
   justify-content: space-between;
   height: $topbar-height;
   padding: 0 1.75rem;
-  background: rgba(10, 10, 20, 0.8);
+  background: var(--glass-bg);
   backdrop-filter: blur(16px);
   border-bottom: 1px solid var(--border);
 

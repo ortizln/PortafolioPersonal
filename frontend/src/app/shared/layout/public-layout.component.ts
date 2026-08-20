@@ -129,7 +129,7 @@ export class PublicLayoutComponent implements OnInit, OnDestroy {
   isScrolled = false;
   showBackToTop = false;
   isMobileMenuOpen = false;
-  isDark = true;
+  isDark = false;
   currentYear = new Date().getFullYear();
 
   company: Company | null = null;

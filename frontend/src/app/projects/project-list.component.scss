@@ -533,7 +533,7 @@ select.form-control {
 
 .badge-draft {
   background: rgba(100, 116, 139, 0.2);
-  color: #94a3b8;
+  color: var(--text-secondary);
   border: 1px solid rgba(100, 116, 139, 0.3);
 }
 

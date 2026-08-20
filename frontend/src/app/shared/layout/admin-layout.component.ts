@@ -156,7 +156,7 @@ export class AdminLayoutComponent implements OnInit, OnDestroy {
 
   isSidebarCollapsed = false;
   isMobileSidebarOpen = false;
-  isDark = true;
+  isDark = false;
   pageTitle = 'Dashboard';
   notificationsOpen = false;
   notifications: Notification[] = [];
