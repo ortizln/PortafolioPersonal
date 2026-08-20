@@ -15,7 +15,7 @@
     border: none;
     border-radius: 10px;
     background: var(--accent, #0d47a1);
-    color: #fff;
+    color: var(--white);
     font-size: 0.875rem;
     font-weight: 500;
     cursor: pointer;
@@ -115,7 +115,7 @@
       border: none;
       border-radius: 10px;
       background: var(--accent, #0d47a1);
-      color: #fff;
+      color: var(--white);
       font-size: 0.875rem;
       font-weight: 500;
       cursor: pointer;
@@ -141,7 +141,7 @@
   padding: 12px 20px;
   border-radius: 10px;
   background: var(--success, #2ecc71);
-  color: #fff;
+  color: var(--white);
   font-size: 0.85rem;
   font-weight: 500;
   box-shadow: 0 8px 24px rgba(0, 0, 0, 0.3);

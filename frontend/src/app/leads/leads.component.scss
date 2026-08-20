@@ -109,7 +109,7 @@
 
   td {
     padding: 0.7rem 1rem;
-    border-bottom: 1px solid rgba(255, 255, 255, 0.04);
+    border-bottom: 1px solid var(--border);
     font-size: 0.85rem;
     color: var(--text-primary);
   }
@@ -271,7 +271,7 @@
     }
 
     .badge-secondary {
-      background: rgba(255, 255, 255, 0.06);
+      background: var(--border);
       color: var(--text-secondary);
       padding: 3px 10px;
       border-radius: 20px;

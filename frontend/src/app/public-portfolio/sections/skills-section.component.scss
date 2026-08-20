@@ -97,7 +97,7 @@
 
   &.active {
     background: linear-gradient(135deg, var(--accent), var(--accent-secondary, #a855f7));
-    color: #fff;
+    color: var(--white);
     border-color: transparent;
   }
 }

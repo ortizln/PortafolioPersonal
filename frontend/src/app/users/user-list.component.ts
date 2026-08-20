@@ -49,6 +49,8 @@ export class UserListComponent implements OnInit {
   editRoleId = '';
   editTeamMemberId = '';
   editNewPassword = '';
+  editConfirmPassword = '';
+  editChangePassword = false;
 
   showDeleted = false;
   showDeletedList = false;
@@ -252,6 +254,8 @@ export class UserListComponent implements OnInit {
     this.editRoleId = user.rbacRole?.id || user.userRoles?.[0]?.role?.id || '';
     this.editTeamMemberId = user.teamMemberId || '';
     this.editNewPassword = '';
+    this.editConfirmPassword = '';
+    this.editChangePassword = false;
     this.editError = '';
     this.showEditModal = true;
     this.loadTeamMembers(user.id);
@@ -267,6 +271,20 @@ export class UserListComponent implements OnInit {
       this.editError = 'Email y nombre son requeridos';
       return;
     }
+    if (this.editChangePassword) {
+      if (!this.editNewPassword) {
+        this.editError = 'La nueva contraseña es requerida';
+        return;
+      }
+      if (this.editNewPassword !== this.editConfirmPassword) {
+        this.editError = 'Las contraseñas no coinciden';
+        return;
+      }
+      if (this.editNewPassword.length < 8) {
+        this.editError = 'La contraseña debe tener al menos 8 caracteres';
+        return;
+      }
+    }
     this.editing = true;
     this.editError = '';
     const data: any = {
@@ -275,7 +293,7 @@ export class UserListComponent implements OnInit {
       roleId: this.editRoleId || null,
       teamMemberId: this.editTeamMemberId || null,
     };
-    if (this.editNewPassword) data.password = this.editNewPassword;
+    if (this.editChangePassword && this.editNewPassword) data.password = this.editNewPassword;
 
     this.apiService.updateUser(this.editUserId, data).subscribe({
       next: (updated) => {

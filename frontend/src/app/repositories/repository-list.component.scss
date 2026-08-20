@@ -1,16 +1,4 @@
 :host {
-  --glass-bg: rgba(255, 255, 255, 0.05);
-  --glass-border: rgba(255, 255, 255, 0.1);
-  --glass-shadow: 0 8px 32px rgba(0, 0, 0, 0.3);
-  --accent: #6c5ce7;
-  --accent-dim: rgba(108, 92, 231, 0.2);
-  --text-primary: #e0e0e0;
-  --text-secondary: #a0a0a0;
-  --danger: #e74c3c;
-  --success: #2ecc71;
-  --warning: #f39c12;
-  --surface: #1a1a2e;
-  --card-radius: 16px;
   display: block;
   padding: 24px;
   color: var(--text-primary);
@@ -45,7 +33,7 @@
   border: none;
   border-radius: 12px;
   background: var(--accent);
-  color: #fff;
+  color: var(--white);
   font-size: 0.875rem;
   font-weight: 500;
   cursor: pointer;
@@ -311,7 +299,7 @@
 
       &.btn-submit {
         background: var(--accent);
-        color: #fff;
+        color: var(--white);
 
         &:disabled {
           opacity: 0.5;
@@ -352,7 +340,7 @@
   padding: 12px 20px;
   border-radius: 10px;
   background: var(--success, #2ecc71);
-  color: #fff;
+  color: var(--white);
   font-size: 0.85rem;
   font-weight: 500;
   box-shadow: 0 8px 24px rgba(0, 0, 0, 0.3);

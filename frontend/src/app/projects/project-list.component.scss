@@ -448,7 +448,7 @@ select.form-control {
   height: 28px;
   border: none;
   border-radius: 6px;
-  background: rgba(255, 255, 255, 0.15);
+  background: var(--glass-border);
   color: var(--white);
   cursor: pointer;
   font-size: 0.9rem;
