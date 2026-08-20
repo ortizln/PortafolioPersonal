@@ -13,8 +13,7 @@ const projectInclude = {
 };
 
 function buildListWhere(req) {
-  const isAdmin = ['SUPER_ADMIN', 'ADMIN'].includes(req.user?.rbacRole?.name) ||
-    req.user?.userRoles?.some(ur => ['SUPER_ADMIN', 'ADMIN'].includes(ur.role?.name));
+  const isAdmin = req.user?.roles?.some(r => ['SUPER_ADMIN', 'ADMIN'].includes(r));
   const where = {};
 
   if (!isAdmin) {
@@ -64,8 +63,7 @@ const projectController = {
       if (!project || project.deletedAt) {
         throw new AppError('Project not found', 404);
       }
-      const isProjectAdmin = ['SUPER_ADMIN', 'ADMIN'].includes(req.user?.rbacRole?.name) ||
-        req.user?.userRoles?.some(ur => ['SUPER_ADMIN', 'ADMIN'].includes(ur.role?.name));
+      const isProjectAdmin = req.user?.roles?.some(r => ['SUPER_ADMIN', 'ADMIN'].includes(r));
       if (!isProjectAdmin && project.userId !== req.user.id) {
         throw new AppError('Project not found', 404);
       }
@@ -174,8 +172,7 @@ const projectController = {
       if (!existing || existing.deletedAt) {
         throw new AppError('Project not found', 404);
       }
-      const canEdit = ['SUPER_ADMIN', 'ADMIN'].includes(req.user?.rbacRole?.name) ||
-        req.user?.userRoles?.some(ur => ['SUPER_ADMIN', 'ADMIN'].includes(ur.role?.name));
+      const canEdit = req.user?.roles?.some(r => ['SUPER_ADMIN', 'ADMIN'].includes(r));
       if (!canEdit && existing.userId !== req.user.id) {
         throw new AppError('Project not found', 404);
       }
@@ -277,8 +274,7 @@ const projectController = {
       if (!existing || existing.deletedAt) {
         throw new AppError('Project not found', 404);
       }
-      const canDelete = ['SUPER_ADMIN', 'ADMIN'].includes(req.user?.rbacRole?.name) ||
-        req.user?.userRoles?.some(ur => ['SUPER_ADMIN', 'ADMIN'].includes(ur.role?.name));
+      const canDelete = req.user?.roles?.some(r => ['SUPER_ADMIN', 'ADMIN'].includes(r));
       if (!canDelete && existing.userId !== req.user.id) {
         throw new AppError('Project not found', 404);
       }
@@ -316,8 +312,7 @@ const projectController = {
       if (!existing.deletedAt) {
         throw new AppError('Project is not deleted', 400);
       }
-      const canRestore = ['SUPER_ADMIN', 'ADMIN'].includes(req.user?.rbacRole?.name) ||
-        req.user?.userRoles?.some(ur => ['SUPER_ADMIN', 'ADMIN'].includes(ur.role?.name));
+      const canRestore = req.user?.roles?.some(r => ['SUPER_ADMIN', 'ADMIN'].includes(r));
       if (!canRestore && existing.userId !== req.user.id) {
         throw new AppError('Project not found', 404);
       }
@@ -353,8 +348,7 @@ const projectController = {
       if (!project || project.deletedAt) {
         throw new AppError('Project not found', 404);
       }
-      const canEditImage = ['SUPER_ADMIN', 'ADMIN'].includes(req.user?.rbacRole?.name) ||
-        req.user?.userRoles?.some(ur => ['SUPER_ADMIN', 'ADMIN'].includes(ur.role?.name));
+      const canEditImage = req.user?.roles?.some(r => ['SUPER_ADMIN', 'ADMIN'].includes(r));
       if (!canEditImage && project.userId !== req.user.id) {
         throw new AppError('Project not found', 404);
       }
@@ -388,8 +382,7 @@ const projectController = {
       if (!project || project.deletedAt) {
         throw new AppError('Project not found', 404);
       }
-      const canEditImage = ['SUPER_ADMIN', 'ADMIN'].includes(req.user?.rbacRole?.name) ||
-        req.user?.userRoles?.some(ur => ['SUPER_ADMIN', 'ADMIN'].includes(ur.role?.name));
+      const canEditImage = req.user?.roles?.some(r => ['SUPER_ADMIN', 'ADMIN'].includes(r));
       if (!canEditImage && project.userId !== req.user.id) {
         throw new AppError('Project not found', 404);
       }
