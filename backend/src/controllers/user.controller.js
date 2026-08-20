@@ -130,6 +130,8 @@ const userController = {
       if (password) {
         if (password.length < 8) throw new AppError('La contraseña debe tener al menos 8 caracteres', 400);
         data.password = await bcrypt.hash(password, 12);
+        data.failedAttempts = 0;
+        data.lockoutUntil = null;
       }
 
       if (teamMemberId !== undefined) {
