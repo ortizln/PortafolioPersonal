@@ -67,7 +67,11 @@ const userController = {
         throw new AppError('Email, password y name son requeridos', 400);
       }
 
-      const existing = await prisma.user.findUnique({ where: { email: email.toLowerCase() } });
+      if (password.length < 8) {
+        throw new AppError('La contraseña debe tener al menos 8 caracteres', 400);
+      }
+
+      const existing = await prisma.user.findUnique({ where: { email: email.toLowerCase().trim() } });
       if (existing) throw new AppError('El email ya está registrado', 409);
 
       if (teamMemberId) {
@@ -78,13 +82,20 @@ const userController = {
         if (linked) throw new AppError('Este miembro del equipo ya tiene una cuenta de usuario', 409);
       }
 
+      if (roleId) {
+        const role = await prisma.role.findUnique({ where: { id: roleId } });
+        if (!role) throw new AppError('Rol no encontrado', 404);
+      }
+
       const hashedPassword = await bcrypt.hash(password, 12);
 
       const user = await prisma.user.create({
         data: {
-          email: email.toLowerCase(),
+          email: email.toLowerCase().trim(),
           password: hashedPassword,
           name,
+          role: 'USER',
+          isActive: true,
           roleId: roleId || null,
           teamMemberId: teamMemberId || null,
         },
