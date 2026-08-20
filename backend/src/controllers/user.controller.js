@@ -141,7 +141,7 @@ const userController = {
         data.teamMemberId = teamMemberId || null;
       }
 
-      if (roleId !== undefined) {
+      if (roleId !== undefined && roleId !== null) {
         const role = await prisma.role.findUnique({ where: { id: roleId } });
         if (!role) throw new AppError('Role not found', 404);
 
@@ -151,6 +151,9 @@ const userController = {
         if (role.name !== 'VIEWER') {
           await prisma.userRole.create({ data: { userId: req.params.id, roleId } });
         }
+      } else if (roleId === null) {
+        data.roleId = null;
+        await prisma.userRole.deleteMany({ where: { userId: req.params.id } });
       }
 
       const user = await prisma.user.update({
