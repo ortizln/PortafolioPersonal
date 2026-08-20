@@ -1,5 +1,5 @@
 function isAdmin(req) {
-  return req.user?.role === 'ADMIN';
+  return req.user?.roles?.some(r => r === 'ADMIN' || r === 'SUPER_ADMIN') || false;
 }
 
 function buildProfileWhere(req, baseWhere = {}) {
@@ -15,7 +15,7 @@ function buildProfileWhere(req, baseWhere = {}) {
 function canManage(req, entity) {
   if (!entity) return false;
   if (entity.userId === req.user.id) return true;
-  if (isAdmin(req) && entity.memberId) return true;
+  if (isAdmin(req)) return true;
   return false;
 }
 

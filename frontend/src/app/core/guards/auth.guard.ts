@@ -69,11 +69,15 @@ export const authGuard: CanActivateFn = () => {
   );
 };
 
-export const permissionGuard = (permission: string): CanActivateFn => {
+export const permissionGuard = (...permissions: string[]): CanActivateFn => {
   return () => {
     const authService = inject(AuthService);
     const router = inject(Router);
-    if (authService.hasPermission(permission)) return true;
+    if (permissions.length === 1) {
+      if (authService.hasPermission(permissions[0])) return true;
+    } else {
+      if (authService.hasAnyPermission(permissions)) return true;
+    }
     return router.parseUrl('/admin');
   };
 };

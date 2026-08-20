@@ -1,6 +1,6 @@
 const { Router } = require('express');
 const testimonialController = require('../controllers/testimonial.controller');
-const { authenticate } = require('../middlewares/auth');
+const { authenticate, requirePermission } = require('../middlewares/auth');
 
 const router = Router();
 
@@ -8,8 +8,8 @@ router.use(authenticate);
 
 router.get('/', testimonialController.getAll);
 router.get('/:id', testimonialController.getById);
-router.post('/', testimonialController.create);
-router.put('/:id', testimonialController.update);
-router.delete('/:id', testimonialController.remove);
+router.post('/', requirePermission('testimonials.manage'), testimonialController.create);
+router.put('/:id', requirePermission('testimonials.manage'), testimonialController.update);
+router.delete('/:id', requirePermission('testimonials.manage'), testimonialController.remove);
 
 module.exports = router;

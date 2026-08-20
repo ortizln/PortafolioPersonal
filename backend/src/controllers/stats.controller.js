@@ -1,8 +1,16 @@
 const prisma = require('../config/database');
 
+function isStatsAdmin(user) {
+  return ['SUPER_ADMIN', 'ADMIN'].includes(user?.rbacRole?.name) ||
+    user?.userRoles?.some(ur => ['SUPER_ADMIN', 'ADMIN'].includes(ur.role?.name));
+}
+
 const statsController = {
   async getStats(req, res, next) {
     try {
+      const admin = isStatsAdmin(req.user);
+      const userFilter = admin ? {} : { userId: req.user.id };
+
       const [
         projectsCount,
         experiencesCount,
@@ -14,28 +22,28 @@ const statsController = {
         reposCount
       ] = await Promise.all([
         prisma.project.count({
-          where: { userId: req.user.id, deletedAt: null }
+          where: { ...userFilter, deletedAt: null }
         }),
         prisma.experience.count({
-          where: { userId: req.user.id, deletedAt: null }
+          where: { ...userFilter, deletedAt: null }
         }),
         prisma.education.count({
-          where: { userId: req.user.id, deletedAt: null }
+          where: { ...userFilter, deletedAt: null }
         }),
         prisma.certification.count({
-          where: { userId: req.user.id, deletedAt: null }
+          where: { ...userFilter, deletedAt: null }
         }),
         prisma.skill.count({
-          where: { userId: req.user.id, deletedAt: null }
+          where: { ...userFilter, deletedAt: null }
         }),
         prisma.language.count({
-          where: { userId: req.user.id, deletedAt: null }
+          where: { ...userFilter, deletedAt: null }
         }),
         prisma.contactMessage.count({
-          where: { userId: req.user.id, isRead: false }
+          where: admin ? { isRead: false } : { userId: req.user.id, isRead: false }
         }),
         prisma.repository.count({
-          where: { userId: req.user.id, deletedAt: null }
+          where: { ...userFilter, deletedAt: null }
         })
       ]);
 
@@ -58,8 +66,11 @@ const statsController = {
 
   async getProjectStats(req, res, next) {
     try {
+      const admin = isStatsAdmin(req.user);
+      const userFilter = admin ? {} : { userId: req.user.id };
+
       const allProjects = await prisma.project.findMany({
-        where: { userId: req.user.id, deletedAt: null },
+        where: { ...userFilter, deletedAt: null },
         include: {
           technologies: {
             include: { technology: true }

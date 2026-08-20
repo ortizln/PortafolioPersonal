@@ -256,7 +256,7 @@
   </div>
 
   <div class="project-grid" *ngIf="projects.length > 0">
-    <div class="project-card" *ngFor="let project of projects">
+    <div class="project-card" *ngFor="let project of projects; let i = index" [class.deleted-project]="showDeleted">
       <div class="project-banner" *ngIf="getPrimaryImage(project)">
         <img [src]="getPrimaryImage(project)" [alt]="project.title" loading="lazy" decoding="async" />
         <span class="project-status" [ngClass]="getStatusClass(project.status || 'draft')">{{ getStatusLabel(project.status || 'draft') }}</span>
@@ -293,10 +293,22 @@
         <img *ngFor="let img of project.images.slice(0, 4)" [src]="getImageUrl(img)" alt="" loading="lazy" decoding="async" />
         <span *ngIf="project.images.length > 4" class="more-count">+{{ project.images.length - 4 }}</span>
       </div>
-      <div class="project-actions">
-        <button type="button" class="btn-accent" (click)="openEdit(project)" *ngIf="!showDeleted">Editar</button>
-        <button type="button" class="btn-danger" (click)="deleteProject(project.id)" *ngIf="!showDeleted">Eliminar</button>
-        <button type="button" class="btn-accent" (click)="restoreProject(project.id)" *ngIf="showDeleted">Restaurar</button>
+      <div class="project-actions-row">
+        <div class="project-reorder" *ngIf="!showDeleted">
+          <button type="button" class="btn-icon-sm" (click)="moveUp(i)" [disabled]="i === 0" title="Mover arriba">↑</button>
+          <button type="button" class="btn-icon-sm" (click)="moveDown(i)" [disabled]="i === projects.length - 1" title="Mover abajo">↓</button>
+        </div>
+        <select class="status-select" [ngClass]="getStatusClass(project.status || 'draft')" (change)="quickStatus(project, $event)" *ngIf="!showDeleted">
+          <option value="draft" [selected]="project.status === 'draft'">Borrador</option>
+          <option value="in_progress" [selected]="project.status === 'in_progress'">En Progreso</option>
+          <option value="completed" [selected]="project.status === 'completed'">Completado</option>
+          <option value="archived" [selected]="project.status === 'archived'">Archivado</option>
+        </select>
+        <div class="project-actions">
+          <button type="button" class="btn-accent" (click)="openEdit(project)" *ngIf="!showDeleted">Editar</button>
+          <button type="button" class="btn-danger" (click)="deleteProject(project.id)" *ngIf="!showDeleted">Eliminar</button>
+          <button type="button" class="btn-accent" (click)="restoreProject(project.id)" *ngIf="showDeleted">Restaurar</button>
+        </div>
       </div>
     </div>
   </div>

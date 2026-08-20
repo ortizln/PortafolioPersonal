@@ -666,6 +666,71 @@ select.form-control {
   margin-top: auto;
 }
 
+.project-actions-row {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  padding: 10px 20px 16px;
+  border-top: 1px solid var(--border);
+  margin-top: auto;
+  flex-wrap: wrap;
+
+  .project-reorder {
+    display: flex;
+    gap: 4px;
+  }
+
+  .status-select {
+    padding: 4px 8px;
+    border-radius: 6px;
+    border: 1px solid var(--border);
+    background: var(--bg-secondary);
+    color: var(--text-primary);
+    font-size: 0.78rem;
+    cursor: pointer;
+    outline: none;
+    margin-left: auto;
+  }
+
+  .project-actions {
+    padding: 0;
+    border: none;
+    margin: 0;
+    display: flex;
+    gap: 6px;
+  }
+}
+
+.btn-icon-sm {
+  width: 28px;
+  height: 28px;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  border: 1px solid var(--border);
+  border-radius: 6px;
+  background: var(--bg-secondary);
+  color: var(--text-secondary);
+  cursor: pointer;
+  font-size: 0.85rem;
+  transition: var(--transition);
+
+  &:hover:not(:disabled) {
+    border-color: var(--accent);
+    color: var(--accent);
+  }
+
+  &:disabled {
+    opacity: 0.3;
+    cursor: not-allowed;
+  }
+}
+
+.deleted-project {
+  opacity: 0.6;
+  border-color: rgba(239, 68, 68, 0.3) !important;
+}
+
 .toast-container {
   position: fixed;
   top: 24px;

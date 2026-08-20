@@ -390,6 +390,40 @@ export class ProjectListComponent implements OnInit {
     else this.selectedCategoryIds = [catId];
   }
 
+  moveUp(index: number): void {
+    if (index === 0) return;
+    const arr = [...this.projects];
+    [arr[index - 1], arr[index]] = [arr[index], arr[index - 1]];
+    this.projects = arr;
+    this.reorderProjects();
+  }
+
+  moveDown(index: number): void {
+    if (index >= this.projects.length - 1) return;
+    const arr = [...this.projects];
+    [arr[index], arr[index + 1]] = [arr[index + 1], arr[index]];
+    this.projects = arr;
+    this.reorderProjects();
+  }
+
+  private reorderProjects(): void {
+    const updates = this.projects.map((p, i) =>
+      this.apiService.updateProject(p.id, { order: i } as any).toPromise()
+    );
+    Promise.all(updates).then(() => this.showToast('Orden actualizado', 'success'));
+  }
+
+  quickStatus(project: Project, event: Event): void {
+    const status = (event.target as HTMLSelectElement).value;
+    this.apiService.updateProject(project.id, { status } as any).subscribe({
+      next: () => {
+        project.status = status;
+        this.showToast('Estado actualizado', 'success');
+      },
+      error: () => this.showToast('Error al cambiar estado', 'error'),
+    });
+  }
+
   isTechSelected(id: string): boolean {
     return this.selectedTechIds.includes(id);
   }
