@@ -4,12 +4,13 @@ import { NgFor, NgIf, NgClass, DatePipe } from '@angular/common';
 import { environment } from '../../environments/environment';
 import { ApiService } from '../core/services/api.service';
 import { ConfirmService } from '../core/services/confirm.service';
+import { HasPermissionDirective } from '../core/directives/has-permission.directive';
 import { Certification, CertificateFile } from '../core/models';
 
 @Component({
   selector: 'app-certificate-list',
   standalone: true,
-  imports: [ReactiveFormsModule, NgFor, NgIf, NgClass, DatePipe],
+  imports: [ReactiveFormsModule, NgFor, NgIf, NgClass, DatePipe, HasPermissionDirective],
   templateUrl: './certificate-list.component.html',
   styleUrls: ['./certificate-list.component.scss'],
 })

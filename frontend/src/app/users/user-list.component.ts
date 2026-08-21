@@ -3,12 +3,13 @@ import { CommonModule } from '@angular/common';
 import { FormsModule } from '@angular/forms';
 import { ApiService } from '../core/services/api.service';
 import { ConfirmService } from '../core/services/confirm.service';
+import { HasPermissionDirective } from '../core/directives/has-permission.directive';
 import { User, Role, Permission, TeamMember } from '../core/models';
 
 @Component({
   selector: 'app-user-list',
   standalone: true,
-  imports: [CommonModule, FormsModule],
+  imports: [CommonModule, FormsModule, HasPermissionDirective],
   templateUrl: './user-list.component.html',
   styleUrls: ['./user-list.component.scss'],
 })

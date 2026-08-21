@@ -4,6 +4,7 @@ import { NgFor, NgIf, NgClass, NgStyle } from '@angular/common';
 import { ApiService } from '../core/services/api.service';
 import { ConfirmService } from '../core/services/confirm.service';
 import { Skill } from '../core/models';
+import { HasPermissionDirective } from '../core/directives/has-permission.directive';
 
 const SKILL_CATEGORIES = [
   'FRONTEND', 'BACKEND', 'DEVOPS', 'DATABASE',
@@ -13,7 +14,7 @@ const SKILL_CATEGORIES = [
 @Component({
   selector: 'app-skill-list',
   standalone: true,
-  imports: [ReactiveFormsModule, NgFor, NgIf, NgClass, NgStyle],
+  imports: [ReactiveFormsModule, NgFor, NgIf, NgClass, NgStyle, HasPermissionDirective],
   templateUrl: './skill-list.component.html',
   styleUrls: ['./skill-list.component.scss'],
 })

@@ -3,12 +3,13 @@ import { CommonModule } from '@angular/common';
 import { FormsModule } from '@angular/forms';
 import { ApiService } from '../core/services/api.service';
 import { ConfirmService } from '../core/services/confirm.service';
+import { HasPermissionDirective } from '../core/directives/has-permission.directive';
 import { Role, Permission } from '../core/models';
 
 @Component({
   selector: 'app-role-list',
   standalone: true,
-  imports: [CommonModule, FormsModule],
+  imports: [CommonModule, FormsModule, HasPermissionDirective],
   templateUrl: './role-list.component.html',
   styleUrls: ['./role-list.component.scss'],
 })

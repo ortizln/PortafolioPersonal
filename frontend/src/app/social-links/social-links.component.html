@@ -1,6 +1,6 @@
 <div class="header">
   <h2>Redes Sociales</h2>
-  <button class="btn-add" (click)="openCreate()"><i class="bi bi-plus-lg"></i> Agregar Enlace</button>
+  <button class="btn-add" *appHasPermission="'team.update'" (click)="openCreate()"><i class="bi bi-plus-lg"></i> Agregar Enlace</button>
 </div>
 
 <div class="loading-state" *ngIf="loading">Cargando redes sociales...</div>
@@ -65,10 +65,10 @@
         </div>
         <div class="card-actions">
           <div class="action-buttons">
-            <button class="btn-edit" (click)="openEdit(link)">Editar</button>
-            <button class="btn-delete" (click)="deleteLink(link.id)">Eliminar</button>
+            <button class="btn-edit" *appHasPermission="'team.update'" (click)="openEdit(link)">Editar</button>
+            <button class="btn-delete" *appHasPermission="'team.update'" (click)="deleteLink(link.id)">Eliminar</button>
           </div>
-          <div class="toggle" [class.active]="link.isActive" (click)="toggleActive(link)">
+          <div class="toggle" *appHasPermission="'team.update'" [class.active]="link.isActive" (click)="toggleActive(link)">
             <div class="toggle-knob"></div>
           </div>
         </div>

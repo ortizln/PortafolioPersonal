@@ -4,12 +4,13 @@ import { FormsModule } from '@angular/forms';
 import { ApiService } from '../core/services/api.service';
 import { ConfirmService } from '../core/services/confirm.service';
 import { UploadUrlPipe } from '../shared/upload-url.pipe';
+import { HasPermissionDirective } from '../core/directives/has-permission.directive';
 import { TeamMember } from '../core/models';
 
 @Component({
   selector: 'app-team-list',
   standalone: true,
-  imports: [CommonModule, FormsModule, UploadUrlPipe],
+  imports: [CommonModule, FormsModule, UploadUrlPipe, HasPermissionDirective],
   templateUrl: './team-list.component.html',
   styleUrls: ['./team-list.component.scss']
 })

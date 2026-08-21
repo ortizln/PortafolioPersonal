@@ -4,6 +4,7 @@ import { FormsModule } from '@angular/forms';
 import { ApiService } from '../core/services/api.service';
 import { ConfirmService } from '../core/services/confirm.service';
 import { Post, PostCategory, PostTag } from '../core/models';
+import { HasPermissionDirective } from '../core/directives/has-permission.directive';
 import { environment } from '../../environments/environment';
 
 const STATUS_LABELS: Record<string, string> = {
@@ -16,7 +17,7 @@ const STATUS_LABELS: Record<string, string> = {
 @Component({
   selector: 'app-post-list',
   standalone: true,
-  imports: [CommonModule, FormsModule],
+  imports: [CommonModule, FormsModule, HasPermissionDirective],
   templateUrl: './post-list.component.html',
   styleUrls: ['./post-list.component.scss'],
 })

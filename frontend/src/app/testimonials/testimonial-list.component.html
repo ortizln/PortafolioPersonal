@@ -1,6 +1,6 @@
 <div class="header">
   <h2>Testimonios</h2>
-  <button class="btn-save" (click)="openCreate()">+ Nuevo Testimonio</button>
+  <button class="btn-save" *appHasPermission="'testimonials.manage'" (click)="openCreate()">+ Nuevo Testimonio</button>
 </div>
 
 <div class="loading-state" *ngIf="loading">Cargando...</div>
@@ -41,8 +41,8 @@
             </td>
             <td><span class="status" [class.active]="t.isPublished">{{ t.isPublished ? 'Sí' : 'No' }}</span></td>
             <td class="actions">
-              <button class="btn-icon" title="Editar" (click)="openEdit(t)"><i class="bi bi-pencil"></i></button>
-              <button class="btn-icon danger" title="Eliminar" (click)="deleteTestimonial(t)"><i class="bi bi-trash"></i></button>
+              <button class="btn-icon" *appHasPermission="'testimonials.manage'" title="Editar" (click)="openEdit(t)"><i class="bi bi-pencil"></i></button>
+              <button class="btn-icon danger" *appHasPermission="'testimonials.manage'" title="Eliminar" (click)="deleteTestimonial(t)"><i class="bi bi-trash"></i></button>
             </td>
           </tr>
         }
@@ -53,7 +53,7 @@
   <div class="empty-state" *ngIf="testimonials.length === 0">
     <i class="bi bi-chat-quote"></i>
     <p>Aún no hay testimonios registrados.</p>
-    <button class="btn-save" (click)="openCreate()">Crear el primer testimonio</button>
+    <button class="btn-save" *appHasPermission="'testimonials.manage'" (click)="openCreate()">Crear el primer testimonio</button>
   </div>
 }
 

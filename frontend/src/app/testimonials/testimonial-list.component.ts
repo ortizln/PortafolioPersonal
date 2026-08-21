@@ -5,11 +5,12 @@ import { ApiService } from '../core/services/api.service';
 import { ConfirmService } from '../core/services/confirm.service';
 import { UploadUrlPipe } from '../shared/upload-url.pipe';
 import { Testimonial, Client } from '../core/models';
+import { HasPermissionDirective } from '../core/directives/has-permission.directive';
 
 @Component({
   selector: 'app-testimonial-list',
   standalone: true,
-  imports: [CommonModule, FormsModule, UploadUrlPipe],
+  imports: [CommonModule, FormsModule, UploadUrlPipe, HasPermissionDirective],
   templateUrl: './testimonial-list.component.html',
   styleUrls: ['./testimonial-list.component.scss']
 })

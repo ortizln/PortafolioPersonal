@@ -1,6 +1,6 @@
 <div class="header">
   <h2>Categorías</h2>
-  <button class="btn-add" (click)="openCreate()"><i class="bi bi-plus-lg"></i> Agregar Categoría</button>
+  <button class="btn-add" (click)="openCreate()" *appHasPermission="'categories.manage'"><i class="bi bi-plus-lg"></i> Agregar Categoría</button>
 </div>
 
 <div class="loading-state" *ngIf="loading">Cargando categorías...</div>
@@ -43,8 +43,8 @@
           <span class="label">Proyectos</span>
         </div>
         <div class="card-actions">
-          <button class="btn-edit" (click)="openEdit(cat)">Editar</button>
-          <button class="btn-delete" (click)="deleteCategory(cat.id)">Eliminar</button>
+          <button class="btn-edit" (click)="openEdit(cat)" *appHasPermission="'categories.manage'">Editar</button>
+          <button class="btn-delete" (click)="deleteCategory(cat.id)" *appHasPermission="'categories.manage'">Eliminar</button>
         </div>
       </div>
     } @empty {

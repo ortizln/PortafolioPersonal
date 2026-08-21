@@ -29,12 +29,14 @@
         <div class="message-footer">
           <span class="date">{{ formatDate(msg.createdAt) }}</span>
           <div class="actions">
-            <button class="btn-read" *ngIf="!msg.isRead" (click)="markAsReadEvent($event, msg.id)">
-              Marcar como leído
-            </button>
-            <button class="btn-delete" (click)="requestDeleteEvent($event, msg.id)">
-              Eliminar
-            </button>
+            <ng-container *appHasPermission="'messages.update'">
+              <button class="btn-read" *ngIf="!msg.isRead" (click)="markAsReadEvent($event, msg.id)">
+                Marcar como leído
+              </button>
+              <button class="btn-delete" (click)="requestDeleteEvent($event, msg.id)">
+                Eliminar
+              </button>
+            </ng-container>
           </div>
         </div>
       </div>
@@ -55,8 +57,8 @@
   <div class="delete-confirm" (click)="stopPropagation($event)">
     <p>¿Seguro que quieres eliminar este mensaje?</p>
     <div class="confirm-actions">
-      <button class="btn-confirm" (click)="confirmDelete()">Eliminar</button>
-      <button class="btn-cancel" (click)="cancelDelete()">Cancelar</button>
+      <button class="btn-confirm" (click)="confirmDelete()" *appHasPermission="'messages.update'">Eliminar</button>
+      <button class="btn-cancel" (click)="cancelDelete()" *appHasPermission="'messages.update'">Cancelar</button>
     </div>
   </div>
 </div>

@@ -4,13 +4,14 @@ import { FormsModule } from '@angular/forms';
 import { ApiService } from '../core/services/api.service';
 import { ConfirmService } from '../core/services/confirm.service';
 import { Language } from '../core/models';
+import { HasPermissionDirective } from '../core/directives/has-permission.directive';
 
 type LanguageLevel = 'Beginner' | 'Intermediate' | 'Advanced' | 'Native';
 
 @Component({
   selector: 'app-language-list',
   standalone: true,
-  imports: [CommonModule, FormsModule],
+  imports: [CommonModule, FormsModule, HasPermissionDirective],
   templateUrl: './language-list.component.html',
   styleUrls: ['./language-list.component.scss']
 })

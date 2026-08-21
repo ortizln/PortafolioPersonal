@@ -4,7 +4,7 @@
       <h1>Experience</h1>
       <p>Manage your work history and professional experience</p>
     </div>
-    <button type="button" class="btn-gradient" (click)="openAdd()">+ Add Experience</button>
+    <button type="button" class="btn-gradient" *appHasPermission="'team.update'" (click)="openAdd()">+ Add Experience</button>
   </header>
 
   <div class="loading-state" *ngIf="loading">Loading experiences...</div>
@@ -90,8 +90,8 @@
           <span>{{ exp.location }}</span>
         </div>
         <div class="timeline-actions">
-          <button type="button" class="btn-accent" (click)="openEdit(exp)">Edit</button>
-          <button type="button" class="btn-danger" (click)="deleteExperience(exp.id)">Delete</button>
+          <button type="button" class="btn-accent" *appHasPermission="'team.update'" (click)="openEdit(exp)">Edit</button>
+          <button type="button" class="btn-danger" *appHasPermission="'team.update'" (click)="deleteExperience(exp.id)">Delete</button>
         </div>
       </div>
     </div>

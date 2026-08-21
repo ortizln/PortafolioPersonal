@@ -6,11 +6,12 @@ import { ApiService } from '../core/services/api.service';
 import { ConfirmService } from '../core/services/confirm.service';
 import { Project, ProjectImage, Technology, Category, Client, Service, TeamMember } from '../core/models';
 import { environment } from '../../environments/environment';
+import { HasPermissionDirective } from '../core/directives/has-permission.directive';
 
 @Component({
   selector: 'app-project-list',
   standalone: true,
-  imports: [ReactiveFormsModule, FormsModule, NgFor, NgIf, NgClass, NgStyle, DatePipe],
+  imports: [ReactiveFormsModule, FormsModule, NgFor, NgIf, NgClass, NgStyle, DatePipe, HasPermissionDirective],
   templateUrl: './project-list.component.html',
   styleUrls: ['./project-list.component.scss'],
 })

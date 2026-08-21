@@ -1,6 +1,6 @@
 <div class="header">
   <h2>Clientes</h2>
-  <button class="btn-save" (click)="openCreate()">+ Nuevo Cliente</button>
+  <button class="btn-save" *appHasPermission="'clients.manage'" (click)="openCreate()">+ Nuevo Cliente</button>
 </div>
 
 <div class="loading-state" *ngIf="loading">Cargando...</div>
@@ -34,8 +34,8 @@
             <td><span class="status" [class.active]="client.isFeatured">{{ client.isFeatured ? '★' : '—' }}</span></td>
             <td>{{ client._count?.testimonials ?? 0 }}</td>
             <td class="actions">
-              <button class="btn-icon" title="Editar" (click)="openEdit(client)"><i class="bi bi-pencil"></i></button>
-              <button class="btn-icon danger" title="Eliminar" (click)="deleteClient(client)"><i class="bi bi-trash"></i></button>
+              <button class="btn-icon" *appHasPermission="'clients.manage'" title="Editar" (click)="openEdit(client)"><i class="bi bi-pencil"></i></button>
+              <button class="btn-icon danger" *appHasPermission="'clients.manage'" title="Eliminar" (click)="deleteClient(client)"><i class="bi bi-trash"></i></button>
             </td>
           </tr>
         }
@@ -46,7 +46,7 @@
   <div class="empty-state" *ngIf="clients.length === 0">
     <i class="bi bi-people"></i>
     <p>Aún no hay clientes registrados.</p>
-    <button class="btn-save" (click)="openCreate()">Registrar el primer cliente</button>
+    <button class="btn-save" *appHasPermission="'clients.manage'" (click)="openCreate()">Registrar el primer cliente</button>
   </div>
 }
 

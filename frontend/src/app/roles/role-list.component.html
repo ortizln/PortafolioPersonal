@@ -1,6 +1,6 @@
 <div class="header-row">
   <h2>Roles y permisos</h2>
-  <button class="btn-primary" (click)="openCreate()"><i class="bi bi-plus-lg"></i> Nuevo rol</button>
+  <button *appHasPermission="'roles.manage'" class="btn-primary" (click)="openCreate()"><i class="bi bi-plus-lg"></i> Nuevo rol</button>
 </div>
 
 <div class="toast-stack">
@@ -26,7 +26,9 @@
       <span><i class="bi bi-shield-check"></i> {{ (role.permissions || []).length }} permisos</span>
     </div>
     <div class="role-card-actions">
-      <button class="delete-btn" *ngIf="!role.isSystem" (click)="deleteRole(role)"><i class="bi bi-trash"></i> Eliminar</button>
+      <ng-container *appHasPermission="'roles.manage'">
+        <button class="delete-btn" *ngIf="!role.isSystem" (click)="deleteRole(role)"><i class="bi bi-trash"></i> Eliminar</button>
+      </ng-container>
       <span class="system-tag" *ngIf="role.isSystem">Sistema</span>
     </div>
 
@@ -36,7 +38,9 @@
         <div class="perm-group-title">{{ group.module }}</div>
         <div class="perm-list">
           <label class="perm-item" *ngFor="let p of group.items">
-            <input type="checkbox" [checked]="hasPermission(role, p.id)" (change)="togglePermission(role, p.id)" />
+            <ng-container *appHasPermission="'roles.manage'">
+              <input type="checkbox" [checked]="hasPermission(role, p.id)" (change)="togglePermission(role, p.id)" />
+            </ng-container>
             <span class="perm-name">{{ p.name }}</span>
             <span class="perm-key">{{ p.code }}</span>
           </label>
@@ -78,7 +82,7 @@
     </div>
     <div class="modal-actions">
       <button class="btn-secondary" (click)="showCreate = false">Cancelar</button>
-      <button class="btn-primary" (click)="createRole()" [disabled]="!newRoleName.trim()">Crear rol</button>
+      <button *appHasPermission="'roles.manage'" class="btn-primary" (click)="createRole()" [disabled]="!newRoleName.trim()">Crear rol</button>
     </div>
   </div>
 </div>

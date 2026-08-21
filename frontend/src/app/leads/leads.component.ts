@@ -4,6 +4,7 @@ import { FormsModule } from '@angular/forms';
 import { ApiService } from '../core/services/api.service';
 import { ConfirmService } from '../core/services/confirm.service';
 import { ContactMessage } from '../core/models';
+import { HasPermissionDirective } from '../core/directives/has-permission.directive';
 
 const STATUS_LABELS: Record<string, string> = {
   NEW: 'Nuevo',
@@ -18,7 +19,7 @@ const STATUS_LABELS: Record<string, string> = {
 @Component({
   selector: 'app-leads',
   standalone: true,
-  imports: [CommonModule, FormsModule],
+  imports: [CommonModule, FormsModule, HasPermissionDirective],
   templateUrl: './leads.component.html',
   styleUrls: ['./leads.component.scss'],
 })

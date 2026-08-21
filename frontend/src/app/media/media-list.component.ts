@@ -5,11 +5,12 @@ import { ApiService } from '../core/services/api.service';
 import { ConfirmService } from '../core/services/confirm.service';
 import { MediaFile } from '../core/models';
 import { environment } from '../../environments/environment';
+import { HasPermissionDirective } from '../core/directives/has-permission.directive';
 
 @Component({
   selector: 'app-media-list',
   standalone: true,
-  imports: [CommonModule, FormsModule],
+  imports: [CommonModule, FormsModule, HasPermissionDirective],
   templateUrl: './media-list.component.html',
   styleUrls: ['./media-list.component.scss'],
 })

@@ -4,6 +4,7 @@ import { FormsModule } from '@angular/forms';
 import { ApiService } from '../core/services/api.service';
 import { ConfirmService } from '../core/services/confirm.service';
 import { Category } from '../core/models';
+import { HasPermissionDirective } from '../core/directives/has-permission.directive';
 
 interface CategoryWithCount extends Category {
   projectCount?: number;
@@ -13,7 +14,7 @@ interface CategoryWithCount extends Category {
 @Component({
   selector: 'app-category-list',
   standalone: true,
-  imports: [CommonModule, FormsModule],
+  imports: [CommonModule, FormsModule, HasPermissionDirective],
   templateUrl: './category-list.component.html',
   styleUrls: ['./category-list.component.scss']
 })

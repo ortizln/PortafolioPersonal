@@ -1,13 +1,17 @@
 <div class="header-row">
   <h2>Usuarios</h2>
   <div class="header-actions">
-    <button class="btn-deleted-toggle" [class.active]="showDeleted" (click)="toggleShowDeleted()">
-      <i class="bi" [ngClass]="showDeleted ? 'bi-person-check' : 'bi-person-x'"></i>
-      {{ showDeleted ? 'Ver activos' : 'Ver eliminados' }}
-    </button>
-    <button class="btn-create" (click)="openCreateModal()">
-      <i class="bi bi-plus-lg"></i> Crear usuario
-    </button>
+    <ng-container *appHasPermission="'users.manage'">
+      <button class="btn-deleted-toggle" [class.active]="showDeleted" (click)="toggleShowDeleted()">
+        <i class="bi" [ngClass]="showDeleted ? 'bi-person-check' : 'bi-person-x'"></i>
+        {{ showDeleted ? 'Ver activos' : 'Ver eliminados' }}
+      </button>
+    </ng-container>
+    <ng-container *appHasPermission="'users.manage'">
+      <button class="btn-create" (click)="openCreateModal()">
+        <i class="bi bi-plus-lg"></i> Crear usuario
+      </button>
+    </ng-container>
   </div>
 </div>
 
@@ -61,33 +65,43 @@
           <span class="role-badge" [style.background]="roleColor(user) + '20'" [style.color]="roleColor(user)" [style.border-color]="roleColor(user) + '40'">
             {{ userRoleName(user) }}
           </span>
-          <select *ngIf="!showDeleted" class="role-select" [value]="user.roleId || ''" (change)="changeRole(user, $any($event.target).value)">
-            <option value="" disabled>Cambiar...</option>
-            <option *ngFor="let r of roles" [value]="r.id">{{ r.name }}</option>
-          </select>
+          <ng-container *appHasPermission="'users.manage'">
+            <select *ngIf="!showDeleted" class="role-select" [value]="user.roleId || ''" (change)="changeRole(user, $any($event.target).value)">
+              <option value="" disabled>Cambiar...</option>
+              <option *ngFor="let r of roles" [value]="r.id">{{ r.name }}</option>
+            </select>
+          </ng-container>
         </td>
         <td>
-          <button class="perms-btn" (click)="openPermissions(user)" [attr.aria-label]="'Ver permisos de ' + user.name">
+          <button *appHasPermission="'users.manage'" class="perms-btn" (click)="openPermissions(user)" [attr.aria-label]="'Ver permisos de ' + user.name">
             <i class="bi bi-key" aria-hidden="true"></i> Ver
           </button>
         </td>
         <td>
-          <button *ngIf="!showDeleted" class="active-toggle" [class.active]="user.isActive" (click)="toggleActive(user)">
-            {{ user.isActive ? 'Activo' : 'Inactivo' }}
-          </button>
+          <ng-container *appHasPermission="'users.manage'">
+            <button *ngIf="!showDeleted" class="active-toggle" [class.active]="user.isActive" (click)="toggleActive(user)">
+              {{ user.isActive ? 'Activo' : 'Inactivo' }}
+            </button>
+          </ng-container>
           <span *ngIf="showDeleted" class="deleted-label">Eliminado</span>
         </td>
         <td class="last-login">{{ user.lastLogin ? (user.lastLogin | date: 'dd/MM/yyyy HH:mm') : 'Nunca' }}</td>
         <td class="actions-cell">
-          <button *ngIf="!showDeleted" class="edit-btn" (click)="openEditModal(user)" title="Editar usuario">
-            <i class="bi bi-pencil"></i>
-          </button>
-          <button *ngIf="!showDeleted" class="delete-btn" (click)="deleteUser(user)" title="Eliminar usuario">
-            <i class="bi bi-trash"></i>
-          </button>
-          <button *ngIf="showDeleted" class="restore-btn" (click)="restoreUser(user)" title="Restaurar usuario">
-            <i class="bi bi-arrow-counterclockwise"></i> Restaurar
-          </button>
+          <ng-container *appHasPermission="'users.manage'">
+            <button *ngIf="!showDeleted" class="edit-btn" (click)="openEditModal(user)" title="Editar usuario">
+              <i class="bi bi-pencil"></i>
+            </button>
+          </ng-container>
+          <ng-container *appHasPermission="'users.manage'">
+            <button *ngIf="!showDeleted" class="delete-btn" (click)="deleteUser(user)" title="Eliminar usuario">
+              <i class="bi bi-trash"></i>
+            </button>
+          </ng-container>
+          <ng-container *appHasPermission="'users.manage'">
+            <button *ngIf="showDeleted" class="restore-btn" (click)="restoreUser(user)" title="Restaurar usuario">
+              <i class="bi bi-arrow-counterclockwise"></i> Restaurar
+            </button>
+          </ng-container>
         </td>
       </tr>
       <tr *ngIf="users.length === 0">

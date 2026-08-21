@@ -1,6 +1,6 @@
 <div class="header">
   <h2>Idiomas</h2>
-  <button class="btn-add" (click)="openCreate()"><i class="bi bi-plus-lg"></i> Agregar Idioma</button>
+  <button class="btn-add" *appHasPermission="'team.update'" (click)="openCreate()"><i class="bi bi-plus-lg"></i> Agregar Idioma</button>
 </div>
 
 <div class="loading-state" *ngIf="loading">Cargando idiomas...</div>
@@ -58,8 +58,8 @@
           <div class="certification"><strong>Certificación:</strong> {{ lang.certification }}</div>
         }
         <div class="card-actions">
-          <button class="btn-edit" (click)="openEdit(lang)">Editar</button>
-          <button class="btn-delete" (click)="deleteLanguage(lang.id)">Eliminar</button>
+          <button class="btn-edit" *appHasPermission="'team.update'" (click)="openEdit(lang)">Editar</button>
+          <button class="btn-delete" *appHasPermission="'team.update'" (click)="deleteLanguage(lang.id)">Eliminar</button>
         </div>
       </div>
     } @empty {

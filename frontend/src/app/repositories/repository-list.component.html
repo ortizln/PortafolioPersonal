@@ -1,13 +1,13 @@
 <div class="header">
   <h2>Repositorios</h2>
   <div class="header-actions">
-    <button class="btn-sync" [class.syncing]="syncing.github" (click)="syncGitHub()">
+    <button class="btn-sync" [class.syncing]="syncing.github" (click)="syncGitHub()" *appHasPermission="'projects.create'">
       <i class="bi bi-github"></i> {{ syncing.github ? 'Sincronizando...' : 'Sincronizar GitHub' }}
     </button>
-    <button class="btn-sync" [class.syncing]="syncing.gitlab" (click)="syncGitLab()">
+    <button class="btn-sync" [class.syncing]="syncing.gitlab" (click)="syncGitLab()" *appHasPermission="'projects.create'">
       <i class="bi bi-gitlab"></i> {{ syncing.gitlab ? 'Sincronizando...' : 'Sincronizar GitLab' }}
     </button>
-    <button class="btn-add" (click)="openCreate()"><i class="bi bi-plus-lg"></i> Agregar Repo</button>
+    <button class="btn-add" (click)="openCreate()" *appHasPermission="'projects.create'"><i class="bi bi-plus-lg"></i> Agregar Repo</button>
   </div>
 </div>
 
@@ -108,8 +108,8 @@
         <div class="repo-footer">
           <span>Actualizado {{ repo.lastPushed }}</span>
           <div class="card-actions">
-            <button class="btn-edit" (click)="openEdit(repo)">Editar</button>
-            <button class="btn-delete" (click)="deleteRepo(repo.id)">Eliminar</button>
+            <button class="btn-edit" (click)="openEdit(repo)" *appHasPermission="'projects.update'">Editar</button>
+            <button class="btn-delete" (click)="deleteRepo(repo.id)" *appHasPermission="'projects.delete'">Eliminar</button>
           </div>
         </div>
       </div>

@@ -4,7 +4,7 @@
       <h1>Skills</h1>
       <p>Manage your professional skills and proficiency levels</p>
     </div>
-    <button type="button" class="btn-gradient" (click)="openAdd()">+ Add Skill</button>
+    <button type="button" class="btn-gradient" *appHasPermission="'team.update'" (click)="openAdd()">+ Add Skill</button>
   </header>
 
   <div class="loading-state" *ngIf="loading">Loading skills...</div>
@@ -86,18 +86,22 @@
           </span>
         </div>
         <div class="skill-bars">
-          <div class="skill-bar-item" *ngFor="let skill of getGroupSkills(cat)" (click)="openEdit(skill)">
-            <div class="skill-bar-info">
-              <span class="skill-bar-icon" *ngIf="skill.icon">{{ skill.icon }}</span>
-              <span class="skill-bar-name">{{ skill.name }}</span>
-              <span class="skill-bar-level" *ngIf="skill.level">{{ skill.level }}</span>
+          <ng-container *appHasPermission="'team.update'">
+            <div class="skill-bar-item" *ngFor="let skill of getGroupSkills(cat)" (click)="openEdit(skill)">
+              <div class="skill-bar-info">
+                <span class="skill-bar-icon" *ngIf="skill.icon">{{ skill.icon }}</span>
+                <span class="skill-bar-name">{{ skill.name }}</span>
+                <span class="skill-bar-level" *ngIf="skill.level">{{ skill.level }}</span>
+              </div>
+              <div class="skill-bar-track">
+                <div class="skill-bar-fill" [style.width.%]="skill.percentage" [style.background]="getBarColor(skill)"></div>
+              </div>
+              <span class="skill-bar-pct">{{ skill.percentage }}%</span>
+              <ng-container *appHasPermission="'team.update'">
+                <button type="button" class="btn-delete-skill" (click)="deleteWithEvent($event, skill.id)" title="Delete skill">&times;</button>
+              </ng-container>
             </div>
-            <div class="skill-bar-track">
-              <div class="skill-bar-fill" [style.width.%]="skill.percentage" [style.background]="getBarColor(skill)"></div>
-            </div>
-            <span class="skill-bar-pct">{{ skill.percentage }}%</span>
-            <button type="button" class="btn-delete-skill" (click)="deleteWithEvent($event, skill.id)" title="Delete skill">&times;</button>
-          </div>
+          </ng-container>
         </div>
       </ng-container>
     </div>
@@ -105,18 +109,22 @@
 
   <!-- Flat filtered list -->
   <div class="skill-bars" *ngIf="activeCategory !== 'All' && filteredSkills.length > 0">
-    <div class="skill-bar-item" *ngFor="let skill of filteredSkills" (click)="openEdit(skill)">
-      <div class="skill-bar-info">
-        <span class="skill-bar-icon" *ngIf="skill.icon">{{ skill.icon }}</span>
-        <span class="skill-bar-name">{{ skill.name }}</span>
-        <span class="skill-bar-level" *ngIf="skill.level">{{ skill.level }}</span>
+    <ng-container *appHasPermission="'team.update'">
+      <div class="skill-bar-item" *ngFor="let skill of filteredSkills" (click)="openEdit(skill)">
+        <div class="skill-bar-info">
+          <span class="skill-bar-icon" *ngIf="skill.icon">{{ skill.icon }}</span>
+          <span class="skill-bar-name">{{ skill.name }}</span>
+          <span class="skill-bar-level" *ngIf="skill.level">{{ skill.level }}</span>
+        </div>
+        <div class="skill-bar-track">
+          <div class="skill-bar-fill" [style.width.%]="skill.percentage" [style.background]="getBarColor(skill)"></div>
+        </div>
+        <span class="skill-bar-pct">{{ skill.percentage }}%</span>
+        <ng-container *appHasPermission="'team.update'">
+          <button type="button" class="btn-delete-skill" (click)="deleteWithEvent($event, skill.id)" title="Delete skill">&times;</button>
+        </ng-container>
       </div>
-      <div class="skill-bar-track">
-        <div class="skill-bar-fill" [style.width.%]="skill.percentage" [style.background]="getBarColor(skill)"></div>
-      </div>
-      <span class="skill-bar-pct">{{ skill.percentage }}%</span>
-      <button type="button" class="btn-delete-skill" (click)="deleteWithEvent($event, skill.id)" title="Delete skill">&times;</button>
-    </div>
+    </ng-container>
   </div>
 
   <div class="toast-container">

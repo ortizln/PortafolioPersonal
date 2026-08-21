@@ -5,10 +5,10 @@
       <p>Gestiona los proyectos de tu portafolio</p>
     </div>
     <div class="header-actions">
-      <button type="button" class="btn-secondary" (click)="toggleDeletedView()">
+      <button type="button" class="btn-secondary" (click)="toggleDeletedView()" *appHasPermission="'projects.delete'">
         {{ showDeleted ? 'Ver activos' : 'Ver eliminados' }}
       </button>
-      <button type="button" class="btn-gradient" (click)="openAdd()">+ Nuevo Proyecto</button>
+      <button type="button" class="btn-gradient" (click)="openAdd()" *appHasPermission="'projects.create'">+ Nuevo Proyecto</button>
     </div>
   </header>
 
@@ -295,19 +295,25 @@
       </div>
       <div class="project-actions-row">
         <div class="project-reorder" *ngIf="!showDeleted">
-          <button type="button" class="btn-icon-sm" (click)="moveUp(i)" [disabled]="i === 0" title="Mover arriba">↑</button>
-          <button type="button" class="btn-icon-sm" (click)="moveDown(i)" [disabled]="i === projects.length - 1" title="Mover abajo">↓</button>
+          <button type="button" class="btn-icon-sm" (click)="moveUp(i)" [disabled]="i === 0" title="Mover arriba" *appHasPermission="'projects.update'">↑</button>
+          <button type="button" class="btn-icon-sm" (click)="moveDown(i)" [disabled]="i === projects.length - 1" title="Mover abajo" *appHasPermission="'projects.update'">↓</button>
         </div>
-        <select class="status-select" [ngClass]="getStatusClass(project.status || 'draft')" (change)="quickStatus(project, $event)" *ngIf="!showDeleted">
-          <option value="draft" [selected]="project.status === 'draft'">Borrador</option>
-          <option value="in_progress" [selected]="project.status === 'in_progress'">En Progreso</option>
-          <option value="completed" [selected]="project.status === 'completed'">Completado</option>
-          <option value="archived" [selected]="project.status === 'archived'">Archivado</option>
-        </select>
+        <ng-container *appHasPermission="'projects.update'">
+          <select class="status-select" [ngClass]="getStatusClass(project.status || 'draft')" (change)="quickStatus(project, $event)" *ngIf="!showDeleted">
+            <option value="draft" [selected]="project.status === 'draft'">Borrador</option>
+            <option value="in_progress" [selected]="project.status === 'in_progress'">En Progreso</option>
+            <option value="completed" [selected]="project.status === 'completed'">Completado</option>
+            <option value="archived" [selected]="project.status === 'archived'">Archivado</option>
+          </select>
+        </ng-container>
         <div class="project-actions">
-          <button type="button" class="btn-accent" (click)="openEdit(project)" *ngIf="!showDeleted">Editar</button>
-          <button type="button" class="btn-danger" (click)="deleteProject(project.id)" *ngIf="!showDeleted">Eliminar</button>
-          <button type="button" class="btn-accent" (click)="restoreProject(project.id)" *ngIf="showDeleted">Restaurar</button>
+          <ng-container *appHasPermission="'projects.update'">
+            <button type="button" class="btn-accent" (click)="openEdit(project)" *ngIf="!showDeleted">Editar</button>
+          </ng-container>
+          <ng-container *appHasPermission="'projects.delete'">
+            <button type="button" class="btn-danger" (click)="deleteProject(project.id)" *ngIf="!showDeleted">Eliminar</button>
+            <button type="button" class="btn-accent" (click)="restoreProject(project.id)" *ngIf="showDeleted">Restaurar</button>
+          </ng-container>
         </div>
       </div>
     </div>

@@ -1,6 +1,6 @@
 <div class="header-row">
   <h2>Tecnologías</h2>
-  <button class="btn-primary" (click)="openCreate()"><i class="bi bi-plus-lg"></i> Nueva tecnología</button>
+  <button class="btn-primary" (click)="openCreate()" *appHasPermission="'technologies.manage'"><i class="bi bi-plus-lg"></i> Nueva tecnología</button>
 </div>
 
 <div class="toolbar">
@@ -29,8 +29,8 @@
       <span class="tech-count">{{ t._count?.projects || 0 }} proyectos · {{ t._count?.skills || 0 }} skills</span>
     </div>
     <div class="tech-actions">
-      <button (click)="openEdit(t)" title="Editar"><i class="bi bi-pencil"></i></button>
-      <button (click)="deleteTechnology(t)" title="Eliminar"><i class="bi bi-trash"></i></button>
+      <button (click)="openEdit(t)" title="Editar" *appHasPermission="'technologies.manage'"><i class="bi bi-pencil"></i></button>
+      <button (click)="deleteTechnology(t)" title="Eliminar" *appHasPermission="'technologies.manage'"><i class="bi bi-trash"></i></button>
     </div>
   </div>
   <div class="empty-state" *ngIf="filtered.length === 0">

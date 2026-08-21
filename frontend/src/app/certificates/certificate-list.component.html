@@ -4,7 +4,7 @@
       <h1>Certificados</h1>
       <p>Gestiona tus certificaciones y credenciales profesionales</p>
     </div>
-    <button type="button" class="btn-gradient" (click)="openAdd()">+ Nuevo Certificado</button>
+    <button type="button" class="btn-gradient" *appHasPermission="'team.update'" (click)="openAdd()">+ Nuevo Certificado</button>
   </header>
 
   <div class="loading-state" *ngIf="loading">Cargando certificados...</div>
@@ -154,8 +154,8 @@
         </a>
       </div>
       <div class="cert-actions">
-        <button type="button" class="btn-accent" (click)="openEdit(cert)">Editar</button>
-        <button type="button" class="btn-danger" (click)="deleteCertificate(cert.id)">Eliminar</button>
+        <button type="button" class="btn-accent" *appHasPermission="'team.update'" (click)="openEdit(cert)">Editar</button>
+        <button type="button" class="btn-danger" *appHasPermission="'team.update'" (click)="deleteCertificate(cert.id)">Eliminar</button>
       </div>
     </div>
   </div>

@@ -1,7 +1,7 @@
 <div class="media-header">
   <div class="media-title-row">
     <h2>Biblioteca multimedia</h2>
-    <button class="btn-primary" (click)="fileInput.click()" [disabled]="uploading">
+    <button class="btn-primary" (click)="fileInput.click()" [disabled]="uploading" *appHasPermission="'media.upload'">
       <i class="bi" [ngClass]="uploading ? 'bi-arrow-repeat spin' : 'bi-upload'"></i>
       {{ uploading ? 'Subiendo...' : 'Subir archivo' }}
     </button>
@@ -47,8 +47,8 @@
     </div>
     <div class="media-actions">
       <button (click)="copyUrl(f)" title="Copiar URL"><i class="bi bi-link-45deg"></i></button>
-      <button (click)="startEditAlt(f)" title="Editar alt"><i class="bi bi-type"></i></button>
-      <button (click)="deleteFile(f)" title="Eliminar"><i class="bi bi-trash"></i></button>
+      <button (click)="startEditAlt(f)" title="Editar alt" *appHasPermission="'media.manage'"><i class="bi bi-type"></i></button>
+      <button (click)="deleteFile(f)" title="Eliminar" *appHasPermission="'media.manage'"><i class="bi bi-trash"></i></button>
     </div>
   </div>
 </div>
@@ -78,7 +78,7 @@
       <span>{{ previewFile.mimeType }} · {{ formatSize(previewFile.size) }}</span>
       <div class="preview-actions">
         <button class="btn-secondary" (click)="copyUrl(previewFile)"><i class="bi bi-link-45deg"></i> Copiar URL</button>
-        <button class="btn-danger" (click)="deleteFile(previewFile); closePreview()"><i class="bi bi-trash"></i> Eliminar</button>
+        <button class="btn-danger" (click)="deleteFile(previewFile); closePreview()" *appHasPermission="'media.manage'"><i class="bi bi-trash"></i> Eliminar</button>
       </div>
     </div>
   </div>

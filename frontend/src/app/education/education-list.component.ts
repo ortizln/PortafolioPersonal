@@ -3,12 +3,13 @@ import { ReactiveFormsModule, FormBuilder, FormGroup } from '@angular/forms';
 import { NgFor, NgIf, DatePipe } from '@angular/common';
 import { ApiService } from '../core/services/api.service';
 import { ConfirmService } from '../core/services/confirm.service';
+import { HasPermissionDirective } from '../core/directives/has-permission.directive';
 import { Education } from '../core/models';
 
 @Component({
   selector: 'app-education-list',
   standalone: true,
-  imports: [ReactiveFormsModule, NgFor, NgIf, DatePipe],
+  imports: [ReactiveFormsModule, NgFor, NgIf, DatePipe, HasPermissionDirective],
   templateUrl: './education-list.component.html',
   styleUrls: ['./education-list.component.scss'],
 })

@@ -1,6 +1,6 @@
 <div class="header">
   <h2>Ajustes</h2>
-  <button class="btn-add" (click)="openCreate()"><i class="bi bi-plus-lg"></i> Agregar Ajuste</button>
+  <button *appHasPermission="'settings.manage'" class="btn-add" (click)="openCreate()"><i class="bi bi-plus-lg"></i> Agregar Ajuste</button>
 </div>
 
 <div class="loading-state" *ngIf="loading">Cargando ajustes...</div>
@@ -52,7 +52,7 @@
           <pre>{{ setting.value }}</pre>
         </div>
         <div class="setting-actions">
-          <button class="btn-edit" (click)="openEdit(setting)">Editar</button>
+          <button *appHasPermission="'settings.manage'" class="btn-edit" (click)="openEdit(setting)">Editar</button>
         </div>
       </div>
     } @empty {

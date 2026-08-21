@@ -4,7 +4,7 @@
       <h1>Educación</h1>
       <p>Gestiona tu formación académica y títulos</p>
     </div>
-    <button type="button" class="btn-gradient" (click)="openAdd()">+ Nueva Educación</button>
+    <button type="button" class="btn-gradient" *appHasPermission="'team.update'" (click)="openAdd()">+ Nueva Educación</button>
   </header>
 
   <div class="loading-state" *ngIf="loading">Cargando educación...</div>
@@ -88,8 +88,8 @@
       </div>
       <div class="edu-description" *ngIf="edu.description">{{ edu.description }}</div>
       <div class="edu-actions">
-        <button type="button" class="btn-accent" (click)="openEdit(edu)">Editar</button>
-        <button type="button" class="btn-danger" (click)="deleteEducation(edu.id)">Eliminar</button>
+        <button type="button" class="btn-accent" *appHasPermission="'team.update'" (click)="openEdit(edu)">Editar</button>
+        <button type="button" class="btn-danger" *appHasPermission="'team.update'" (click)="deleteEducation(edu.id)">Eliminar</button>
       </div>
     </div>
   </div>

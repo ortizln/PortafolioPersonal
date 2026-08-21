@@ -1,10 +1,10 @@
 <div class="header-row">
   <h2>Blog</h2>
   <div class="header-actions">
-    <button class="btn-ghost" (click)="showCategoriesPanel = !showCategoriesPanel">
+    <button class="btn-ghost" *appHasPermission="'posts.manage'" (click)="showCategoriesPanel = !showCategoriesPanel">
       <i class="bi bi-tags"></i> Categorías y tags
     </button>
-    <button class="btn-primary" (click)="openCreate()"><i class="bi bi-plus-lg"></i> Nuevo post</button>
+    <button class="btn-primary" *appHasPermission="'posts.manage'" (click)="openCreate()"><i class="bi bi-plus-lg"></i> Nuevo post</button>
   </div>
 </div>
 
@@ -12,26 +12,26 @@
   <div class="taxo-col">
     <h4>Categorías</h4>
     <div class="taxo-add">
-      <input class="form-control" [(ngModel)]="newCategory" (keyup.enter)="addCategory()" placeholder="Nueva categoría..." />
-      <button class="btn-small" (click)="addCategory()">Agregar</button>
+      <input class="form-control" *appHasPermission="'posts.manage'" [(ngModel)]="newCategory" (keyup.enter)="addCategory()" placeholder="Nueva categoría..." />
+      <button class="btn-small" *appHasPermission="'posts.manage'" (click)="addCategory()">Agregar</button>
     </div>
     <div class="taxo-list">
       <span class="taxo-item" *ngFor="let c of categories">
         {{ c.name }}
-        <button (click)="removeCategory(c)"><i class="bi bi-x-lg"></i></button>
+        <button *appHasPermission="'posts.manage'" (click)="removeCategory(c)"><i class="bi bi-x-lg"></i></button>
       </span>
     </div>
   </div>
   <div class="taxo-col">
     <h4>Tags</h4>
     <div class="taxo-add">
-      <input class="form-control" [(ngModel)]="newTag" (keyup.enter)="addTag()" placeholder="Nuevo tag..." />
-      <button class="btn-small" (click)="addTag()">Agregar</button>
+      <input class="form-control" *appHasPermission="'posts.manage'" [(ngModel)]="newTag" (keyup.enter)="addTag()" placeholder="Nuevo tag..." />
+      <button class="btn-small" *appHasPermission="'posts.manage'" (click)="addTag()">Agregar</button>
     </div>
     <div class="taxo-list">
       <span class="taxo-item" *ngFor="let t of tags">
         {{ t.name }}
-        <button (click)="removeTag(t)"><i class="bi bi-x-lg"></i></button>
+        <button *appHasPermission="'posts.manage'" (click)="removeTag(t)"><i class="bi bi-x-lg"></i></button>
       </span>
     </div>
   </div>
@@ -81,10 +81,14 @@
         <span class="mini-chip" *ngFor="let t of p.tags">#{{ t.name }}</span>
       </div>
       <div class="post-actions">
-        <button class="btn-small" (click)="openEdit(p)"><i class="bi bi-pencil"></i> Editar</button>
-        <button class="btn-small success" *ngIf="p.status !== 'PUBLISHED'" (click)="publish(p)"><i class="bi bi-send"></i> Publicar</button>
-        <button class="btn-small" *ngIf="p.status === 'PUBLISHED'" (click)="archive(p)"><i class="bi bi-archive"></i> Archivar</button>
-        <button class="btn-small danger" (click)="remove(p)"><i class="bi bi-trash"></i></button>
+        <button class="btn-small" *appHasPermission="'posts.manage'" (click)="openEdit(p)"><i class="bi bi-pencil"></i> Editar</button>
+        <ng-container *appHasPermission="'posts.publish'">
+          <button class="btn-small success" *ngIf="p.status !== 'PUBLISHED'" (click)="publish(p)"><i class="bi bi-send"></i> Publicar</button>
+        </ng-container>
+        <ng-container *appHasPermission="'posts.manage'">
+          <button class="btn-small" *ngIf="p.status === 'PUBLISHED'" (click)="archive(p)"><i class="bi bi-archive"></i> Archivar</button>
+        </ng-container>
+        <button class="btn-small danger" *appHasPermission="'posts.manage'" (click)="remove(p)"><i class="bi bi-trash"></i></button>
       </div>
     </div>
   </div>
