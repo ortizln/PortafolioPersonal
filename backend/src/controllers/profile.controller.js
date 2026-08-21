@@ -8,7 +8,17 @@ const profileController = {
         where: { userId: req.user.id }
       });
 
-      if (!profile) throw new AppError('Profile not found', 404);
+      if (!profile) {
+        const user = await prisma.user.findUnique({ where: { id: req.user.id }, select: { name: true, email: true } });
+        return res.json({
+          userId: req.user.id,
+          fullName: user?.name || '',
+          professionalTitle: '',
+          profileImage: null,
+          bannerImage: null,
+          cvFile: null,
+        });
+      }
 
       res.json(profile);
     } catch (error) {

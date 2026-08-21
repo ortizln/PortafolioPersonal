@@ -98,6 +98,7 @@ const userController = {
           isActive: true,
           roleId: roleId || null,
           teamMemberId: teamMemberId || null,
+          profile: { create: { fullName: name, professionalTitle: '' } },
         },
         select: userSelect,
       });
