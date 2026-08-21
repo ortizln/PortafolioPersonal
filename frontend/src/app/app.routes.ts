@@ -1,5 +1,5 @@
 import { Routes } from '@angular/router';
-import { authGuard, permissionGuard } from './core/guards/auth.guard';
+import { authGuard, authenticatedGuard, permissionGuard } from './core/guards/auth.guard';
 
 export const routes: Routes = [
   {
@@ -35,7 +35,7 @@ export const routes: Routes = [
       import('./shared/layout/admin-layout.component').then(
         (m) => m.AdminLayoutComponent
       ),
-    canActivate: [authGuard],
+    canActivate: [authenticatedGuard],
     children: [
       { path: '', loadComponent: () => import('./dashboard/dashboard.component').then((m) => m.DashboardComponent), data: { animation: 'page' } },
     ],

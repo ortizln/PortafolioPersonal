@@ -69,6 +69,37 @@ export const authGuard: CanActivateFn = () => {
   );
 };
 
+export const authenticatedGuard: CanActivateFn = () => {
+  const authService = inject(AuthService);
+  const apiService = inject(ApiService);
+  const router = inject(Router);
+
+  const token = authService.getToken();
+  if (!token) return router.parseUrl('/auth/login');
+
+  const ensureUser = () => {
+    const user = authService.getCurrentUser();
+    if (user && user.id) return of(true);
+    return apiService.getMe().pipe(
+      map((fresh) => { authService.setCurrentUser(fresh); return true; }),
+      catchError(() => of(router.parseUrl('/auth/login')))
+    );
+  };
+
+  try {
+    const decoded: { exp?: number } = jwtDecode(token);
+    if (!decoded.exp) { authService.clearStorage(); return router.parseUrl('/auth/login'); }
+    if (decoded.exp * 1000 > Date.now()) return ensureUser();
+  } catch {
+    return router.parseUrl('/auth/login');
+  }
+
+  return authService.refreshToken().pipe(
+    switchMap(() => ensureUser()),
+    catchError(() => { authService.clearStorage(); return of(router.parseUrl('/auth/login')); })
+  );
+};
+
 export const permissionGuard = (...permissions: string[]): CanActivateFn => {
   return () => {
     const authService = inject(AuthService);
