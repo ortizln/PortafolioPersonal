@@ -54,6 +54,11 @@ const profileController = {
         create: { userId: req.user.id, fullName: '', professionalTitle: '', profileImage: urlPath }
       });
 
+      const user = await prisma.user.findUnique({ where: { id: req.user.id }, select: { teamMemberId: true } });
+      if (user?.teamMemberId) {
+        await prisma.teamMember.update({ where: { id: user.teamMemberId }, data: { photoUrl: urlPath } });
+      }
+
       res.json(profile);
     } catch (error) {
       next(error);
