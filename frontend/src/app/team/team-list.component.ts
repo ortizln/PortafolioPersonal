@@ -104,14 +104,26 @@ export class TeamListComponent implements OnInit {
     const input = event.target as HTMLInputElement;
     const file = input.files?.[0];
     if (!file) return;
-    this.apiService.uploadFile(file, 'team').subscribe({
-      next: (res) => {
-        this.form.photoUrl = res.url;
-        this.showToast('Foto subida', 'success');
-      },
-      error: () => this.showToast('Error al subir la foto', 'error'),
-      complete: () => (input.value = '')
-    });
+
+    if (this.editingMember) {
+      this.apiService.uploadTeamPhoto(this.editingMember.id, file).subscribe({
+        next: (res) => {
+          this.form.photoUrl = res.photoUrl;
+          this.showToast('Foto subida', 'success');
+        },
+        error: () => this.showToast('Error al subir la foto', 'error'),
+        complete: () => (input.value = '')
+      });
+    } else {
+      this.apiService.uploadFile(file, 'team').subscribe({
+        next: (res) => {
+          this.form.photoUrl = res.url;
+          this.showToast('Foto subida', 'success');
+        },
+        error: () => this.showToast('Error al subir la foto', 'error'),
+        complete: () => (input.value = '')
+      });
+    }
   }
 
   async deleteMember(m: TeamMember): Promise<void> {

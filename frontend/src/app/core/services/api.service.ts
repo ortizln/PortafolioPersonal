@@ -635,6 +635,12 @@ export class ApiService {
     return this.http.delete<void>(`${this.apiUrl}/team/${id}`);
   }
 
+  uploadTeamPhoto(memberId: string, file: File): Observable<{ photoUrl: string }> {
+    const formData = new FormData();
+    formData.append('photo', file);
+    return this.http.post<{ photoUrl: string }>(`${this.apiUrl}/team/${memberId}/photo`, formData);
+  }
+
   // Public corporate endpoints
   getPublicCompany(): Observable<Company> {
     return this.http.get<{ company: Company }>(`${this.apiUrl}/public/company`).pipe(

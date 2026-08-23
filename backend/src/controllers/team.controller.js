@@ -173,6 +173,24 @@ const teamController = {
       if (error.code === 'P2025') return next(new AppError('Team member not found', 404));
       next(error);
     }
+  },
+
+  async uploadPhoto(req, res, next) {
+    try {
+      if (!req.file) throw new AppError('No file uploaded', 400);
+
+      const urlPath = `images/${req.file.filename}`;
+
+      const member = await prisma.teamMember.update({
+        where: { id: req.params.id },
+        data: { photoUrl: urlPath }
+      });
+
+      res.json({ photoUrl: urlPath });
+    } catch (error) {
+      if (error.code === 'P2025') return next(new AppError('Team member not found', 404));
+      next(error);
+    }
   }
 };
 
