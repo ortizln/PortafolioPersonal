@@ -156,7 +156,7 @@ export class AdminLayoutComponent implements OnInit, OnDestroy {
 
   isSidebarCollapsed = false;
   isMobileSidebarOpen = false;
-  isDark = false;
+  isDark = document.documentElement.getAttribute('data-theme') === 'dark';
   pageTitle = 'Dashboard';
   notificationsOpen = false;
   notifications: Notification[] = [];
@@ -344,7 +344,10 @@ export class AdminLayoutComponent implements OnInit, OnDestroy {
 
   toggleTheme(): void {
     this.isDark = !this.isDark;
-    document.documentElement.setAttribute('data-theme', this.isDark ? 'dark' : 'light');
+    const theme = this.isDark ? 'dark' : 'light';
+    document.documentElement.setAttribute('data-theme', theme);
+    document.documentElement.setAttribute('data-bs-theme', theme);
+    try { localStorage.setItem('alantek-theme', theme); } catch {}
   }
 
   @HostListener('window:resize')

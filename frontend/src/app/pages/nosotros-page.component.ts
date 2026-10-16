@@ -6,17 +6,20 @@ import { SeoService } from '../core/services/seo.service';
 import { Company, TeamMember } from '../core/models';
 import { applyCompanyBrand } from '../core/utils/brand.util';
 import { environment } from '../../environments/environment';
+import { ContactCtaComponent } from '../shared/components/contact-cta.component';
+import { ScrollRevealDirective } from '../core/directives/scroll-reveal.directive';
 
 @Component({
   selector: 'app-nosotros-page',
   standalone: true,
-  imports: [NgIf, NgFor, RouterLink],
+  imports: [NgIf, NgFor, RouterLink, ContactCtaComponent, ScrollRevealDirective],
   template: `
     <div class="page-wrapper">
-      <header class="page-hero">
-        <div class="container">
-          <h1>Sobre {{ companyName }}</h1>
-          <p>{{ company?.slogan || 'Tecnología que impulsa tu negocio' }}</p>
+      <header class="page-hero page-hero--center">
+        <div class="container-alantek">
+          <span class="eyebrow">Nosotros</span>
+          <h1 class="page-title">Sobre {{ companyName }}</h1>
+          <p class="page-subtitle">{{ company?.slogan || 'Tecnología que impulsa tu negocio' }}</p>
         </div>
       </header>
 
@@ -29,77 +32,66 @@ import { environment } from '../../environments/environment';
       </div>
 
       <ng-container *ngIf="!loading">
-        <section class="container section" data-aos="fade-up">
-          <p class="intro">{{ company?.description || company?.shortDescription }}</p>
-          <div class="story" *ngIf="company?.history">
-            <h2>Nuestra historia</h2>
-            <p>{{ company.history }}</p>
-          </div>
-          <div class="mv-grid" *ngIf="company?.mission || company?.vision">
-            <div class="mv-card" *ngIf="company?.mission">
-              <i class="bi bi-bullseye" aria-hidden="true"></i>
-              <h2>Misión</h2>
-              <p>{{ company?.mission }}</p>
+        <section class="page-section">
+          <div class="container-alantek container-narrow">
+            <div class="prose" appScrollReveal>
+              <p class="intro">{{ company?.description || company?.shortDescription }}</p>
+              <div class="story" *ngIf="company?.history">
+                <h2>Nuestra historia</h2>
+                <p>{{ company.history }}</p>
+              </div>
             </div>
-            <div class="mv-card" *ngIf="company?.vision">
-              <i class="bi bi-eye" aria-hidden="true"></i>
-              <h2>Visión</h2>
-              <p>{{ company?.vision }}</p>
+            <div class="mv-grid" *ngIf="company?.mission || company?.vision">
+              <div class="card-alantek mv-card" *ngIf="company?.mission" appScrollReveal>
+                <i class="bi bi-bullseye" aria-hidden="true"></i>
+                <h2>Misión</h2>
+                <p>{{ company?.mission }}</p>
+              </div>
+              <div class="card-alantek mv-card" *ngIf="company?.vision" appScrollReveal [revealDelay]="120">
+                <i class="bi bi-eye" aria-hidden="true"></i>
+                <h2>Visión</h2>
+                <p>{{ company?.vision }}</p>
+              </div>
             </div>
           </div>
         </section>
 
-        <section class="section section--alt" *ngIf="team.length" data-aos="fade-up">
-          <div class="container">
-            <h2 class="section-title">Nuestro equipo</h2>
-            <p class="section-subtitle">Los profesionales detrás de cada proyecto.</p>
-            <div class="team-grid">
-              <a class="team-card" *ngFor="let m of team" [routerLink]="['/equipo', m.slug]" data-aos="fade-up">
-                <div class="team-photo">
-                  <img [src]="getPhoto(m) || 'assets/avatar-placeholder.svg'" [alt]="m.fullName" loading="lazy" />
-                </div>
-                <h3 class="team-name">{{ m.fullName }}</h3>
-                <span class="team-title">{{ m.professionalTitle }}</span>
+        <section class="page-section page-section--alt" *ngIf="team.length">
+          <div class="container-alantek">
+            <div class="section-head" appScrollReveal>
+              <span class="eyebrow">Equipo</span>
+              <h2>Nuestro equipo</h2>
+              <p class="section-subtitle">Los profesionales detrás de cada proyecto.</p>
+            </div>
+            <div class="grid-team">
+              <a class="card-member" *ngFor="let m of team" [routerLink]="['/equipo', m.slug]" appScrollReveal>
+                <img
+                  class="member-photo"
+                  [src]="getPhoto(m) || 'assets/avatar-placeholder.svg'"
+                  [alt]="m.fullName"
+                  loading="lazy"
+                />
+                <h3>{{ m.fullName }}</h3>
+                <span class="member-role">{{ m.professionalTitle }}</span>
               </a>
             </div>
           </div>
         </section>
       </ng-container>
+
+      <app-contact-cta></app-contact-cta>
     </div>
   `,
   styles: [`
-    .page-wrapper { min-height: 100vh; padding-top: 80px; background: var(--bg-primary); }
-    .container { max-width: 1100px; margin: 0 auto; padding: 0 24px; }
-    .page-hero { background: linear-gradient(160deg, var(--bg-secondary), var(--bg-primary)); border-bottom: 1px solid var(--border); padding: 48px 0; text-align: center; }
-    .page-hero h1 { font-size: 2.2rem; margin: 0 0 8px; }
-    .page-hero p { color: var(--text-secondary); margin: 0; }
-    .page-loading { display: flex; justify-content: center; padding: 100px 0; }
-    .spinner { width: 40px; height: 40px; border: 3px solid var(--border); border-top-color: var(--accent); border-radius: 50%; animation: spin 0.8s linear infinite; }
-    @keyframes spin { to { transform: rotate(360deg); } }
-    .section { padding: 70px 0; }
-    .section--alt { background: var(--bg-secondary); }
-    .section-title { font-size: 1.8rem; font-weight: 700; margin: 0 0 8px; }
-    .section-subtitle { color: var(--text-secondary); margin: 0 0 32px; }
-    .intro { font-size: 1.05rem; color: var(--text-secondary); line-height: 1.9; white-space: pre-wrap; }
-    .story h2 { font-size: 1.4rem; margin: 40px 0 12px; color: var(--white); }
-    .story p { color: var(--text-secondary); line-height: 1.9; white-space: pre-wrap; }
-    .mv-grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(320px, 1fr)); gap: 20px; margin-top: 40px; }
-    .mv-card { background: var(--bg-card); border: 1px solid var(--border); border-radius: 16px; padding: 28px; }
+    .intro { font-size: var(--fs-lg); white-space: pre-wrap; }
+    .story p { white-space: pre-wrap; }
+    .mv-grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(300px, 1fr)); gap: var(--space-5); margin-top: var(--space-7); }
     .mv-card i { font-size: 1.6rem; color: var(--accent); }
-    .mv-card h2 { font-size: 1.2rem; margin: 14px 0 8px; color: var(--white); }
-    .mv-card p { color: var(--text-secondary); line-height: 1.7; margin: 0; }
-    .team-grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(220px, 1fr)); gap: 20px; }
-    .team-card { text-align: center; background: var(--bg-card); border: 1px solid var(--border); border-radius: 16px; padding: 24px; text-decoration: none; transition: var(--transition); display: block; }
-    .team-card:hover { border-color: var(--accent); transform: translateY(-4px); box-shadow: var(--shadow-lg); }
-    .team-photo { width: 96px; height: 96px; margin: 0 auto 14px; border-radius: 50%; overflow: hidden; background: var(--bg-secondary); }
-    .team-photo img { width: 100%; height: 100%; object-fit: cover; }
-    .team-name { font-size: 1rem; color: var(--white); margin: 0 0 4px; }
-    .team-title { font-size: 0.8rem; color: var(--accent); }
-    .page-error { text-align: center; padding: 60px 24px; color: var(--text-muted); }
-    .page-error i { font-size: 2.5rem; color: var(--accent); margin-bottom: 12px; }
-    .page-error p { margin-bottom: 16px; }
-    .btn-retry { background: var(--accent); color: var(--bg-primary); border: none; padding: 10px 24px; border-radius: 8px; cursor: pointer; font-weight: 600; }
-    .btn-retry:hover { opacity: 0.9; }
+    .mv-card h2 { font-family: var(--font-heading); font-size: var(--fs-xl); font-weight: var(--fw-semibold); color: var(--text-primary); margin: var(--space-4) 0 var(--space-2); }
+    .mv-card p { color: var(--text-secondary); line-height: var(--lh-normal); margin: 0; }
+    .section-head { margin-bottom: var(--space-6); }
+    .section-head h2 { font-family: var(--font-heading); font-size: var(--fs-3xl); font-weight: var(--fw-bold); color: var(--text-primary); margin: 0 0 var(--space-2); }
+    .section-subtitle { color: var(--text-secondary); margin: 0; }
   `],
 })
 export class NosotrosPageComponent implements OnInit {

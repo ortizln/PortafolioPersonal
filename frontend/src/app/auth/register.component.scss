@@ -79,7 +79,7 @@
 
     &:focus {
       border-color: var(--accent);
-      box-shadow: 0 0 0 3px rgba(100, 255, 218, 0.1);
+      box-shadow: 0 0 0 3px rgba(var(--accent-rgb), 0.15);
     }
 
     &.ng-invalid.ng-touched {
@@ -126,7 +126,7 @@
 
   &:hover:not(:disabled) {
     transform: translateY(-2px);
-    box-shadow: 0 8px 25px rgba(100, 255, 218, 0.3);
+    box-shadow: 0 8px 25px rgba(var(--accent-rgb), 0.3);
   }
 
   &:disabled {

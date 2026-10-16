@@ -1,20 +1,22 @@
 import { Component, OnInit, inject } from '@angular/core';
 import { NgIf, NgFor } from '@angular/common';
-import { RouterLink } from '@angular/router';
 import { ApiService } from '../core/services/api.service';
 import { Client } from '../core/models';
 import { environment } from '../../environments/environment';
+import { ScrollRevealDirective } from '../core/directives/scroll-reveal.directive';
+import { ContactCtaComponent } from '../shared/components/contact-cta.component';
 
 @Component({
   selector: 'app-clientes-page',
   standalone: true,
-  imports: [NgIf, NgFor, RouterLink],
+  imports: [NgIf, NgFor, ScrollRevealDirective, ContactCtaComponent],
   template: `
     <div class="page-wrapper">
-      <header class="page-hero">
-        <div class="container">
-          <h1>Clientes</h1>
-          <p>Empresas que confían en nuestro trabajo.</p>
+      <header class="page-hero page-hero--center">
+        <div class="container-alantek">
+          <span class="eyebrow">Confianza</span>
+          <h1 class="page-title">Clientes</h1>
+          <p class="page-subtitle">Empresas que confían en nuestro trabajo.</p>
         </div>
       </header>
 
@@ -24,42 +26,80 @@ import { environment } from '../../environments/environment';
         <p>No pudimos cargar la información. Intenta de nuevo.</p>
         <button class="btn-retry" (click)="retry()" aria-label="Reintentar">Reintentar</button>
       </div>
-      <div *ngIf="!loading && !clients.length" class="page-empty">Aún no hay clientes publicados.</div>
+      <div *ngIf="!loading && !error && !clients.length" class="page-empty">Aún no hay clientes publicados.</div>
 
-      <section class="container section" *ngIf="!loading && clients.length">
-        <div class="clients-grid">
-          <a class="client-card" *ngFor="let c of clients" [href]="c.website || null" [attr.target]="c.website ? '_blank' : null" [attr.tabindex]="c.website ? null : -1" [attr.aria-hidden]="!c.website" rel="noopener" data-aos="fade-up">
-            <img *ngIf="getLogo(c)" [src]="getLogo(c)" [alt]="c.name" loading="lazy" />
-            <span *ngIf="!getLogo(c)" class="client-fallback">{{ c.name }}</span>
-            <span class="client-industry" *ngIf="c.industry">{{ c.industry }}</span>
-          </a>
+      <section class="page-section" *ngIf="!loading && !error && clients.length">
+        <div class="container-alantek">
+          <div class="grid-clients">
+            <a
+              class="client-card"
+              *ngFor="let c of clients; trackBy: trackByClient"
+              [href]="c.website || null"
+              [attr.target]="c.website ? '_blank' : null"
+              [attr.tabindex]="c.website ? null : -1"
+              [attr.aria-label]="c.name"
+              rel="noopener"
+              appScrollReveal
+            >
+              <img *ngIf="getLogo(c)" [src]="getLogo(c)" [alt]="c.name" loading="lazy" />
+              <span *ngIf="!getLogo(c)" class="client-fallback">{{ c.name }}</span>
+              <span class="client-industry" *ngIf="c.industry">{{ c.industry }}</span>
+            </a>
+          </div>
         </div>
       </section>
+
+      <app-contact-cta
+        eyebrow="Empecemos"
+        title="¿Trabajamos juntos?"
+        text="Suma tu empresa a las organizaciones que ya confían en ALANTEK."
+      ></app-contact-cta>
     </div>
   `,
   styles: [`
-    .page-wrapper { min-height: 100vh; padding-top: 80px; background: var(--bg-primary); }
-    .container { max-width: 1100px; margin: 0 auto; padding: 0 24px; }
-    .page-hero { background: linear-gradient(160deg, var(--bg-secondary), var(--bg-primary)); border-bottom: 1px solid var(--border); padding: 48px 0; text-align: center; }
-    .page-hero h1 { font-size: 2.2rem; margin: 0 0 8px; }
-    .page-hero p { color: var(--text-secondary); margin: 0; }
-    .page-loading { display: flex; justify-content: center; padding: 100px 0; }
-    .page-empty { text-align: center; padding: 100px 24px; color: var(--text-muted); }
-    .spinner { width: 40px; height: 40px; border: 3px solid var(--border); border-top-color: var(--accent); border-radius: 50%; animation: spin 0.8s linear infinite; }
-    @keyframes spin { to { transform: rotate(360deg); } }
-    .section { padding: 70px 0; }
-    .clients-grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(200px, 1fr)); gap: 18px; }
-    .client-card { display: flex; flex-direction: column; align-items: center; justify-content: center; min-height: 130px; padding: 24px; background: var(--bg-card); border: 1px solid var(--border); border-radius: 14px; text-decoration: none; transition: var(--transition); }
-    .client-card:hover { border-color: var(--accent); transform: translateY(-3px); box-shadow: var(--shadow-lg); }
-    .client-card img { max-width: 150px; max-height: 60px; object-fit: contain; filter: grayscale(0.4); opacity: 0.85; transition: var(--transition); }
-    .client-card:hover img { filter: grayscale(0); opacity: 1; }
-    .client-fallback { font-weight: 700; color: var(--text-secondary); }
-    .client-industry { margin-top: 10px; font-size: 0.76rem; color: var(--text-muted); }
-    .page-error { text-align: center; padding: 60px 24px; color: var(--text-muted); }
-    .page-error i { font-size: 2.5rem; color: var(--accent); margin-bottom: 12px; }
-    .page-error p { margin-bottom: 16px; }
-    .btn-retry { background: var(--accent); color: var(--bg-primary); border: none; padding: 10px 24px; border-radius: 8px; cursor: pointer; font-weight: 600; }
-    .btn-retry:hover { opacity: 0.9; }
+    .client-card {
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      justify-content: center;
+      min-height: 130px;
+      padding: var(--space-5);
+      background: var(--bg-card);
+      border: 1px solid var(--border);
+      border-radius: var(--radius-lg);
+      text-decoration: none;
+      transition: all var(--duration-base) var(--ease-out);
+
+      &:hover {
+        border-color: var(--border-accent);
+        transform: translateY(-3px);
+        box-shadow: var(--shadow-md);
+      }
+
+      img {
+        max-width: 150px;
+        max-height: 60px;
+        object-fit: contain;
+        filter: grayscale(0.4);
+        opacity: 0.85;
+        transition: all var(--duration-base) var(--ease-out);
+      }
+
+      &:hover img {
+        filter: grayscale(0);
+        opacity: 1;
+      }
+    }
+    .client-fallback {
+      font-family: var(--font-heading);
+      font-weight: var(--fw-bold);
+      color: var(--text-secondary);
+    }
+    .client-industry {
+      margin-top: var(--space-2);
+      font-size: var(--fs-xs);
+      color: var(--text-muted);
+    }
   `],
 })
 export class ClientesPageComponent implements OnInit {
@@ -79,7 +119,6 @@ export class ClientesPageComponent implements OnInit {
       next: (list) => {
         this.clients = list || [];
         this.loading = false;
-        setTimeout(() => this.initAOS(), 100);
       },
       error: () => { this.loading = false; this.error = true; },
     });
@@ -91,12 +130,9 @@ export class ClientesPageComponent implements OnInit {
     return `${environment.uploadUrl}/${c.logoUrl}`;
   }
 
-  private initAOS(): void {
-    const aos = (window as any).AOS;
-    if (aos) aos.init({ duration: 800, easing: 'ease-out-cubic', once: true, offset: 80 });
-  }
-
   retry(): void {
     this.loadClients();
   }
+
+  trackByClient = (i: number, c: any) => c.id || i;
 }

@@ -5,11 +5,13 @@ import { ApiService } from '../core/services/api.service';
 import { SeoService } from '../core/services/seo.service';
 import { TeamMember } from '../core/models';
 import { environment } from '../../environments/environment';
+import { ContactCtaComponent } from '../shared/components/contact-cta.component';
+import { ScrollRevealDirective } from '../core/directives/scroll-reveal.directive';
 
 @Component({
   selector: 'app-team-detail-page',
   standalone: true,
-  imports: [NgIf, NgFor, DatePipe, RouterLink],
+  imports: [NgIf, NgFor, DatePipe, RouterLink, ContactCtaComponent, ScrollRevealDirective],
   template: `
     <div class="page-wrapper">
       <div *ngIf="loading" class="page-loading"><div class="spinner"></div></div>
@@ -21,15 +23,15 @@ import { environment } from '../../environments/environment';
       </div>
 
       <ng-container *ngIf="!loading && !error && member">
-        <header class="profile-hero">
-          <div class="container hero-inner">
-            <div class="avatar-wrap">
+        <header class="page-hero page-hero--split">
+          <div class="container-alantek page-hero-inner">
+            <div class="detail-banner">
               <img [src]="getPhoto() || 'assets/avatar-placeholder.svg'" [alt]="member.fullName" loading="lazy" decoding="async" />
             </div>
-            <div class="hero-info">
+            <div>
               <a routerLink="/equipo" class="back-link">&larr; Volver al equipo</a>
-              <h1>{{ member.fullName }}</h1>
-              <p class="member-title">{{ member.professionalTitle }}</p>
+              <h1 class="page-title">{{ member.fullName }}</h1>
+              <p class="page-subtitle">{{ member.professionalTitle }}</p>
               <div class="member-meta" *ngIf="member.location || member.email || member.phone">
                 <span *ngIf="member.location"><i class="bi bi-geo-alt" aria-hidden="true"></i> {{ member.location }}</span>
                 <span *ngIf="member.email"><i class="bi bi-envelope" aria-hidden="true"></i> {{ member.email }}</span>
@@ -44,13 +46,13 @@ import { environment } from '../../environments/environment';
           </div>
         </header>
 
-        <div class="container content">
-          <section class="section-block" *ngIf="member.about || member.bio">
+        <div class="container-alantek content">
+          <section class="page-section" *ngIf="member.about || member.bio" appScrollReveal>
             <h2>Sobre mí</h2>
-            <p class="text">{{ member.about || member.bio }}</p>
+            <p class="prose">{{ member.about || member.bio }}</p>
           </section>
 
-          <section class="section-block" *ngIf="member.experiences?.length">
+          <section class="page-section" *ngIf="member.experiences?.length" appScrollReveal>
             <h2>Experiencia</h2>
             <div class="list-block" *ngFor="let e of member.experiences">
               <h3>{{ e.position }}</h3>
@@ -60,7 +62,7 @@ import { environment } from '../../environments/environment';
             </div>
           </section>
 
-          <section class="section-block" *ngIf="member.educations?.length">
+          <section class="page-section" *ngIf="member.educations?.length" appScrollReveal>
             <h2>Educación</h2>
             <div class="list-block" *ngFor="let ed of member.educations">
               <h3>{{ ed.degree }}</h3>
@@ -69,7 +71,7 @@ import { environment } from '../../environments/environment';
             </div>
           </section>
 
-          <section class="section-block" *ngIf="member.certifications?.length">
+          <section class="page-section" *ngIf="member.certifications?.length" appScrollReveal>
             <h2>Certificaciones</h2>
             <div class="cert-grid">
               <div class="cert-card" *ngFor="let c of member.certifications">
@@ -80,14 +82,14 @@ import { environment } from '../../environments/environment';
             </div>
           </section>
 
-          <section class="section-block" *ngIf="member.skills?.length">
+          <section class="page-section" *ngIf="member.skills?.length" appScrollReveal>
             <h2>Habilidades</h2>
-            <div class="chips">
+            <div class="detail-meta">
               <span class="chip" *ngFor="let s of member.skills">{{ s.name }}</span>
             </div>
           </section>
 
-          <section class="section-block" *ngIf="member.languages?.length">
+          <section class="page-section" *ngIf="member.languages?.length" appScrollReveal>
             <h2>Idiomas</h2>
             <div class="languages">
               <div class="language" *ngFor="let l of member.languages">
@@ -99,32 +101,23 @@ import { environment } from '../../environments/environment';
           </section>
         </div>
       </ng-container>
+
+      <app-contact-cta
+        eyebrow="Colaboremos"
+        title="¿Te gustaría trabajar con nosotros?"
+        text="Cuéntanos tu proyecto y te ayudaremos a hacerlo realidad."
+      ></app-contact-cta>
     </div>
   `,
   styles: [`
-    .page-wrapper { min-height: 100vh; padding-top: 80px; background: var(--bg-primary); }
-    .container { max-width: 900px; margin: 0 auto; padding: 0 24px; }
-    .page-loading { display: flex; justify-content: center; padding: 100px 0; }
-    .spinner { width: 40px; height: 40px; border: 3px solid var(--border); border-top-color: var(--accent); border-radius: 50%; animation: spin 0.8s linear infinite; }
-    @keyframes spin { to { transform: rotate(360deg); } }
-    .page-error { text-align: center; padding: 100px 24px; color: var(--text-muted); }
-    .page-error i { font-size: 3rem; color: var(--accent); margin-bottom: 16px; display: block; }
-    .btn-retry { background: var(--accent); color: var(--bg-primary); border: none; padding: 10px 24px; border-radius: 8px; cursor: pointer; font-weight: 600; text-decoration: none; display: inline-block; margin-top: 12px; }
-    .profile-hero { background: linear-gradient(160deg, var(--bg-secondary), var(--bg-primary)); border-bottom: 1px solid var(--border); padding: 48px 0; }
-    .hero-inner { display: flex; gap: 32px; align-items: center; }
-    .avatar-wrap { width: 160px; height: 160px; border-radius: 50%; overflow: hidden; background: var(--bg-card); border: 3px solid var(--accent); flex-shrink: 0; }
-    .avatar-wrap img { width: 100%; height: 100%; object-fit: cover; }
     .back-link { color: var(--accent); font-size: 0.82rem; text-decoration: none; display: inline-block; margin-bottom: 12px; }
-    .hero-info h1 { font-size: 2rem; margin: 0 0 6px; }
-    .member-title { color: var(--accent); font-size: 1.05rem; margin: 0 0 14px; }
     .member-meta { display: flex; flex-wrap: wrap; gap: 16px; font-size: 0.85rem; color: var(--text-muted); margin-bottom: 14px; }
     .member-meta span { display: inline-flex; align-items: center; gap: 6px; }
     .member-social { display: flex; gap: 8px; }
     .member-social a { width: 38px; height: 38px; border-radius: 10px; background: var(--bg-card); border: 1px solid var(--border); color: var(--text-secondary); display: flex; align-items: center; justify-content: center; text-decoration: none; transition: var(--transition); }
     .member-social a:hover { color: var(--accent); border-color: var(--accent); }
-    .content { padding: 48px 24px; display: flex; flex-direction: column; gap: 40px; }
-    .section-block h2 { font-size: 1.3rem; color: var(--white); margin: 0 0 18px; padding-left: 14px; border-left: 3px solid var(--accent); }
-    .text { color: var(--text-secondary); line-height: 1.8; white-space: pre-wrap; margin: 0; }
+    .content { display: flex; flex-direction: column; gap: 40px; }
+    .page-section h2 { font-size: 1.3rem; color: var(--white); margin: 0 0 18px; padding-left: 14px; border-left: 3px solid var(--accent); }
     .list-block { background: var(--bg-card); border: 1px solid var(--border); border-radius: 12px; padding: 18px; margin-bottom: 12px; }
     .list-block h3 { font-size: 1rem; color: var(--white); margin: 0 0 4px; }
     .list-block .org { display: block; color: var(--accent); font-size: 0.88rem; }
@@ -135,15 +128,13 @@ import { environment } from '../../environments/environment';
     .cert-card i { color: var(--accent); font-size: 1.2rem; margin-bottom: 8px; }
     .cert-name { display: block; color: var(--white); font-size: 0.9rem; font-weight: 600; }
     .cert-org { display: block; color: var(--text-muted); font-size: 0.78rem; margin-top: 2px; }
-    .chips { display: flex; flex-wrap: wrap; gap: 8px; }
-    .chip { background: rgba(var(--accent-rgb), 0.08); color: var(--accent); padding: 5px 12px; border-radius: 20px; font-size: 0.8rem; }
     .languages { display: grid; grid-template-columns: repeat(auto-fill, minmax(240px, 1fr)); gap: 16px; }
     .language { display: flex; flex-direction: column; gap: 6px; }
     .lang-name { color: var(--white); font-size: 0.9rem; font-weight: 600; }
     .lang-bar { height: 6px; border-radius: 4px; background: var(--bg-card); overflow: hidden; }
     .lang-fill { height: 100%; background: linear-gradient(90deg, var(--accent), var(--accent-secondary)); border-radius: 4px; }
     .lang-level { color: var(--text-muted); font-size: 0.78rem; }
-    @media (max-width: 640px) { .hero-inner { flex-direction: column; text-align: center; } .member-meta, .member-social { justify-content: center; } }
+    @media (max-width: 640px) { .page-hero--split .page-hero-inner { flex-direction: column; text-align: center; } .member-meta, .member-social { justify-content: center; } }
   `],
 })
 export class TeamDetailPageComponent implements OnInit {

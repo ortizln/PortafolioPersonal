@@ -27,7 +27,7 @@ export class TechnologyListComponent implements OnInit {
     slug: '',
     description: '',
     icon: '',
-    color: '#38bdf8',
+    color: '#BD6735',
     category: '',
     website: '',
   };
@@ -60,7 +60,7 @@ export class TechnologyListComponent implements OnInit {
 
   openCreate(): void {
     this.editing = null;
-    this.form = { name: '', slug: '', description: '', icon: '', color: '#38bdf8', category: '', website: '' };
+    this.form = { name: '', slug: '', description: '', icon: '', color: '#BD6735', category: '', website: '' };
     this.showForm = true;
   }
 
@@ -71,7 +71,7 @@ export class TechnologyListComponent implements OnInit {
       slug: t.slug,
       description: t.description || '',
       icon: t.icon || '',
-      color: t.color || '#38bdf8',
+      color: t.color || '#BD6735',
       category: t.category || '',
       website: t.website || '',
     };

@@ -1,185 +1,237 @@
 import { Component, OnInit, inject } from '@angular/core';
-import { DatePipe, NgFor, NgIf, NgClass } from '@angular/common';
+import { DatePipe, NgFor, NgIf } from '@angular/common';
 import { ActivatedRoute, Router, RouterLink } from '@angular/router';
 import { ApiService } from '../core/services/api.service';
 import { SeoService } from '../core/services/seo.service';
 import { Project, ProjectMember } from '../core/models';
 import { environment } from '../../environments/environment';
+import { ContactCtaComponent } from '../shared/components/contact-cta.component';
+import { ProjectCarouselComponent } from '../shared/components/project-carousel.component';
+import { ScrollRevealDirective } from '../core/directives/scroll-reveal.directive';
 
 @Component({
   selector: 'app-project-detail-page',
   standalone: true,
-  imports: [DatePipe, NgIf, NgFor, NgClass, RouterLink],
+  imports: [DatePipe, NgIf, NgFor, RouterLink, ContactCtaComponent, ProjectCarouselComponent, ScrollRevealDirective],
   template: `
     <div class="page-wrapper">
       <div class="page-loading" *ngIf="loading"><div class="spinner"></div></div>
 
-      <div *ngIf="!loading && error" class="page-error">
-        <i class="bi bi-exclamation-triangle"></i>
+      <div *ngIf="!loading && error" class="page-error" role="alert">
+        <i class="bi bi-exclamation-triangle" aria-hidden="true"></i>
         <p>No se encontró el proyecto.</p>
         <a routerLink="/projects" class="btn-retry">Volver a proyectos</a>
       </div>
 
       <ng-container *ngIf="!loading && !error && project">
-        <div class="project-hero">
-          <img class="hero-image" [src]="getPrimaryImage(project) || 'assets/project-placeholder.svg'" [alt]="'Portada de ' + project.title" />
-          <div class="hero-overlay"></div>
-          <div class="container">
-            <a routerLink="/projects" class="back-link">&larr; Volver a Proyectos</a>
-            <span class="hero-badge" *ngIf="project.isCaseStudy"><i class="bi bi-graph-up-arrow"></i> Caso de éxito</span>
-            <h1 class="hero-title">{{ project.title }}</h1>
-            <p class="hero-subtitle" *ngIf="project.summary">{{ project.summary }}</p>
-            <div class="hero-meta">
-              <span *ngIf="project.clientRel?.name || project.client"><i class="bi bi-building"></i> {{ project.clientRel?.name || project.client }}</span>
-              <span *ngIf="project.service?.name"><i class="bi bi-briefcase"></i> {{ project.service.name }}</span>
-              <span *ngIf="project.projectType"><i class="bi bi-tag"></i> {{ project.projectType }}</span>
-              <span *ngIf="project.startDate"><i class="bi bi-calendar"></i> {{ project.startDate | date: 'MMM yyyy' }}</span>
-            </div>
-            <div class="hero-actions" *ngIf="project.demoUrl || project.githubUrl || project.gitlabUrl || project.videoUrl">
-              <a *ngIf="project.demoUrl" class="btn-hero primary btn-press" [href]="project.demoUrl" target="_blank" rel="noopener"><i class="bi bi-box-arrow-up-right"></i> Demo</a>
-              <a *ngIf="project.githubUrl" class="btn-hero btn-press" [href]="project.githubUrl" target="_blank" rel="noopener"><i class="bi bi-github"></i> GitHub</a>
-              <a *ngIf="project.gitlabUrl" class="btn-hero btn-press" [href]="project.gitlabUrl" target="_blank" rel="noopener"><i class="bi bi-gitlab"></i> GitLab</a>
-              <a *ngIf="project.videoUrl" class="btn-hero btn-press" [href]="project.videoUrl" target="_blank" rel="noopener"><i class="bi bi-play-circle"></i> Video</a>
-            </div>
-          </div>
-        </div>
-
-        <div class="container content">
-          <div class="techs" *ngIf="project.technologies?.length">
-            <span class="tech" *ngFor="let tech of project.technologies" [style.--tech-color]="tech.color || 'var(--accent)'">{{ tech.name }}</span>
-          </div>
-
-          <section class="section" *ngIf="project.description">
-            <h2>Resumen</h2>
-            <p class="section-text">{{ project.description }}</p>
-          </section>
-
-          <section class="section" *ngIf="project.challenge">
-            <h2>El problema</h2>
-            <p class="section-text">{{ project.challenge }}</p>
-          </section>
-
-          <section class="section" *ngIf="project.solution">
-            <h2>La solución</h2>
-            <p class="section-text">{{ project.solution }}</p>
-          </section>
-
-          <section class="section" *ngIf="project.architecture">
-            <h2>Arquitectura</h2>
-            <p class="section-text">{{ project.architecture }}</p>
-          </section>
-
-          <section class="section" *ngIf="project.features?.length">
-            <h2>Características</h2>
-            <ul class="feature-list">
-              <li *ngFor="let f of project.features"><i class="bi bi-check2-circle"></i> {{ f }}</li>
-            </ul>
-          </section>
-
-          <section class="section" *ngIf="project.images?.length">
-            <h2>Galería</h2>
-            <div class="gallery">
-              <div class="img-hover-zoom" *ngFor="let img of project.images"><img class="gallery-item" [src]="getImageUrl(img)" [alt]="img.alt || 'Imagen del proyecto'" loading="lazy" decoding="async" /></div>
-            </div>
-          </section>
-
-          <section class="section" *ngIf="project.results || project.metrics?.length">
-            <h2>Resultados</h2>
-            <p class="section-text" *ngIf="project.results">{{ project.results }}</p>
-            <div class="metrics" *ngIf="project.metrics?.length">
-              <div class="metric" *ngFor="let m of project.metrics">
-                <span class="metric-value">{{ m.value }}</span>
-                <span class="metric-label">{{ m.label }}</span>
+        <header class="page-hero page-hero--split">
+          <div class="container-alantek">
+            <div class="page-hero-inner">
+              <div>
+                <span class="eyebrow" *ngIf="project.isCaseStudy">
+                  <i class="bi bi-graph-up-arrow" aria-hidden="true"></i> Caso de éxito
+                </span>
+                <h1 class="page-title">{{ project.title }}</h1>
+                <p class="page-subtitle" *ngIf="project.summary">{{ project.summary }}</p>
+              </div>
+              <div class="hero-actions" *ngIf="project.demoUrl || project.githubUrl || project.gitlabUrl || project.videoUrl">
+                <a *ngIf="project.demoUrl" class="btn-alantek-accent" [href]="project.demoUrl" target="_blank" rel="noopener">
+                  <i class="bi bi-box-arrow-up-right" aria-hidden="true"></i> Demo
+                </a>
+                <a *ngIf="project.githubUrl" class="btn-alantek-outline" [href]="project.githubUrl" target="_blank" rel="noopener">
+                  <i class="bi bi-github" aria-hidden="true"></i> GitHub
+                </a>
+                <a *ngIf="project.gitlabUrl" class="btn-alantek-outline" [href]="project.gitlabUrl" target="_blank" rel="noopener">
+                  <i class="bi bi-gitlab" aria-hidden="true"></i> GitLab
+                </a>
+                <a *ngIf="project.videoUrl" class="btn-alantek-ghost" [href]="project.videoUrl" target="_blank" rel="noopener">
+                  <i class="bi bi-play-circle" aria-hidden="true"></i> Video
+                </a>
               </div>
             </div>
-          </section>
+          </div>
+        </header>
 
-          <section class="section" *ngIf="project.members?.length">
-            <h2>Equipo que participó</h2>
-            <div class="team-grid">
-              <a class="team-card" *ngFor="let member of project.members" [routerLink]="'/equipo/' + member.teamMember?.slug">
-                <img class="team-avatar" [src]="getMemberAvatar(member)" [alt]="member.teamMember?.name" loading="lazy" decoding="async" />
-                <div class="team-info">
-                  <span class="team-name">{{ member.teamMember?.fullName }}</span>
-                  <span class="team-role">{{ member.isLead ? 'Líder · ' : '' }}{{ member.role || member.teamMember?.professionalTitle || 'Miembro del equipo' }}</span>
-                </div>
-              </a>
-            </div>
-          </section>
-        </div>
+        <section class="page-section">
+          <div class="container-alantek container-narrow content">
+            <img
+              class="detail-banner"
+              *ngIf="getPrimaryImage(project)"
+              [src]="getPrimaryImage(project)"
+              [alt]="'Portada de ' + project.title"
+            />
 
-        <section class="related" *ngIf="related.length">
-          <div class="container">
-            <h2>Proyectos relacionados</h2>
-            <div class="related-grid">
-              <a class="related-card" *ngFor="let p of related" [routerLink]="'/proyectos/' + p.slug">
-                <div class="img-hover-zoom"><img class="related-image" [src]="getPrimaryImage(p) || 'assets/project-placeholder.svg'" [alt]="p.title" loading="lazy" decoding="async" /></div>
-                <div class="related-body">
-                  <h3>{{ p.title }}</h3>
-                  <p>{{ p.summary || p.description }}</p>
-                </div>
-              </a>
+            <div class="detail-meta">
+              <span *ngIf="project.clientRel?.name || project.client"><i class="bi bi-building" aria-hidden="true"></i> {{ project.clientRel?.name || project.client }}</span>
+              <span *ngIf="project.service?.name"><i class="bi bi-briefcase" aria-hidden="true"></i> {{ project.service.name }}</span>
+              <span *ngIf="project.projectType"><i class="bi bi-tag" aria-hidden="true"></i> {{ project.projectType }}</span>
+              <span *ngIf="project.startDate"><i class="bi bi-calendar" aria-hidden="true"></i> {{ project.startDate | date: 'MMM yyyy' }}</span>
             </div>
+
+            <div class="techs" *ngIf="project.technologies?.length">
+              <span class="chip" *ngFor="let tech of project.technologies">{{ tech.name }}</span>
+            </div>
+
+            <div class="prose" appScrollReveal>
+              <section *ngIf="project.description">
+                <h2>Resumen</h2>
+                <p>{{ project.description }}</p>
+              </section>
+
+              <section *ngIf="project.challenge">
+                <h2>El problema</h2>
+                <p>{{ project.challenge }}</p>
+              </section>
+
+              <section *ngIf="project.solution">
+                <h2>La solución</h2>
+                <p>{{ project.solution }}</p>
+              </section>
+
+              <section *ngIf="project.architecture">
+                <h2>Arquitectura</h2>
+                <p>{{ project.architecture }}</p>
+              </section>
+
+              <section *ngIf="project.features?.length">
+                <h2>Características</h2>
+                <ul class="feature-list">
+                  <li *ngFor="let f of project.features"><i class="bi bi-check2-circle" aria-hidden="true"></i> {{ f }}</li>
+                </ul>
+              </section>
+
+              <section *ngIf="project.results || project.metrics?.length">
+                <h2>Resultados</h2>
+                <p *ngIf="project.results">{{ project.results }}</p>
+                <div class="metrics" *ngIf="project.metrics?.length">
+                  <div class="metric" *ngFor="let m of project.metrics">
+                    <span class="metric-value">{{ m.value }}</span>
+                    <span class="metric-label">{{ m.label }}</span>
+                  </div>
+                </div>
+              </section>
+            </div>
+
+            <section *ngIf="project.images?.length" class="gallery-section">
+              <h2 class="gallery-title">Galería</h2>
+              <div class="gallery">
+                <img class="gallery-item" *ngFor="let img of project.images" [src]="getImageUrl(img)" [alt]="img.alt || 'Imagen del proyecto'" loading="lazy" decoding="async" />
+              </div>
+            </section>
+
+            <section *ngIf="project.members?.length" class="team-section">
+              <h2 class="gallery-title">Equipo que participó</h2>
+              <div class="grid-team">
+                <a class="card-member" *ngFor="let member of project.members" [routerLink]="'/equipo/' + member.teamMember?.slug" appScrollReveal>
+                  <img class="member-photo" [src]="getMemberAvatar(member)" [alt]="member.teamMember?.name" loading="lazy" decoding="async" />
+                  <h3>{{ member.teamMember?.fullName }}</h3>
+                  <span class="member-role">{{ member.isLead ? 'Líder · ' : '' }}{{ member.role || member.teamMember?.professionalTitle || 'Miembro del equipo' }}</span>
+                </a>
+              </div>
+            </section>
+          </div>
+        </section>
+
+        <section class="page-section page-section--alt" *ngIf="related.length">
+          <div class="container-alantek">
+            <h2 class="section-heading" appScrollReveal>Proyectos relacionados</h2>
+            <app-project-carousel [projects]="related"></app-project-carousel>
           </div>
         </section>
       </ng-container>
+
+      <app-contact-cta
+        eyebrow="Tu proyecto"
+        title="¿Quieres algo similar?"
+        text="Cuéntanos tu idea y te ayudaremos a llevarla al siguiente nivel."
+      ></app-contact-cta>
     </div>
   `,
   styles: [`
-    .page-wrapper { min-height: 100vh; padding-top: 80px; background: var(--bg-primary); }
-    .container { max-width: 1100px; margin: 0 auto; padding: 0 24px; }
-    .page-loading { display: flex; justify-content: center; padding: 120px 0; }
-    .page-error { text-align: center; padding: 120px 24px; color: var(--text-muted); }
-    .page-error i { font-size: 3rem; color: var(--accent); margin-bottom: 16px; display: block; }
-    .btn-retry { background: var(--accent); color: var(--bg-primary); border: none; padding: 10px 24px; border-radius: 8px; cursor: pointer; font-weight: 600; text-decoration: none; display: inline-block; margin-top: 12px; }
-    .spinner { width: 40px; height: 40px; border: 3px solid var(--border); border-top-color: var(--accent); border-radius: 50%; animation: spin 0.8s linear infinite; }
-    @keyframes spin { to { transform: rotate(360deg); } }
-    .project-hero { position: relative; min-height: 320px; display: flex; align-items: flex-end; background: var(--bg-secondary); overflow: hidden; }
-    .hero-image { position: absolute; inset: 0; width: 100%; height: 100%; object-fit: cover; opacity: 0.35; }
-    .hero-overlay { position: absolute; inset: 0; background: linear-gradient(to top, var(--bg-primary) 0%, rgba(13,17,23,0.4) 60%); }
-    .project-hero .container { position: relative; z-index: 2; padding-top: 40px; padding-bottom: 40px; }
-    .back-link { color: var(--accent); font-size: 0.85rem; text-decoration: none; display: inline-block; margin-bottom: 16px; }
-    .hero-badge { display: inline-flex; align-items: center; gap: 6px; background: rgba(100,255,218,0.12); color: var(--accent); border: 1px solid rgba(100,255,218,0.3); padding: 4px 12px; border-radius: 20px; font-size: 0.78rem; margin-bottom: 12px; }
-    .hero-title { font-size: 2.2rem; font-weight: 700; color: var(--white); margin: 0 0 8px; }
-    .hero-subtitle { font-size: 1rem; color: var(--text-secondary); margin: 0 0 16px; max-width: 720px; line-height: 1.6; }
-    .hero-meta { display: flex; flex-wrap: wrap; gap: 16px; font-size: 0.85rem; color: var(--text-muted); margin-bottom: 20px; }
-    .hero-meta span { display: inline-flex; align-items: center; gap: 6px; }
-    .hero-actions { display: flex; flex-wrap: wrap; gap: 10px; }
-    .btn-hero { display: inline-flex; align-items: center; gap: 6px; padding: 10px 20px; border-radius: 10px; font-size: 0.85rem; font-weight: 600; text-decoration: none; border: 1px solid var(--border); color: var(--text-primary); transition: var(--transition); }
-    .btn-hero:hover { border-color: var(--accent); }
-    .btn-hero.primary { background: linear-gradient(135deg, var(--accent), var(--accent-secondary)); color: var(--bg-primary); border: none; }
-    .content { padding: 48px 24px; display: flex; flex-direction: column; gap: 40px; }
-    .techs { display: flex; flex-wrap: wrap; gap: 8px; }
-    .tech { background: rgba(100,255,218,0.08); color: var(--accent); padding: 5px 12px; border-radius: 6px; font-size: 0.8rem; }
-    .section h2 { font-size: 1.3rem; font-weight: 700; color: var(--white); margin: 0 0 14px; padding-left: 14px; border-left: 3px solid var(--accent); }
-    .section-text { font-size: 0.95rem; color: var(--text-secondary); line-height: 1.8; margin: 0; white-space: pre-wrap; }
-    .feature-list { list-style: none; padding: 0; margin: 0; display: grid; grid-template-columns: repeat(auto-fill, minmax(280px, 1fr)); gap: 10px; }
-    .feature-list li { display: flex; align-items: flex-start; gap: 8px; font-size: 0.9rem; color: var(--text-secondary); }
-    .feature-list i { color: var(--accent); margin-top: 3px; }
-    .gallery { display: grid; grid-template-columns: repeat(auto-fill, minmax(260px, 1fr)); gap: 12px; }
-    .gallery-item { width: 100%; aspect-ratio: 16/9; object-fit: cover; border-radius: 12px; border: 1px solid var(--border); }
-    .metrics { display: grid; grid-template-columns: repeat(auto-fit, minmax(160px, 1fr)); gap: 12px; margin-top: 16px; }
-    .metric { background: var(--bg-card); border: 1px solid var(--border); border-radius: 12px; padding: 20px; text-align: center; }
-    .metric-value { display: block; font-size: 1.6rem; font-weight: 700; color: var(--accent); }
-    .metric-label { display: block; font-size: 0.8rem; color: var(--text-muted); margin-top: 4px; }
-    .team-grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(240px, 1fr)); gap: 12px; }
-    .team-card { display: flex; align-items: center; gap: 12px; background: var(--bg-card); border: 1px solid var(--border); border-radius: 12px; padding: 12px; text-decoration: none; transition: var(--transition); }
-    .team-card:hover { border-color: var(--accent); transform: translateY(-2px); }
-    .team-avatar { width: 48px; height: 48px; border-radius: 50%; object-fit: cover; background: var(--bg-secondary); }
-    .team-info { display: flex; flex-direction: column; min-width: 0; }
-    .team-name { font-size: 0.9rem; font-weight: 600; color: var(--white); }
-    .team-role { font-size: 0.75rem; color: var(--text-muted); overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
-    .related { padding: 48px 0 80px; border-top: 1px solid var(--border); }
-    .related h2 { font-size: 1.3rem; font-weight: 700; color: var(--white); margin: 0 0 24px; }
-    .related-grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(280px, 1fr)); gap: 16px; }
-    .related-card { background: var(--bg-card); border: 1px solid var(--border); border-radius: 14px; overflow: hidden; text-decoration: none; transition: var(--transition); display: block; }
-    .related-card:hover { border-color: var(--accent); transform: translateY(-3px); }
-    .related-image { width: 100%; height: 150px; object-fit: cover; }
-    .related-body { padding: 14px; }
-    .related-body h3 { font-size: 0.95rem; color: var(--white); margin: 0 0 6px; }
-    .related-body p { font-size: 0.8rem; color: var(--text-muted); margin: 0; display: -webkit-box; -webkit-line-clamp: 2; -webkit-box-orient: vertical; overflow: hidden; }
-    @media (max-width: 768px) { .hero-title { font-size: 1.6rem; } }
-  `]
+    .hero-actions {
+      display: flex;
+      flex-wrap: wrap;
+      gap: var(--space-3);
+    }
+    .content {
+      display: flex;
+      flex-direction: column;
+      gap: var(--space-6);
+    }
+    .techs {
+      display: flex;
+      flex-wrap: wrap;
+      gap: var(--space-2);
+    }
+    .detail-banner + .detail-meta {
+      margin-top: 0;
+    }
+    .feature-list {
+      list-style: none;
+      padding: 0;
+      margin: 0;
+      display: grid;
+      grid-template-columns: repeat(auto-fill, minmax(280px, 1fr));
+      gap: var(--space-2);
+    }
+    .feature-list li {
+      display: flex;
+      align-items: flex-start;
+      gap: var(--space-2);
+      color: var(--text-secondary);
+    }
+    .feature-list i {
+      color: var(--accent);
+      margin-top: 3px;
+    }
+    .metrics {
+      display: grid;
+      grid-template-columns: repeat(auto-fit, minmax(160px, 1fr));
+      gap: var(--space-3);
+      margin-top: var(--space-4);
+      list-style: none;
+      padding: 0;
+    }
+    .metric {
+      background: var(--bg-card);
+      border: 1px solid var(--border);
+      border-radius: var(--radius-md);
+      padding: var(--space-5);
+      text-align: center;
+    }
+    .metric-value {
+      display: block;
+      font-size: var(--fs-2xl);
+      font-weight: var(--fw-bold);
+      color: var(--accent);
+    }
+    .metric-label {
+      display: block;
+      font-size: var(--fs-sm);
+      color: var(--text-muted);
+      margin-top: var(--space-1);
+    }
+    .gallery-title,
+    .section-heading {
+      font-family: var(--font-heading);
+      font-size: var(--fs-2xl);
+      font-weight: var(--fw-bold);
+      color: var(--text-primary);
+      margin: 0 0 var(--space-5);
+    }
+    .gallery {
+      display: grid;
+      grid-template-columns: repeat(auto-fill, minmax(260px, 1fr));
+      gap: var(--space-3);
+    }
+    .gallery-item {
+      width: 100%;
+      aspect-ratio: 16 / 9;
+      object-fit: cover;
+      border-radius: var(--radius-md);
+      border: 1px solid var(--border);
+    }
+  `],
 })
 export class ProjectDetailPageComponent implements OnInit {
   private api = inject(ApiService);

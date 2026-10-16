@@ -3,121 +3,171 @@ import { NgFor, NgIf, DatePipe } from '@angular/common';
 import { RouterLink } from '@angular/router';
 import { ApiService } from '../core/services/api.service';
 import { Experience } from '../core/models';
+import { ContactCtaComponent } from '../shared/components/contact-cta.component';
+import { ScrollRevealDirective } from '../core/directives/scroll-reveal.directive';
 
 @Component({
   selector: 'app-experience-page',
   standalone: true,
-  imports: [NgIf, NgFor, DatePipe, RouterLink],
+  imports: [NgIf, NgFor, DatePipe, RouterLink, ContactCtaComponent, ScrollRevealDirective],
   template: `
     <div class="page-wrapper">
-      <div class="page-header">
-        <div class="container">
+      <header class="page-hero page-hero--compact">
+        <div class="container-alantek">
+          <span class="eyebrow">Portafolio</span>
+          <h1 class="page-title">Experiencia Laboral</h1>
           <a routerLink="/portfolio" class="back-link">&larr; Volver al Portafolio</a>
-          <h1>Experiencia Laboral</h1>
         </div>
-      </div>
+      </header>
 
       <div *ngIf="loading" class="page-loading"><div class="spinner"></div></div>
 
-      <div *ngIf="!loading && error" class="page-error">
-        <i class="bi bi-exclamation-triangle"></i>
+      <div *ngIf="!loading && error" class="page-error" role="alert">
+        <i class="bi bi-exclamation-triangle" aria-hidden="true"></i>
         <p>No se pudieron cargar las experiencias. Intenta de nuevo más tarde.</p>
-        <button class="btn-retry" (click)="loadData()">Reintentar</button>
+        <button class="btn-retry" (click)="loadData()" aria-label="Reintentar">Reintentar</button>
       </div>
 
       <div *ngIf="!loading && !error && !experiences.length" class="page-empty">
-        <i class="bi bi-briefcase"></i>
+        <i class="bi bi-briefcase" aria-hidden="true"></i>
         <p>No hay experiencia laboral aún.</p>
       </div>
 
-      <div *ngIf="!loading && experiences.length" class="page-content">
-        <div class="container">
+      <section class="page-section" *ngIf="!loading && experiences.length">
+        <div class="container-alantek container-narrow">
           <div class="timeline">
             <div
               class="timeline-item"
               *ngFor="let exp of experiences; let i = index"
               [class.current]="exp.current"
-              data-aos="fade-up"
-              [attr.data-aos-delay]="i * 100"
+              appScrollReveal
+              [revealDelay]="i * 100"
             >
               <div class="timeline-marker">
                 <div class="timeline-dot" [class.active]="exp.current"></div>
               </div>
 
-              <div class="timeline-card" [class.current-card]="exp.current">
+              <div class="timeline-card card-alantek" [class.current-card]="exp.current">
                 <div class="timeline-card-header">
                   <div class="timeline-company-icon">
-                    <i class="bi bi-building"></i>
+                    <i class="bi bi-building" aria-hidden="true"></i>
                   </div>
                   <div class="timeline-company-info">
                     <h3 class="timeline-position">{{ exp.position }}</h3>
                     <span class="timeline-company">{{ exp.company }}</span>
                   </div>
-                  <span class="timeline-badge" *ngIf="exp.current">Actual</span>
+                  <span class="chip chip--active" *ngIf="exp.current">Actual</span>
                 </div>
 
-                <div class="timeline-meta">
+                <div class="detail-meta">
                   <span class="timeline-date">
-                    <i class="bi bi-calendar3"></i>
+                    <i class="bi bi-calendar3" aria-hidden="true"></i>
                     {{ exp.startDate | date:'MMM yyyy' }} - {{ exp.current ? 'Actualidad' : (exp.endDate | date:'MMM yyyy') }}
                   </span>
                   <span class="timeline-location" *ngIf="exp.location">
-                    <i class="bi bi-geo-alt"></i> {{ exp.location }}
+                    <i class="bi bi-geo-alt" aria-hidden="true"></i> {{ exp.location }}
                   </span>
                 </div>
 
                 <p class="timeline-description">{{ exp.description }}</p>
 
                 <div class="timeline-techs" *ngIf="exp.technologies?.length">
-                  <span class="tech-tag" *ngFor="let tech of exp.technologies">{{ tech }}</span>
+                  <span class="chip" *ngFor="let tech of exp.technologies">{{ tech }}</span>
                 </div>
               </div>
             </div>
           </div>
         </div>
-      </div>
+      </section>
+
+      <app-contact-cta></app-contact-cta>
     </div>
   `,
   styles: [`
-    .page-wrapper { min-height: 100vh; padding-top: 80px; background: var(--bg-primary); }
-    .page-header { background: var(--bg-secondary); border-bottom: 1px solid var(--border); padding: 24px 0; margin-bottom: 0; }
-    .page-header h1 { font-size: 1.5rem; color: var(--white); margin: 8px 0 0; }
-    .back-link { color: var(--accent); font-size: 0.85rem; text-decoration: none; display: inline-flex; align-items: center; gap: 4px; transition: var(--transition); }
+    .back-link {
+      display: inline-flex;
+      align-items: center;
+      gap: var(--space-1);
+      margin-top: var(--space-4);
+      font-size: var(--fs-sm);
+      font-weight: var(--fw-semibold);
+      color: var(--accent);
+      text-decoration: none;
+      transition: opacity var(--duration-base) var(--ease-out);
+    }
     .back-link:hover { opacity: 0.8; }
-    .container { max-width: 1200px; margin: 0 auto; padding: 0 24px; }
-    .page-loading { display: flex; justify-content: center; padding: 80px 0; }
-    .page-error { text-align: center; padding: 80px 24px; color: var(--text-muted); }
-    .page-error i { font-size: 3rem; color: var(--accent); margin-bottom: 16px; }
-    .page-error p { margin-bottom: 20px; }
-    .page-empty { text-align: center; padding: 100px 24px; color: var(--text-muted); }
-    .page-empty i { font-size: 4rem; color: var(--accent); margin-bottom: 16px; opacity: 0.5; }
-    .btn-retry { background: var(--accent); color: var(--bg-primary); border: none; padding: 10px 24px; border-radius: 8px; cursor: pointer; font-weight: 600; }
-    .btn-retry:hover { opacity: 0.9; }
-    .spinner { width: 40px; height: 40px; border: 3px solid var(--border); border-top-color: var(--accent); border-radius: 50%; animation: spin 0.8s linear infinite; margin: 0 auto; }
-    @keyframes spin { to { transform: rotate(360deg); } }
-
-    .page-content { padding: 60px 0; background: var(--bg-primary); }
-    .timeline { position: relative; max-width: 800px; margin: 0 auto; }
-    .timeline::before { content: ''; position: absolute; left: 24px; top: 0; bottom: 0; width: 2px; background: var(--border); }
-    .timeline-item { position: relative; padding-left: 64px; margin-bottom: 40px; }
+    .timeline { position: relative; }
+    .timeline::before {
+      content: '';
+      position: absolute;
+      left: 8px;
+      top: 0;
+      bottom: 0;
+      width: 2px;
+      background: var(--border);
+    }
+    .timeline-item { position: relative; padding-left: 56px; margin-bottom: var(--space-6); }
     .timeline-item:last-child { margin-bottom: 0; }
-    .timeline-marker { position: absolute; left: 0; top: 4px; display: flex; align-items: center; justify-content: center; }
-    .timeline-dot { width: 18px; height: 18px; border-radius: 50%; background: var(--bg-card); border: 2px solid var(--accent); transition: all 0.3s ease; margin-left: -8px; }
-    .timeline-dot.active { background: var(--accent); box-shadow: 0 0 12px rgba(var(--accent-rgb, 100, 255, 218), 0.4); }
-    .timeline-card { background: var(--bg-card); border: 1px solid var(--border); border-radius: 16px; padding: 24px; transition: all 0.3s ease; }
-    .timeline-card:hover { border-color: var(--accent); transform: translateX(4px); box-shadow: 0 4px 20px rgba(0,0,0,0.15); }
-    .timeline-card.current-card { border-color: var(--accent); box-shadow: 0 0 20px rgba(var(--accent-rgb, 100, 255, 218), 0.08); }
-    .timeline-card-header { display: flex; align-items: flex-start; gap: 16px; margin-bottom: 12px; }
-    .timeline-company-icon { width: 44px; height: 44px; border-radius: 12px; background: rgba(var(--accent-rgb, 100, 255, 218), 0.1); color: var(--accent); display: flex; align-items: center; justify-content: center; font-size: 1.2rem; flex-shrink: 0; }
-    .timeline-company-info { flex: 1; }
-    .timeline-position { font-size: 1.05rem; font-weight: 600; color: var(--white); margin: 0; }
-    .timeline-company { font-size: 0.85rem; color: var(--accent); }
-    .timeline-badge { background: rgba(var(--accent-rgb, 100, 255, 218), 0.15); color: var(--accent); padding: 4px 12px; border-radius: 20px; font-size: 0.75rem; font-weight: 600; white-space: nowrap; }
-    .timeline-meta { display: flex; flex-wrap: wrap; gap: 16px; margin-bottom: 12px; font-size: 0.82rem; color: var(--text-muted); }
-    .timeline-meta i { margin-right: 4px; }
-    .timeline-description { font-size: 0.88rem; color: var(--text-secondary); line-height: 1.6; margin: 0; }
-    .timeline-techs { display: flex; flex-wrap: wrap; gap: 8px; margin-top: 12px; padding-top: 12px; border-top: 1px solid var(--border); }
-    .tech-tag { background: rgba(var(--accent-rgb, 100, 255, 218), 0.08); color: var(--accent); padding: 4px 12px; border-radius: 6px; font-size: 0.78rem; }
+    .timeline-marker {
+      position: absolute;
+      left: 0;
+      top: calc(var(--space-5) + 22px);
+      transform: translateY(-50%);
+      display: flex;
+      align-items: center;
+      justify-content: center;
+    }
+    .timeline-dot {
+      width: 18px;
+      height: 18px;
+      border-radius: var(--radius-full);
+      background: var(--bg-card);
+      border: 2px solid var(--accent);
+      transition: all var(--duration-base) var(--ease-out);
+    }
+    .timeline-dot.active { background: var(--accent); box-shadow: 0 0 12px rgba(var(--accent-rgb), 0.4); }
+    .timeline-card.current-card { border-color: var(--accent); box-shadow: var(--shadow-glow); }
+    .timeline-card-header {
+      display: flex;
+      align-items: flex-start;
+      gap: var(--space-4);
+      margin-bottom: var(--space-3);
+    }
+    .timeline-company-icon {
+      width: 44px;
+      height: 44px;
+      border-radius: var(--radius-md);
+      background: var(--gradient-subtle);
+      color: var(--accent);
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      font-size: 1.2rem;
+      flex-shrink: 0;
+    }
+    .timeline-company-info { flex: 1; min-width: 0; }
+    .timeline-position {
+      font-family: var(--font-heading);
+      font-size: var(--fs-lg);
+      font-weight: var(--fw-semibold);
+      color: var(--text-primary);
+      margin: 0 0 var(--space-1);
+    }
+    .timeline-company { font-size: var(--fs-sm); color: var(--accent); font-weight: var(--fw-semibold); }
+    .timeline-description {
+      font-size: var(--fs-base);
+      color: var(--text-secondary);
+      line-height: var(--lh-normal);
+      margin: 0;
+    }
+    .timeline-techs {
+      display: flex;
+      flex-wrap: wrap;
+      gap: var(--space-2);
+      margin-top: var(--space-4);
+      padding-top: var(--space-4);
+      border-top: 1px solid var(--border);
+    }
   `]
 })
 export class ExperiencePageComponent implements OnInit {

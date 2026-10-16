@@ -1,0 +1,390 @@
+// ═══════════════════════════════════════════════════════════
+// ALANTEK CARDS
+// ═══════════════════════════════════════════════════════════
+
+.card-alantek {
+  background: var(--bg-card);
+  border: 1px solid var(--border);
+  border-radius: var(--radius-lg);
+  padding: var(--space-5);
+  transition: all var(--duration-base) var(--ease-out);
+  position: relative;
+  overflow: hidden;
+
+  &::before {
+    content: '';
+    position: absolute;
+    top: 0;
+    left: 0;
+    right: 0;
+    height: 2px;
+    background: var(--gradient-accent);
+    opacity: 0;
+    transition: opacity var(--duration-base) var(--ease-out);
+  }
+
+  &:hover {
+    border-color: var(--border-accent);
+    box-shadow: var(--shadow-md);
+    transform: translateY(-3px);
+
+    &::before {
+      opacity: 1;
+    }
+  }
+
+  &:focus-within {
+    border-color: var(--accent);
+    box-shadow: 0 0 0 3px rgba(var(--accent-rgb), 0.15);
+  }
+}
+
+// Glassmorphism moderado
+.card-glass {
+  background: var(--glass-bg);
+  backdrop-filter: blur(16px);
+  -webkit-backdrop-filter: blur(16px);
+  border: 1px solid var(--glass-border);
+  border-radius: var(--radius-lg);
+  transition: all var(--duration-base) var(--ease-out);
+
+  &:hover {
+    border-color: var(--border-accent);
+    box-shadow: var(--shadow-md);
+  }
+
+  @media (max-width: 768px) {
+    backdrop-filter: blur(8px);
+    -webkit-backdrop-filter: blur(8px);
+  }
+}
+
+// Card con acento cobrizo al hover
+.card-glow {
+  position: relative;
+  overflow: hidden;
+
+  &::after {
+    content: '';
+    position: absolute;
+    inset: -1px;
+    border-radius: inherit;
+    background: radial-gradient(circle at 50% 0%, rgba(var(--accent-rgb), 0.08), transparent 60%);
+    opacity: 0;
+    transition: opacity var(--duration-slow) var(--ease-out);
+    pointer-events: none;
+  }
+
+  &:hover::after {
+    opacity: 1;
+  }
+}
+
+// Card de servicio
+.card-service {
+  display: flex;
+  flex-direction: column;
+  gap: var(--space-4);
+  background: var(--bg-card);
+  border: 1px solid var(--border);
+  border-radius: var(--radius-lg);
+  padding: var(--space-6);
+  transition: all var(--duration-base) var(--ease-out);
+  text-decoration: none;
+  color: inherit;
+
+  .service-icon {
+    width: 52px;
+    height: 52px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    background: var(--gradient-subtle);
+    border-radius: var(--radius-md);
+    font-size: 1.4rem;
+    color: var(--accent);
+    transition: transform var(--duration-base) var(--ease-spring);
+  }
+
+  h3 {
+    font-family: var(--font-heading);
+    font-size: var(--fs-lg);
+    font-weight: var(--fw-semibold);
+    color: var(--text-primary);
+    margin: 0;
+  }
+
+  p {
+    font-size: var(--fs-base);
+    color: var(--text-secondary);
+    line-height: var(--lh-normal);
+    margin: 0;
+    flex: 1;
+  }
+
+  .service-link {
+    font-size: var(--fs-sm);
+    font-weight: var(--fw-semibold);
+    color: var(--accent);
+    display: inline-flex;
+    align-items: center;
+    gap: var(--space-1);
+
+    i {
+      transition: transform var(--duration-base) var(--ease-out);
+    }
+  }
+
+  &:hover {
+    border-color: var(--border-accent);
+    box-shadow: var(--shadow-md);
+    transform: translateY(-4px);
+
+    .service-icon {
+      transform: scale(1.08);
+    }
+
+    .service-link i {
+      transform: translateX(4px);
+    }
+  }
+}
+
+// Card de proyecto
+.card-project {
+  position: relative;
+  border-radius: var(--radius-lg);
+  overflow: hidden;
+  background: var(--bg-card);
+  border: 1px solid var(--border);
+  transition: all var(--duration-base) var(--ease-out);
+  text-decoration: none;
+  color: inherit;
+  display: block;
+
+  .project-image {
+    width: 100%;
+    aspect-ratio: 16 / 10;
+    object-fit: cover;
+    background: var(--bg-secondary);
+    transition: transform var(--duration-slow) var(--ease-out);
+  }
+
+  .project-body {
+    padding: var(--space-4) var(--space-5) var(--space-5);
+
+    h3 {
+      font-family: var(--font-heading);
+      font-size: var(--fs-lg);
+      font-weight: var(--fw-semibold);
+      color: var(--text-primary);
+      margin: 0 0 var(--space-2);
+    }
+
+    .project-category {
+      font-size: var(--fs-xs);
+      font-weight: var(--fw-semibold);
+      text-transform: uppercase;
+      letter-spacing: var(--ls-wider);
+      color: var(--accent);
+      margin-bottom: var(--space-2);
+      display: block;
+    }
+  }
+
+  &:hover {
+    border-color: var(--border-accent);
+    box-shadow: var(--shadow-lg);
+    transform: translateY(-4px);
+
+    .project-image {
+      transform: scale(1.04);
+    }
+  }
+}
+
+// Card de equipo
+.card-member {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  text-align: center;
+  background: var(--bg-card);
+  border: 1px solid var(--border);
+  border-radius: var(--radius-lg);
+  padding: var(--space-6) var(--space-5);
+  transition: all var(--duration-base) var(--ease-out);
+  text-decoration: none;
+  color: inherit;
+
+  .member-photo {
+    width: 100px;
+    height: 100px;
+    border-radius: 50%;
+    object-fit: cover;
+    border: 3px solid var(--border);
+    margin-bottom: var(--space-4);
+    transition: border-color var(--duration-base) var(--ease-out);
+  }
+
+  .member-placeholder {
+    width: 100px;
+    height: 100px;
+    border-radius: 50%;
+    background: var(--gradient-subtle);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-size: 2rem;
+    font-weight: var(--fw-bold);
+    color: var(--accent);
+    border: 3px solid var(--border);
+    margin-bottom: var(--space-4);
+  }
+
+  h3 {
+    font-family: var(--font-heading);
+    font-size: var(--fs-md);
+    font-weight: var(--fw-semibold);
+    color: var(--text-primary);
+    margin: 0 0 var(--space-1);
+  }
+
+  .member-role {
+    font-size: var(--fs-sm);
+    color: var(--accent);
+    margin-bottom: var(--space-3);
+  }
+
+  &:hover {
+    border-color: var(--border-accent);
+    box-shadow: var(--shadow-md);
+    transform: translateY(-3px);
+
+    .member-photo {
+      border-color: var(--accent);
+    }
+  }
+}
+
+// Card de testimonio
+.card-testimonial {
+  background: var(--bg-card);
+  border: 1px solid var(--border);
+  border-radius: var(--radius-lg);
+  padding: var(--space-6);
+  position: relative;
+
+  .testimonial-quote {
+    font-size: 1.6rem;
+    color: var(--accent);
+    opacity: 0.4;
+    line-height: 1;
+    margin-bottom: var(--space-3);
+    font-family: Georgia, serif;
+  }
+
+  .testimonial-text {
+    font-size: var(--fs-base);
+    line-height: var(--lh-normal);
+    color: var(--text-secondary);
+    margin-bottom: var(--space-5);
+  }
+
+  .testimonial-stars {
+    color: var(--accent);
+    font-size: var(--fs-sm);
+    margin-bottom: var(--space-3);
+    letter-spacing: 2px;
+  }
+
+  .testimonial-author {
+    display: flex;
+    align-items: center;
+    gap: var(--space-3);
+
+    .author-avatar {
+      width: 44px;
+      height: 44px;
+      border-radius: 50%;
+      object-fit: cover;
+      background: var(--gradient-subtle);
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      font-weight: var(--fw-bold);
+      color: var(--accent);
+    }
+
+    .author-info {
+      strong {
+        display: block;
+        font-size: var(--fs-base);
+        color: var(--text-primary);
+      }
+
+      span {
+        font-size: var(--fs-xs);
+        color: var(--text-muted);
+      }
+    }
+  }
+}
+
+// Card de blog
+.card-blog {
+  display: block;
+  background: var(--bg-card);
+  border: 1px solid var(--border);
+  border-radius: var(--radius-lg);
+  overflow: hidden;
+  transition: all var(--duration-base) var(--ease-out);
+  text-decoration: none;
+  color: inherit;
+
+  .blog-image {
+    width: 100%;
+    aspect-ratio: 16 / 9;
+    object-fit: cover;
+    background: var(--bg-secondary);
+  }
+
+  .blog-body {
+    padding: var(--space-5);
+
+    .blog-date {
+      font-size: var(--fs-xs);
+      color: var(--text-muted);
+      margin-bottom: var(--space-2);
+    }
+
+    h3 {
+      font-family: var(--font-heading);
+      font-size: var(--fs-md);
+      font-weight: var(--fw-semibold);
+      color: var(--text-primary);
+      margin: 0 0 var(--space-2);
+      display: -webkit-box;
+      -webkit-line-clamp: 2;
+      -webkit-box-orient: vertical;
+      overflow: hidden;
+    }
+
+    p {
+      font-size: var(--fs-sm);
+      color: var(--text-secondary);
+      line-height: var(--lh-normal);
+      margin: 0;
+      display: -webkit-box;
+      -webkit-line-clamp: 3;
+      -webkit-box-orient: vertical;
+      overflow: hidden;
+    }
+  }
+
+  &:hover {
+    border-color: var(--border-accent);
+    box-shadow: var(--shadow-md);
+    transform: translateY(-3px);
+  }
+}

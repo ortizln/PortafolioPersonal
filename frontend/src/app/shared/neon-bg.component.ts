@@ -38,6 +38,7 @@ export class NeonBackgroundComponent implements AfterViewInit, OnDestroy {
 
   ngAfterViewInit(): void {
     if (!isPlatformBrowser(this.platformId)) return;
+    if (window.matchMedia('(prefers-reduced-motion: reduce)').matches) return;
     const canvas = this.canvasRef.nativeElement;
     this.ctx = canvas.getContext('2d')!;
     this.resize();
@@ -102,7 +103,7 @@ export class NeonBackgroundComponent implements AfterViewInit, OnDestroy {
         vx2: (Math.random() - 0.5) * 0.6,
         vy2: (Math.random() - 0.5) * 0.3,
         opacity: Math.random() * 0.25 + 0.06,
-        hue: Math.random() > 0.4 ? 180 : Math.random() > 0.5 ? 260 : 220,
+        hue: Math.random() > 0.5 ? 26 : 105,
         width: Math.random() * 1.2 + 0.4,
         curvX: 0,
         curvY: 0,
@@ -138,8 +139,8 @@ export class NeonBackgroundComponent implements AfterViewInit, OnDestroy {
     // ── CURSOR GLOW ──
     if (mouseActive && isDark) {
       const grd = ctx.createRadialGradient(mx, my, 0, mx, my, mouseRadius);
-      grd.addColorStop(0, 'rgba(34, 211, 238, 0.06)');
-      grd.addColorStop(0.5, 'rgba(99, 102, 241, 0.03)');
+      grd.addColorStop(0, 'rgba(228, 161, 108, 0.06)');
+      grd.addColorStop(0.5, 'rgba(53, 75, 53, 0.03)');
       grd.addColorStop(1, 'rgba(0, 0, 0, 0)');
       ctx.fillStyle = grd;
       ctx.fillRect(mx - mouseRadius, my - mouseRadius, mouseRadius * 2, mouseRadius * 2);
@@ -295,7 +296,7 @@ export class NeonBackgroundComponent implements AfterViewInit, OnDestroy {
       if (isDark && star.r > 1.3) {
         ctx.beginPath();
         ctx.arc(star.x, star.y, star.r * 4, 0, Math.PI * 2);
-        ctx.fillStyle = `rgba(140, 180, 255, ${alpha * 0.06})`;
+        ctx.fillStyle = `rgba(228, 161, 108, ${alpha * 0.06})`;
         ctx.fill();
       }
     }

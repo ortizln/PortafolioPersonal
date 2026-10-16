@@ -1,0 +1,175 @@
+// ═══════════════════════════════════════════════════════════
+// ALANTEK ANIMATIONS
+// Reveals, transiciones y utilidades de movimiento.
+// Respeta prefers-reduced-motion.
+// ═══════════════════════════════════════════════════════════
+
+// ── Fade up (reveal básico) ────────────────────────────────
+@keyframes alantek-fade-up {
+  from {
+    opacity: 0;
+    transform: translateY(24px);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+
+@keyframes alantek-fade-in {
+  from { opacity: 0; }
+  to { opacity: 1; }
+}
+
+@keyframes alantek-fade-in-left {
+  from {
+    opacity: 0;
+    transform: translateX(-32px);
+  }
+  to {
+    opacity: 1;
+    transform: translateX(0);
+  }
+}
+
+@keyframes alantek-fade-in-right {
+  from {
+    opacity: 0;
+    transform: translateX(32px);
+  }
+  to {
+    opacity: 1;
+    transform: translateX(0);
+  }
+}
+
+@keyframes alantek-scale-in {
+  from {
+    opacity: 0;
+    transform: scale(0.95);
+  }
+  to {
+    opacity: 1;
+    transform: scale(1);
+  }
+}
+
+@keyframes alantek-slide-in-right {
+  from {
+    opacity: 0;
+    transform: translateX(40px);
+  }
+  to {
+    opacity: 1;
+    transform: translateX(0);
+  }
+}
+
+// ── Utilidades de animación ────────────────────────────────
+.anim-fade-up {
+  animation: alantek-fade-up 0.6s var(--ease-out) both;
+}
+.anim-fade-in {
+  animation: alantek-fade-in 0.5s var(--ease-out) both;
+}
+.anim-scale-in {
+  animation: alantek-scale-in 0.4s var(--ease-out) both;
+}
+
+// Stagger delays (usar con ngClass o clases)
+.anim-delay-1 { animation-delay: 0.1s; }
+.anim-delay-2 { animation-delay: 0.2s; }
+.anim-delay-3 { animation-delay: 0.3s; }
+.anim-delay-4 { animation-delay: 0.4s; }
+.anim-delay-5 { animation-delay: 0.5s; }
+.anim-delay-6 { animation-delay: 0.6s; }
+
+// ── Scroll Reveal (IntersectionObserver) ───────────────────
+.reveal {
+  opacity: 0;
+  transform: translateY(28px);
+  transition:
+    opacity 0.7s var(--ease-out),
+    transform 0.7s var(--ease-out);
+
+  &.reveal-visible {
+    opacity: 1;
+    transform: translateY(0);
+  }
+
+  &.reveal-left {
+    transform: translateX(-36px);
+  }
+  &.reveal-right {
+    transform: translateX(36px);
+  }
+  &.reveal-scale {
+    transform: scale(0.94);
+  }
+}
+
+// ── Pulse para indicadores ─────────────────────────────────
+@keyframes alantek-pulse {
+  0%, 100% { opacity: 1; }
+  50% { opacity: 0.5; }
+}
+
+@keyframes alantek-breathe {
+  0%, 100% { transform: scale(1); }
+  50% { transform: scale(1.03); }
+}
+
+// ── Marquee (technologies) ─────────────────────────────────
+@keyframes alantek-marquee {
+  from { transform: translateX(0); }
+  to { transform: translateX(-50%); }
+}
+
+.alantek-marquee-track {
+  display: flex;
+  width: max-content;
+  animation: alantek-marquee var(--marquee-duration, 40s) linear infinite;
+
+  &:hover,
+  &:focus-within {
+    animation-play-state: paused;
+  }
+}
+
+// ── Spinner ────────────────────────────────────────────────
+@keyframes alantek-spin {
+  to { transform: rotate(360deg); }
+}
+
+.spinner-alantek {
+  width: 32px;
+  height: 32px;
+  border: 3px solid var(--border);
+  border-top-color: var(--accent);
+  border-radius: 50%;
+  animation: alantek-spin 0.8s linear infinite;
+}
+
+// ── Reduced motion ─────────────────────────────────────────
+@media (prefers-reduced-motion: reduce) {
+  *,
+  *::before,
+  *::after {
+    animation-duration: 0.01ms !important;
+    animation-iteration-count: 1 !important;
+    transition-duration: 0.01ms !important;
+    scroll-behavior: auto !important;
+  }
+
+  .reveal {
+    opacity: 1;
+    transform: none;
+  }
+
+  .alantek-marquee-track {
+    animation: none;
+    flex-wrap: wrap;
+    justify-content: center;
+    width: 100%;
+  }
+}
