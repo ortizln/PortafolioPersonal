@@ -129,7 +129,7 @@ export class PublicLayoutComponent implements OnInit, OnDestroy {
   isScrolled = false;
   showBackToTop = false;
   isMobileMenuOpen = false;
-  isDark = false;
+  isDark = document.documentElement.getAttribute('data-theme') === 'dark';
   currentYear = new Date().getFullYear();
 
   company: Company | null = null;
@@ -151,12 +151,22 @@ export class PublicLayoutComponent implements OnInit, OnDestroy {
   ngOnInit(): void {
     this.loadCompany();
     this.loadServices();
+    this.initAOS();
     this.routerSub = this.router.events.pipe(
       filter((e) => e instanceof NavigationEnd)
     ).subscribe(() => {
       window.scrollTo({ top: 0, behavior: 'instant' });
       this.isMobileMenuOpen = false;
+      setTimeout(() => (window as any).AOS?.refreshHard?.(), 120);
     });
+  }
+
+  private initAOS(): void {
+    const aos = (window as any).AOS;
+    if (aos && !(window as any).__alantekAosInit) {
+      aos.init({ duration: 800, easing: 'ease-out-cubic', once: true, offset: 80 });
+      (window as any).__alantekAosInit = true;
+    }
   }
 
   ngOnDestroy(): void {
@@ -234,6 +244,9 @@ export class PublicLayoutComponent implements OnInit, OnDestroy {
 
   toggleTheme(): void {
     this.isDark = !this.isDark;
-    document.documentElement.setAttribute('data-theme', this.isDark ? 'dark' : 'light');
+    const theme = this.isDark ? 'dark' : 'light';
+    document.documentElement.setAttribute('data-theme', theme);
+    document.documentElement.setAttribute('data-bs-theme', theme);
+    try { localStorage.setItem('alantek-theme', theme); } catch {}
   }
 }

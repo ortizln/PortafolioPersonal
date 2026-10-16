@@ -1,0 +1,130 @@
+// ═══════════════════════════════════════════════════════════
+// ALANTEK THEME — Light / Dark
+// Identidad: verde militar #354B35, verde profundo #19261E,
+// naranja tierra #BD6735, cobre #E4A16C, blanco cálido #F7F7F2
+// Usa data-theme (legado) + data-bs-theme (Bootstrap 5).
+// ═══════════════════════════════════════════════════════════
+
+// ── Light (default) ────────────────────────────────────────
+:root,
+[data-theme='light'],
+[data-bs-theme='light'] {
+  // Marca
+  --alantek-primary: #354B35;
+  --alantek-secondary: #19261E;
+  --alantek-accent: #BD6735;
+  --alantek-accent-light: #E4A16C;
+  --alantek-background: #F7F7F2;
+  --alantek-surface: #FFFFFF;
+  --alantek-text: #19261E;
+
+  // Semánticas
+  --primary: #354B35;
+  --secondary: #19261E;
+  --accent: #BD6735;
+  --accent-secondary: #E4A16C;
+  --accent-rgb: 189, 103, 53;
+  --primary-rgb: 53, 75, 53;
+
+  --text-primary: #19261E;
+  --text-secondary: #3E5540;
+  --text-muted: #7A8A7C;
+  --text-tertiary: #9BAAA0;
+  --text-inverse: #F7F7F2;
+
+  --bg-primary: #F7F7F2;
+  --bg-secondary: #EEEEEA;
+  --bg-tertiary: #E4E5DF;
+  --bg-card: #FFFFFF;
+  --bg-card-hover: #F2F3EE;
+  --bg-inverse: #111713;
+
+  --border: #D8DBD3;
+  --border-color: #D8DBD3;
+  --border-light: #E5E7E1;
+  --border-accent: rgba(189, 103, 53, 0.35);
+
+  // Estados
+  --success: #2D8A4E;
+  --warning: #C88A2A;
+  --error: #C0392B;
+  --info: #2C6E8E;
+
+  // Alias heredados
+  --white: #19261E;
+  --glass-bg: rgba(255, 255, 255, 0.72);
+  --glass-border: rgba(53, 75, 53, 0.1);
+  --shadow: 0 2px 12px rgba(25, 38, 30, 0.06);
+  --shadow-md: 0 4px 24px rgba(25, 38, 30, 0.08);
+  --shadow-lg: 0 8px 40px rgba(25, 38, 30, 0.12);
+  --shadow-glow: 0 0 24px rgba(189, 103, 53, 0.15);
+
+  --radius: 12px;
+  --radius-lg: 20px;
+
+  color-scheme: light;
+}
+
+// ── Dark ───────────────────────────────────────────────────
+[data-theme='dark'],
+[data-bs-theme='dark'] {
+  --alantek-primary: #354B35;
+  --alantek-secondary: #19261E;
+  --alantek-accent: #E4A16C;
+  --alantek-accent-light: #F0C49B;
+  --alantek-background: #111713;
+  --alantek-surface: #1A231C;
+  --alantek-text: #F7F7F2;
+
+  --primary: #4A6B4D;
+  --secondary: #1A231C;
+  --accent: #E4A16C;
+  --accent-secondary: #BD6735;
+  --accent-rgb: 228, 161, 108;
+  --primary-rgb: 74, 107, 77;
+
+  --text-primary: #F7F7F2;
+  --text-secondary: #B8C4B6;
+  --text-muted: #7A8A7C;
+  --text-tertiary: #5A6B5C;
+  --text-inverse: #19261E;
+
+  --bg-primary: #111713;
+  --bg-secondary: #1A231C;
+  --bg-tertiary: #223026;
+  --bg-card: #1A231C;
+  --bg-card-hover: #223026;
+  --bg-inverse: #F7F7F2;
+
+  --border: #2E3D31;
+  --border-color: #2E3D31;
+  --border-light: #263330;
+  --border-accent: rgba(228, 161, 108, 0.3);
+
+  --success: #3DAA63;
+  --warning: #D4A040;
+  --error: #D5564A;
+  --info: #4A9EC2;
+
+  --white: #F7F7F2;
+  --glass-bg: rgba(26, 35, 28, 0.78);
+  --glass-border: rgba(228, 161, 108, 0.1);
+  --shadow: 0 2px 12px rgba(0, 0, 0, 0.25);
+  --shadow-md: 0 4px 24px rgba(0, 0, 0, 0.35);
+  --shadow-lg: 0 8px 40px rgba(0, 0, 0, 0.45);
+  --shadow-glow: 0 0 32px rgba(228, 161, 108, 0.12);
+
+  --radius: 12px;
+  --radius-lg: 20px;
+
+  color-scheme: dark;
+}
+
+// ── Gradientes reutilizables ───────────────────────────────
+:root {
+  --gradient-brand: linear-gradient(135deg, #19261E 0%, #354B35 55%, #BD6735 100%);
+  --gradient-accent: linear-gradient(135deg, #BD6735 0%, #E4A16C 100%);
+  --gradient-subtle: linear-gradient(135deg, rgba(53, 75, 53, 0.06) 0%, rgba(189, 103, 53, 0.06) 100%);
+  --gradient-radial-copper: radial-gradient(ellipse at 50% 0%, rgba(228, 161, 108, 0.12) 0%, transparent 70%);
+  --gradient-radial-green: radial-gradient(ellipse at 50% 100%, rgba(53, 75, 53, 0.1) 0%, transparent 70%);
+}

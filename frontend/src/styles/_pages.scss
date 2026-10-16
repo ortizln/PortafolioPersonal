@@ -1,0 +1,358 @@
+// ═══════════════════════════════════════════════════════════
+// ALANTEK PAGES — Layout compartido para páginas internas
+// ═══════════════════════════════════════════════════════════
+
+.page-wrapper {
+  min-height: 100vh;
+  padding-top: var(--navbar-height);
+  background: var(--bg-primary);
+  position: relative;
+  z-index: 1;
+}
+
+// ── Hero de página ─────────────────────────────────────────
+.page-hero {
+  position: relative;
+  overflow: hidden;
+  padding: var(--space-9) 0 var(--space-8);
+  background: var(--bg-primary);
+  border-bottom: 1px solid var(--border);
+
+  &::before {
+    content: '';
+    position: absolute;
+    inset: 0;
+    background: var(--gradient-radial-copper);
+    pointer-events: none;
+  }
+
+  .eyebrow {
+    position: relative;
+  }
+}
+
+.page-title {
+  position: relative;
+  font-family: var(--font-heading);
+  font-size: var(--fs-4xl);
+  font-weight: var(--fw-bold);
+  line-height: var(--lh-tight);
+  letter-spacing: var(--ls-tight);
+  color: var(--text-primary);
+  margin: 0 0 var(--space-3);
+}
+
+.page-subtitle {
+  position: relative;
+  font-size: var(--fs-lg);
+  color: var(--text-secondary);
+  line-height: var(--lh-normal);
+  max-width: 680px;
+  margin: 0;
+}
+
+.page-hero--center {
+  text-align: center;
+
+  .page-subtitle {
+    margin-left: auto;
+    margin-right: auto;
+  }
+}
+
+.page-hero--compact {
+  padding: var(--space-8) 0 var(--space-6);
+}
+
+.page-hero--split {
+  .page-hero-inner {
+    display: flex;
+    align-items: flex-end;
+    justify-content: space-between;
+    gap: var(--space-6);
+    flex-wrap: wrap;
+  }
+}
+
+// ── Secciones ──────────────────────────────────────────────
+.page-section {
+  padding: var(--space-9) 0;
+
+  @media (max-width: 768px) {
+    padding: var(--space-8) 0;
+  }
+}
+
+.page-section--alt {
+  background: var(--bg-secondary);
+}
+
+.page-section--tight {
+  padding: var(--space-7) 0;
+}
+
+// ── Loading / Empty / Error ────────────────────────────────
+.page-loading {
+  display: flex;
+  justify-content: center;
+  padding: var(--space-10) 0;
+}
+
+.spinner {
+  width: 40px;
+  height: 40px;
+  border: 3px solid var(--border);
+  border-top-color: var(--accent);
+  border-radius: 50%;
+  animation: alantek-spin 0.8s linear infinite;
+}
+
+@keyframes alantek-spin {
+  to {
+    transform: rotate(360deg);
+  }
+}
+
+.page-empty {
+  text-align: center;
+  padding: var(--space-10) var(--space-5);
+  color: var(--text-muted);
+  font-size: var(--fs-lg);
+}
+
+.page-error {
+  text-align: center;
+  padding: var(--space-9) var(--space-5);
+  color: var(--text-muted);
+
+  i {
+    font-size: 2.5rem;
+    color: var(--accent);
+    margin-bottom: var(--space-3);
+    display: block;
+  }
+
+  p {
+    margin: 0 0 var(--space-4);
+  }
+}
+
+.btn-retry {
+  background: var(--accent);
+  color: #fff;
+  border: none;
+  padding: 0.6rem 1.5rem;
+  border-radius: var(--radius-md);
+  cursor: pointer;
+  font-weight: var(--fw-semibold);
+  transition: all var(--duration-base) var(--ease-out);
+
+  &:hover {
+    box-shadow: 0 4px 16px rgba(var(--accent-rgb), 0.3);
+  }
+}
+
+// ── Grids responsive ───────────────────────────────────────
+.grid-auto {
+  display: grid;
+  gap: var(--space-5);
+  grid-template-columns: repeat(auto-fill, minmax(300px, 1fr));
+}
+
+.grid-services {
+  display: grid;
+  gap: var(--space-5);
+  grid-template-columns: repeat(auto-fill, minmax(300px, 1fr));
+}
+
+.grid-projects {
+  display: grid;
+  gap: var(--space-5);
+  grid-template-columns: repeat(auto-fill, minmax(320px, 1fr));
+}
+
+.grid-team {
+  display: grid;
+  gap: var(--space-5);
+  grid-template-columns: repeat(auto-fill, minmax(220px, 1fr));
+}
+
+.grid-clients {
+  display: grid;
+  gap: var(--space-4);
+  grid-template-columns: repeat(auto-fill, minmax(180px, 1fr));
+}
+
+.grid-blog {
+  display: grid;
+  gap: var(--space-5);
+  grid-template-columns: repeat(auto-fill, minmax(300px, 1fr));
+}
+
+.grid-filters {
+  display: flex;
+  flex-wrap: wrap;
+  gap: var(--space-2);
+  margin-bottom: var(--space-6);
+}
+
+// ── Chips / tags ───────────────────────────────────────────
+.chip {
+  display: inline-flex;
+  align-items: center;
+  gap: var(--space-1);
+  padding: 0.25rem 0.75rem;
+  background: rgba(var(--accent-rgb), 0.08);
+  color: var(--text-secondary);
+  border-radius: var(--radius-full);
+  font-size: var(--fs-xs);
+  border: 1px solid transparent;
+  text-decoration: none;
+  transition: all var(--duration-fast) var(--ease-out);
+}
+
+.chip--clickable:hover,
+.chip--active {
+  border-color: var(--border-accent);
+  color: var(--accent);
+}
+
+.chip--active {
+  background: rgba(var(--accent-rgb), 0.14);
+}
+
+// ── CTA banner (versión global) ────────────────────────────
+.cta-banner {
+  position: relative;
+  overflow: hidden;
+  background: var(--gradient-brand);
+  padding: var(--space-9) 0;
+  text-align: center;
+
+  &::before {
+    content: '';
+    position: absolute;
+    inset: 0;
+    background: radial-gradient(ellipse at 50% 130%, rgba(228, 161, 108, 0.25), transparent 60%);
+    pointer-events: none;
+  }
+
+  h2 {
+    position: relative;
+    font-family: var(--font-heading);
+    font-size: var(--fs-3xl);
+    font-weight: var(--fw-bold);
+    color: #F7F7F2;
+    margin: 0 0 var(--space-3);
+  }
+
+  p {
+    position: relative;
+    color: rgba(247, 247, 242, 0.82);
+    font-size: var(--fs-lg);
+    margin: 0 0 var(--space-5);
+  }
+
+  .btn-alantek-accent {
+    position: relative;
+  }
+}
+
+// ── Prose (blog / detalle) ─────────────────────────────────
+.prose {
+  color: var(--text-secondary);
+  font-size: var(--fs-md);
+  line-height: 1.75;
+
+  h2 {
+    font-family: var(--font-heading);
+    font-size: var(--fs-2xl);
+    color: var(--text-primary);
+    margin: var(--space-7) 0 var(--space-3);
+  }
+
+  h3 {
+    font-family: var(--font-heading);
+    font-size: var(--fs-xl);
+    color: var(--text-primary);
+    margin: var(--space-6) 0 var(--space-3);
+  }
+
+  p {
+    margin: 0 0 var(--space-4);
+  }
+
+  ul,
+  ol {
+    margin: 0 0 var(--space-4);
+    padding-left: var(--space-6);
+  }
+
+  li {
+    margin-bottom: var(--space-2);
+  }
+
+  a {
+    color: var(--accent);
+    text-decoration: underline;
+  }
+
+  img {
+    max-width: 100%;
+    border-radius: var(--radius-lg);
+    margin: var(--space-5) 0;
+  }
+
+  blockquote {
+    border-left: 3px solid var(--accent);
+    padding-left: var(--space-5);
+    margin: var(--space-5) 0;
+    font-style: italic;
+    color: var(--text-secondary);
+  }
+
+  code {
+    font-family: var(--font-mono);
+    font-size: 0.9em;
+    background: var(--bg-secondary);
+    padding: 0.15em 0.4em;
+    border-radius: var(--radius-sm);
+  }
+
+  pre {
+    background: var(--bg-inverse);
+    color: #F7F7F2;
+    padding: var(--space-5);
+    border-radius: var(--radius-lg);
+    overflow-x: auto;
+
+    code {
+      background: none;
+      padding: 0;
+    }
+  }
+}
+
+// ── Detail layouts ─────────────────────────────────────────
+.detail-banner {
+  width: 100%;
+  max-height: 460px;
+  object-fit: cover;
+  border-radius: var(--radius-lg);
+  background: var(--bg-secondary);
+}
+
+.detail-meta {
+  display: flex;
+  flex-wrap: wrap;
+  gap: var(--space-4);
+  color: var(--text-muted);
+  font-size: var(--fs-sm);
+  margin: var(--space-4) 0;
+
+  span {
+    display: inline-flex;
+    align-items: center;
+    gap: var(--space-2);
+  }
+}

@@ -55,7 +55,7 @@
 
   &:hover {
     transform: translateY(-2px);
-    box-shadow: 0 8px 25px rgba(100, 255, 218, 0.3);
+    box-shadow: 0 8px 25px rgba(var(--accent-rgb), 0.3);
   }
 }
 
@@ -75,7 +75,7 @@
 
   &:hover:not(:disabled) {
     transform: translateY(-2px);
-    box-shadow: 0 8px 25px rgba(100, 255, 218, 0.3);
+    box-shadow: 0 8px 25px rgba(var(--accent-rgb), 0.3);
   }
 
   &:disabled {
@@ -119,7 +119,7 @@
   border: 1px solid var(--accent);
   border-radius: var(--radius-lg);
   padding: 24px;
-  box-shadow: 0 0 30px rgba(100, 255, 218, 0.08);
+  box-shadow: 0 0 30px rgba(var(--accent-rgb), 0.08);
 
   h2 {
     font-size: 1.15rem;
@@ -176,7 +176,7 @@
   &:focus {
     outline: none;
     border-color: var(--accent);
-    box-shadow: 0 0 0 3px rgba(100, 255, 218, 0.1);
+    box-shadow: 0 0 0 3px rgba(var(--accent-rgb), 0.1);
   }
 
   &::placeholder {
@@ -217,7 +217,7 @@ select.form-control {
     border-radius: 50%;
     background: var(--accent);
     border: 2px solid var(--bg-primary);
-    box-shadow: 0 0 6px rgba(100, 255, 218, 0.4);
+    box-shadow: 0 0 6px rgba(var(--accent-rgb), 0.4);
     cursor: pointer;
   }
 
@@ -291,7 +291,7 @@ select.form-control {
   }
 
   &.active {
-    background: rgba(100, 255, 218, 0.12);
+    background: rgba(var(--accent-rgb), 0.12);
     border-color: var(--accent);
     color: var(--accent);
     font-weight: 600;
@@ -302,7 +302,7 @@ select.form-control {
   font-size: 0.7rem;
   padding: 1px 6px;
   border-radius: 10px;
-  background: rgba(100, 255, 218, 0.15);
+  background: rgba(var(--accent-rgb), 0.15);
 }
 
 .skill-groups {
@@ -388,9 +388,9 @@ select.form-control {
   font-size: 0.72rem;
   padding: 1px 8px;
   border-radius: 10px;
-  background: rgba(100, 255, 218, 0.08);
+  background: rgba(var(--accent-rgb), 0.08);
   color: var(--accent);
-  border: 1px solid rgba(100, 255, 218, 0.15);
+  border: 1px solid rgba(var(--accent-rgb), 0.15);
   white-space: nowrap;
   flex-shrink: 0;
 }

@@ -51,7 +51,7 @@ export class SkillListComponent implements OnInit {
       percentage: [50],
       level: [''],
       icon: [''],
-      color: ['#64ffda'],
+      color: ['#BD6735'],
       order: [0],
       category: ['FRONTEND'],
     });
@@ -67,7 +67,7 @@ export class SkillListComponent implements OnInit {
 
   openAdd(): void {
     this.editingId = null;
-    this.skillForm.reset({ percentage: 50, order: 0, category: 'FRONTEND', color: '#64ffda' });
+    this.skillForm.reset({ percentage: 50, order: 0, category: 'FRONTEND', color: '#BD6735' });
     this.showForm = true;
   }
 
@@ -78,7 +78,7 @@ export class SkillListComponent implements OnInit {
       percentage: skill.percentage,
       level: (skill as any).level || '',
       icon: (skill as any).icon || '',
-      color: (skill as any).color || '#64ffda',
+      color: (skill as any).color || '#BD6735',
       order: skill.order,
       category: skill.category,
     });
@@ -88,7 +88,7 @@ export class SkillListComponent implements OnInit {
   cancelForm(): void {
     this.showForm = false;
     this.editingId = null;
-    this.skillForm.reset({ percentage: 50, order: 0, category: 'FRONTEND', color: '#64ffda' });
+    this.skillForm.reset({ percentage: 50, order: 0, category: 'FRONTEND', color: '#BD6735' });
   }
 
   save(): void {
@@ -154,11 +154,11 @@ export class SkillListComponent implements OnInit {
 
   getCategoryColor(category: string): string {
     const skill = this.skills.find((s) => s.category === category && (s as any).color);
-    return (skill as any)?.color || '#64ffda';
+    return (skill as any)?.color || '#BD6735';
   }
 
   getBarColor(skill: Skill): string {
-    return (skill as any).color || '#64ffda';
+    return (skill as any).color || '#BD6735';
   }
 
   getGroupSkills(category: string): Skill[] {

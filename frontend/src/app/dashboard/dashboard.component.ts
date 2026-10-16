@@ -321,7 +321,7 @@ export class DashboardComponent implements OnInit {
   }
 
   private emptySkill(): any {
-    return { name: '', percentage: 50, level: '', icon: '', color: '#64ffda', order: 0, category: 'OTHER' };
+    return { name: '', percentage: 50, level: '', icon: '', color: '#BD6735', order: 0, category: 'OTHER' };
   }
 
   openSkillForm(skill?: Skill): void {

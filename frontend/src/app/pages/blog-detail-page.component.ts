@@ -5,94 +5,134 @@ import { ApiService } from '../core/services/api.service';
 import { SeoService } from '../core/services/seo.service';
 import { Post } from '../core/models';
 import { environment } from '../../environments/environment';
+import { ContactCtaComponent } from '../shared/components/contact-cta.component';
+import { ScrollRevealDirective } from '../core/directives/scroll-reveal.directive';
 
 @Component({
   selector: 'app-blog-detail-page',
   standalone: true,
-  imports: [DatePipe, NgIf, NgFor, RouterLink],
-  styles: [
-    `
-      :host { display: block; min-height: 60vh; }
-      .page-wrapper { min-height: 100vh; padding-top: 80px; background: var(--bg-primary); }
-      .back-link { color: var(--accent); text-decoration: none; font-size: 0.9rem; display: inline-block; margin: 2rem 0 0; }
-      .page-loading { display: flex; justify-content: center; padding: 4rem; }
-      .spinner { width: 38px; height: 38px; border: 3px solid rgba(255,255,255,0.12); border-top-color: var(--accent); border-radius: 50%; animation: spin 0.8s linear infinite; }
-      @keyframes spin { to { transform: rotate(360deg); } }
-      .page-error { text-align: center; padding: 4rem; color: var(--text-secondary); }
-      .page-error i { font-size: 2.5rem; display: block; margin-bottom: 0.75rem; opacity: 0.4; }
-      .page-error a { color: var(--accent); }
-      .post-wrap { max-width: 820px; margin: 0 auto; padding: 1.5rem 1rem 3rem; }
-      .post-header { text-align: center; margin-bottom: 1.5rem; }
-      .post-meta { display: flex; justify-content: center; gap: 0.75rem; flex-wrap: wrap; margin-bottom: 0.75rem; }
-      .chip { font-size: 0.72rem; padding: 3px 12px; border-radius: 20px; background: rgba(var(--accent-rgb), 0.12); color: var(--accent); }
-      .chip-neutral { background: rgba(255,255,255,0.06); color: var(--text-secondary); }
-      .post-title { font-size: 2.2rem; line-height: 1.25; color: var(--white); margin: 0.25rem 0 0.75rem; }
-      .post-sub { color: var(--text-secondary); font-size: 0.85rem; display: flex; gap: 1rem; justify-content: center; flex-wrap: wrap; }
-      .post-sub span { display: inline-flex; align-items: center; gap: 0.35rem; }
-      .post-cover { width: 100%; max-height: 460px; object-fit: cover; border-radius: 16px; margin-bottom: 1.5rem; background: var(--bg-secondary); }
-      .post-content { color: var(--text-primary); font-size: 1rem; line-height: 1.8; }
-      .post-content ::ng-deep img { max-width: 100%; border-radius: 12px; }
-      .post-content ::ng-deep pre { background: var(--bg-secondary); padding: 1rem; border-radius: 10px; overflow-x: auto; border: 1px solid var(--border); }
-      .post-content ::ng-deep blockquote { border-left: 3px solid var(--accent); padding-left: 1rem; color: var(--text-secondary); margin: 1.5rem 0; }
-      .post-content ::ng-deep h2, .post-content ::ng-deep h3 { color: var(--white); }
-      .post-content ::ng-deep a { color: var(--accent); }
-      .post-tags { margin-top: 1.5rem; display: flex; gap: 0.5rem; flex-wrap: wrap; }
-      .related { margin-top: 2.5rem; border-top: 1px solid var(--border); padding-top: 1.5rem; }
-      .related h3 { color: var(--white); margin: 0 0 1rem; }
-      .related-grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(240px, 1fr)); gap: 1rem; }
-      .rel-card { background: var(--bg-card); border: 1px solid var(--border); border-radius: 12px; padding: 1rem; text-decoration: none; transition: all 0.2s ease; display: flex; flex-direction: column; gap: 0.4rem; }
-      .rel-card:hover { border-color: var(--accent); transform: translateY(-2px); }
-      .rel-title { font-weight: 600; color: var(--white); font-size: 0.9rem; }
-      .rel-date { font-size: 0.72rem; color: var(--text-secondary); }
-    `,
-  ],
+  imports: [DatePipe, NgIf, NgFor, RouterLink, ContactCtaComponent, ScrollRevealDirective],
   template: `
     <div class="page-wrapper">
-      <div class="container">
-        <a routerLink="/blog" class="back-link">&larr; Volver al Blog</a>
-
-        <div *ngIf="loading" class="page-loading"><div class="spinner"></div></div>
-
-        <div *ngIf="!loading && error" class="page-error">
-          <i class="bi bi-journal-x"></i>
-          <p>{{ error }}</p>
-          <a routerLink="/blog">Ir al Blog</a>
+      <header class="page-hero" *ngIf="!loading && !error && post">
+        <div class="container-alantek">
+          <a routerLink="/blog" class="hero-back">&larr; Volver al Blog</a>
+          <span class="eyebrow">Blog</span>
+          <div class="post-meta" *ngIf="post.categories?.length">
+            <span class="chip" *ngFor="let c of post.categories">{{ c.name }}</span>
+          </div>
+          <h1 class="page-title">{{ post.title }}</h1>
+          <div class="detail-meta">
+            <span *ngIf="post.author"><i class="bi bi-person" aria-hidden="true"></i> {{ post.author.name }}</span>
+            <span *ngIf="post.publishedAt"><i class="bi bi-calendar3" aria-hidden="true"></i> {{ post.publishedAt | date: "dd 'de' MMMM, yyyy" }}</span>
+            <span><i class="bi bi-eye" aria-hidden="true"></i> {{ post.views }}</span>
+          </div>
         </div>
+      </header>
 
-        <article class="post-wrap" *ngIf="!loading && post">
-          <header class="post-header">
-            <div class="post-meta">
-              <span class="chip" *ngFor="let c of post.categories">{{ c.name }}</span>
-            </div>
-            <h1 class="post-title">{{ post.title }}</h1>
-            <div class="post-sub">
-              <span *ngIf="post.author"><i class="bi bi-person"></i> {{ post.author.name }}</span>
-              <span *ngIf="post.publishedAt"><i class="bi bi-calendar3"></i> {{ post.publishedAt | date: "dd 'de' MMMM, yyyy" }}</span>
-              <span><i class="bi bi-eye"></i> {{ post.views }}</span>
-            </div>
-          </header>
+      <div *ngIf="loading" class="page-loading"><div class="spinner"></div></div>
 
-          <div class="img-hover-zoom"><img *ngIf="coverUrl" class="post-cover" [src]="coverUrl" [alt]="post.title" loading="lazy" decoding="async" /></div>
+      <div *ngIf="!loading && error" class="page-error" role="alert">
+        <i class="bi bi-journal-x" aria-hidden="true"></i>
+        <p>{{ error }}</p>
+        <a routerLink="/blog" class="btn-retry">Ir al Blog</a>
+      </div>
 
-          <div class="post-content" [innerHTML]="post.content || '<p>Sin contenido.</p>'"></div>
+      <article class="page-section" *ngIf="!loading && !error && post">
+        <div class="container-alantek container-narrow content">
+          <img class="detail-banner" *ngIf="coverUrl" [src]="coverUrl" [alt]="post.title" loading="lazy" decoding="async" />
+
+          <div class="prose" [innerHTML]="post.content || '<p>Sin contenido.</p>'"></div>
 
           <div class="post-tags" *ngIf="post.tags?.length">
-            <span class="chip chip-neutral" *ngFor="let t of post.tags">#{{ t.name }}</span>
+            <span class="chip" *ngFor="let t of post.tags">#{{ t.name }}</span>
           </div>
+        </div>
+      </article>
 
-          <section class="related" *ngIf="related.length">
-            <h3>Artículos relacionados</h3>
-            <div class="related-grid">
-              <a class="rel-card link-underline" *ngFor="let r of related" [routerLink]="['/blog', r.slug]">
-                <span class="rel-title">{{ r.title }}</span>
-                <span class="rel-date">{{ r.publishedAt | date: 'dd/MM/yyyy' }}</span>
-              </a>
-            </div>
-          </section>
-        </article>
-      </div>
+      <section class="page-section page-section--alt" *ngIf="!loading && !error && post && related.length">
+        <div class="container-alantek">
+          <h2 class="section-heading" appScrollReveal>Artículos relacionados</h2>
+          <div class="grid-blog">
+            <a class="card-alantek rel-card" *ngFor="let r of related" [routerLink]="['/blog', r.slug]" appScrollReveal>
+              <span class="rel-title">{{ r.title }}</span>
+              <span class="rel-date"><i class="bi bi-calendar3" aria-hidden="true"></i> {{ r.publishedAt | date: 'dd/MM/yyyy' }}</span>
+            </a>
+          </div>
+        </div>
+      </section>
+
+      <app-contact-cta
+        eyebrow="Trabajemos juntos"
+        title="¿Tienes un proyecto en mente?"
+        text="Cuéntanos tu idea y te ayudaremos a hacerla realidad."
+      ></app-contact-cta>
     </div>
   `,
+  styles: [`
+    .hero-back {
+      position: relative;
+      display: inline-flex;
+      align-items: center;
+      gap: var(--space-1);
+      color: var(--accent);
+      font-size: var(--fs-sm);
+      text-decoration: none;
+      margin-bottom: var(--space-4);
+      transition: opacity var(--duration-base) var(--ease-out);
+    }
+    .hero-back:hover { opacity: 0.8; }
+    .post-meta {
+      position: relative;
+      display: flex;
+      flex-wrap: wrap;
+      gap: var(--space-2);
+      margin-bottom: var(--space-4);
+    }
+    .detail-meta { position: relative; }
+    .page-error .btn-retry {
+      display: inline-block;
+      text-decoration: none;
+    }
+    .content {
+      display: flex;
+      flex-direction: column;
+      gap: var(--space-6);
+    }
+    .detail-banner { display: block; }
+    .post-tags {
+      display: flex;
+      flex-wrap: wrap;
+      gap: var(--space-2);
+    }
+    .section-heading {
+      font-family: var(--font-heading);
+      font-size: var(--fs-2xl);
+      font-weight: var(--fw-bold);
+      color: var(--text-primary);
+      margin: 0 0 var(--space-5);
+    }
+    .rel-card {
+      display: flex;
+      flex-direction: column;
+      gap: var(--space-2);
+    }
+    .rel-title {
+      display: block;
+      font-family: var(--font-heading);
+      font-size: var(--fs-md);
+      font-weight: var(--fw-semibold);
+      color: var(--text-primary);
+      line-height: var(--lh-snug);
+    }
+    .rel-date {
+      display: inline-flex;
+      align-items: center;
+      gap: var(--space-2);
+      font-size: var(--fs-xs);
+      color: var(--text-muted);
+    }
+  `],
 })
 export class BlogDetailPageComponent implements OnInit {
   private apiService = inject(ApiService);

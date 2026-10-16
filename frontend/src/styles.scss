@@ -1,1 +1,25 @@
+// ═══════════════════════════════════════════════════════════
+// ALANTEK GLOBAL STYLES — Punto de entrada
+// Orden: Bootstrap → Design System → Legacy
+// ═══════════════════════════════════════════════════════════
+
+// 1. Bootstrap 5 con variables ALANTEK
+@import 'styles/bootstrap-config';
+
+// 2. Design tokens (tipografía, espaciado, radio, motion)
+@import 'styles/tokens';
+
+// 3. Themes (light/dark, gradientes)
+@import 'styles/themes';
+
+// 4. Componentes base
+@import 'styles/buttons';
+@import 'styles/cards';
+@import 'styles/pages';
+
+// 5. Animaciones y utilities
+@import 'styles/animations';
+@import 'styles/utilities';
+
+// 6. Legacy (valores históricos — mantener compatibilidad)
 @import 'styles/theme';

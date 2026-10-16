@@ -56,7 +56,7 @@
 
   &:hover {
     transform: translateY(-2px);
-    box-shadow: 0 8px 25px rgba(100, 255, 218, 0.3);
+    box-shadow: 0 8px 25px rgba(var(--accent-rgb), 0.3);
   }
 }
 
@@ -72,7 +72,7 @@
   transition: var(--transition);
 
   &:hover {
-    background: rgba(100, 255, 218, 0.1);
+    background: rgba(var(--accent-rgb), 0.1);
   }
 }
 
@@ -108,7 +108,7 @@
 
   &:hover:not(:disabled) {
     transform: translateY(-2px);
-    box-shadow: 0 8px 25px rgba(100, 255, 218, 0.3);
+    box-shadow: 0 8px 25px rgba(var(--accent-rgb), 0.3);
   }
 
   &:disabled {
@@ -177,7 +177,7 @@
   background: linear-gradient(135deg, var(--accent), var(--accent-secondary));
   border: 3px solid var(--bg-primary);
   z-index: 1;
-  box-shadow: 0 0 12px rgba(100, 255, 218, 0.3);
+  box-shadow: 0 0 12px rgba(var(--accent-rgb), 0.3);
 }
 
 .timeline-card {
@@ -270,7 +270,7 @@
   border: 1px solid var(--accent);
   border-radius: var(--radius-lg);
   padding: 24px;
-  box-shadow: 0 0 30px rgba(100, 255, 218, 0.08);
+  box-shadow: 0 0 30px rgba(var(--accent-rgb), 0.08);
 
   h2 {
     font-size: 1.15rem;
@@ -317,7 +317,7 @@
   &:focus {
     outline: none;
     border-color: var(--accent);
-    box-shadow: 0 0 0 3px rgba(100, 255, 218, 0.1);
+    box-shadow: 0 0 0 3px rgba(var(--accent-rgb), 0.1);
   }
 
   &::placeholder {

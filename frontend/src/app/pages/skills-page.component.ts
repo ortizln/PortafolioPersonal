@@ -3,43 +3,58 @@ import { NgFor, NgIf, NgClass } from '@angular/common';
 import { RouterLink } from '@angular/router';
 import { ApiService } from '../core/services/api.service';
 import { Skill } from '../core/models';
+import { ContactCtaComponent } from '../shared/components/contact-cta.component';
+import { ScrollRevealDirective } from '../core/directives/scroll-reveal.directive';
 
 @Component({
   selector: 'app-skills-page',
   standalone: true,
-  imports: [NgIf, NgFor, NgClass, RouterLink],
+  imports: [NgIf, NgFor, NgClass, RouterLink, ContactCtaComponent, ScrollRevealDirective],
   template: `
     <div class="page-wrapper">
-      <div class="page-header">
-        <div class="container">
+      <header class="page-hero page-hero--compact">
+        <div class="container-alantek">
+          <span class="eyebrow">Portafolio</span>
+          <h1 class="page-title">Habilidades</h1>
           <a routerLink="/portfolio" class="back-link">&larr; Volver al Portafolio</a>
-          <h1>Habilidades</h1>
         </div>
-      </div>
+      </header>
 
       <div *ngIf="loading" class="page-loading"><div class="spinner"></div></div>
 
-      <div *ngIf="!loading && error" class="page-error">
-        <i class="bi bi-exclamation-triangle"></i>
+      <div *ngIf="!loading && error" class="page-error" role="alert">
+        <i class="bi bi-exclamation-triangle" aria-hidden="true"></i>
         <p>No se pudieron cargar las habilidades. Intenta de nuevo más tarde.</p>
-        <button class="btn-retry" (click)="loadData()">Reintentar</button>
+        <button class="btn-retry" (click)="loadData()" aria-label="Reintentar">Reintentar</button>
       </div>
 
       <div *ngIf="!loading && !error && !skills.length" class="page-empty">
-        <i class="bi bi-gear"></i>
+        <i class="bi bi-gear" aria-hidden="true"></i>
         <p>No hay habilidades aún.</p>
       </div>
 
-      <div *ngIf="!loading && skills.length" class="page-content">
-        <div class="container">
-          <div class="skills-tabs" data-aos="fade-up">
-            <button class="tab-btn" *ngFor="let cat of categories" [class.active]="activeCategory === cat" (click)="activeCategory = cat">
-              <i class="bi" [ngClass]="getIcon(cat)"></i> {{ cat }}
+      <section class="page-section" *ngIf="!loading && skills.length">
+        <div class="container-alantek container-narrow">
+          <div class="grid-filters" appScrollReveal>
+            <button
+              type="button"
+              class="chip chip--clickable"
+              *ngFor="let cat of categories"
+              [class.chip--active]="activeCategory === cat"
+              [attr.aria-pressed]="activeCategory === cat"
+              (click)="activeCategory = cat"
+            >
+              <i class="bi" [ngClass]="getIcon(cat)" aria-hidden="true"></i> {{ cat }}
             </button>
           </div>
 
-          <div class="skills-grid" data-aos="fade-up" *ngIf="activeCategory">
-            <div class="skill-card" *ngFor="let skill of filteredSkills; let i = index" data-aos="fade-up" [attr.data-aos-delay]="i * 60">
+          <div class="grid-auto" *ngIf="activeCategory">
+            <div
+              class="card-alantek"
+              *ngFor="let skill of filteredSkills; let i = index"
+              appScrollReveal
+              [revealDelay]="i * 60"
+            >
               <div class="skill-header">
                 <span class="skill-name">{{ skill.name }}</span>
                 <span class="skill-level" [ngClass]="getLevelClass(skill.percentage)">{{ getLevelLabel(skill.percentage) }}</span>
@@ -51,43 +66,64 @@ import { Skill } from '../core/models';
             </div>
           </div>
         </div>
-      </div>
+      </section>
+
+      <app-contact-cta></app-contact-cta>
     </div>
   `,
   styles: [`
-    .page-wrapper { min-height: 100vh; padding-top: 80px; background: var(--bg-primary); }
-    .page-header { background: var(--bg-secondary); border-bottom: 1px solid var(--border); padding: 24px 0; }
-    .page-header h1 { font-size: 1.5rem; color: var(--white); margin: 8px 0 0; }
-    .back-link { color: var(--accent); font-size: 0.85rem; text-decoration: none; display: inline-flex; align-items: center; gap: 4px; transition: var(--transition); }
+    .back-link {
+      display: inline-flex;
+      align-items: center;
+      gap: var(--space-1);
+      margin-top: var(--space-4);
+      font-size: var(--fs-sm);
+      font-weight: var(--fw-semibold);
+      color: var(--accent);
+      text-decoration: none;
+      transition: opacity var(--duration-base) var(--ease-out);
+    }
     .back-link:hover { opacity: 0.8; }
-    .container { max-width: 1200px; margin: 0 auto; padding: 0 24px; }
-    .page-loading { display: flex; justify-content: center; padding: 120px 0; }
-    .page-error { text-align: center; padding: 120px 24px; color: var(--text-muted); }
-    .page-error i { font-size: 3rem; color: var(--accent); margin-bottom: 16px; }
-    .page-empty { text-align: center; padding: 120px 24px; color: var(--text-muted); }
-    .page-empty i { font-size: 4rem; color: var(--accent); opacity: 0.5; margin-bottom: 16px; }
-    .btn-retry { background: var(--accent); color: var(--bg-primary); border: none; padding: 10px 24px; border-radius: 8px; cursor: pointer; font-weight: 600; }
-    .btn-retry:hover { opacity: 0.9; }
-    .spinner { width: 40px; height: 40px; border: 3px solid var(--border); border-top-color: var(--accent); border-radius: 50%; animation: spin 0.8s linear infinite; margin: 0 auto; }
-    @keyframes spin { to { transform: rotate(360deg); } }
-    .page-content { padding: 60px 0; }
-    .skills-tabs { display: flex; flex-wrap: wrap; gap: 10px; justify-content: center; margin-bottom: 40px; }
-    .tab-btn { background: var(--bg-card); border: 1px solid var(--border); color: var(--text-secondary); padding: 10px 20px; border-radius: 10px; cursor: pointer; font-size: 0.85rem; transition: var(--transition); display: flex; align-items: center; gap: 6px; }
-    .tab-btn:hover { border-color: var(--accent); color: var(--accent); }
-    .tab-btn.active { background: rgba(var(--accent-rgb, 100, 255, 218), 0.1); border-color: var(--accent); color: var(--accent); }
-    .skills-grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(280px, 1fr)); gap: 20px; max-width: 900px; margin: 0 auto; }
-    .skill-card { background: var(--bg-card); border: 1px solid var(--border); border-radius: 14px; padding: 20px; transition: var(--transition); }
-    .skill-card:hover { border-color: var(--accent); transform: translateY(-2px); }
-    .skill-header { display: flex; justify-content: space-between; align-items: center; margin-bottom: 12px; }
-    .skill-name { font-weight: 600; color: var(--white); font-size: 0.9rem; }
-    .skill-level { font-size: 0.75rem; padding: 3px 10px; border-radius: 20px; font-weight: 500; }
+    button.chip {
+      cursor: pointer;
+      font-family: var(--font-sans);
+      font-size: var(--fs-sm);
+      padding: var(--space-2) var(--space-4);
+    }
+    .skill-header {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      gap: var(--space-3);
+      margin-bottom: var(--space-3);
+    }
+    .skill-name { font-weight: var(--fw-semibold); color: var(--text-primary); font-size: var(--fs-base); }
+    .skill-level {
+      font-size: var(--fs-xs);
+      padding: var(--space-1) var(--space-3);
+      border-radius: var(--radius-full);
+      font-weight: var(--fw-medium);
+      white-space: nowrap;
+    }
     .level-expert { background: rgba(34, 197, 94, 0.15); color: #22c55e; }
     .level-advanced { background: rgba(59, 130, 246, 0.15); color: #3b82f6; }
     .level-intermediate { background: rgba(245, 158, 11, 0.15); color: #f59e0b; }
     .level-beginner { background: rgba(239, 68, 68, 0.15); color: #ef4444; }
-    .skill-bar-track { width: 100%; height: 8px; background: var(--bg-secondary); border-radius: 4px; overflow: hidden; margin-bottom: 8px; }
-    .skill-bar-fill { height: 100%; border-radius: 4px; background: var(--bar-color, var(--accent)); transition: width 0.8s ease; }
-    .skill-percentage { font-size: 0.78rem; color: var(--text-muted); }
+    .skill-bar-track {
+      width: 100%;
+      height: 8px;
+      background: var(--bg-tertiary);
+      border-radius: var(--radius-full);
+      overflow: hidden;
+      margin-bottom: var(--space-2);
+    }
+    .skill-bar-fill {
+      height: 100%;
+      border-radius: var(--radius-full);
+      background: var(--bar-color, var(--accent));
+      transition: width 0.8s var(--ease-out);
+    }
+    .skill-percentage { font-size: var(--fs-xs); color: var(--text-muted); }
   `]
 })
 export class SkillsPageComponent implements OnInit {

@@ -82,7 +82,7 @@
 
   &:hover {
     transform: translateY(-2px);
-    box-shadow: 0 8px 25px rgba(100, 255, 218, 0.3);
+    box-shadow: 0 8px 25px rgba(var(--accent-rgb), 0.3);
   }
 }
 
@@ -98,7 +98,7 @@
   transition: var(--transition);
 
   &:hover {
-    background: rgba(100, 255, 218, 0.1);
+    background: rgba(var(--accent-rgb), 0.1);
   }
 }
 
@@ -134,7 +134,7 @@
 
   &:hover:not(:disabled) {
     transform: translateY(-2px);
-    box-shadow: 0 8px 25px rgba(100, 255, 218, 0.3);
+    box-shadow: 0 8px 25px rgba(var(--accent-rgb), 0.3);
   }
 
   &:disabled {
@@ -178,7 +178,7 @@
   border: 1px solid var(--accent);
   border-radius: var(--radius-lg);
   padding: 24px;
-  box-shadow: 0 0 30px rgba(100, 255, 218, 0.08);
+  box-shadow: 0 0 30px rgba(var(--accent-rgb), 0.08);
 
   h2 {
     font-size: 1.15rem;
@@ -225,7 +225,7 @@
   &:focus {
     outline: none;
     border-color: var(--accent);
-    box-shadow: 0 0 0 3px rgba(100, 255, 218, 0.1);
+    box-shadow: 0 0 0 3px rgba(var(--accent-rgb), 0.1);
   }
 
   &::placeholder {
@@ -312,7 +312,7 @@ select.form-control {
   }
 
   &.active {
-    background: rgba(100, 255, 218, 0.12);
+    background: rgba(var(--accent-rgb), 0.12);
     border-color: var(--accent);
     color: var(--accent);
     font-weight: 600;
@@ -561,9 +561,9 @@ select.form-control {
   border-radius: 20px;
   font-size: 0.7rem;
   font-weight: 600;
-  background: rgba(99, 102, 241, 0.12);
-  color: #818cf8;
-  border: 1px solid rgba(99, 102, 241, 0.25);
+  background: rgba(var(--accent-rgb), 0.12);
+  color: var(--accent);
+  border: 1px solid rgba(var(--accent-rgb), 0.28);
 }
 
 .project-body {
@@ -606,9 +606,9 @@ select.form-control {
   border-radius: 20px;
   font-size: 0.72rem;
   font-weight: 500;
-  background: rgba(100, 255, 218, 0.08);
+  background: rgba(var(--accent-rgb), 0.08);
   color: var(--chip-color, var(--accent));
-  border: 1px solid rgba(100, 255, 218, 0.15);
+  border: 1px solid rgba(var(--accent-rgb), 0.15);
 }
 
 .project-meta {
