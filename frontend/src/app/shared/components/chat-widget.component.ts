@@ -4,6 +4,7 @@ import {
 } from '@angular/core';
 import { NgIf, NgFor } from '@angular/common';
 import { FormsModule } from '@angular/forms';
+import { Router } from '@angular/router';
 import { ApiService } from '../../core/services/api.service';
 import { Company, Service, Project } from '../../core/models';
 
@@ -125,6 +126,7 @@ const DEFAULT_WHATSAPP = '593986056366';
 export class ChatWidgetComponent implements OnInit {
   private api = inject(ApiService);
   private cdr = inject(ChangeDetectorRef);
+  private router = inject(Router);
 
   @ViewChild('log') logRef?: ElementRef<HTMLElement>;
   @ViewChild('textInput') textInputRef?: ElementRef<HTMLInputElement>;
@@ -479,7 +481,9 @@ export class ChatWidgetComponent implements OnInit {
       return;
     }
     if (reply.action === 'open-blog' && reply.href) {
-      window.location.href = reply.href;
+      this.isOpen = false;
+      this.router.navigateByUrl(reply.href);
+      this.cdr.markForCheck();
       return;
     }
     if (reply.next) {

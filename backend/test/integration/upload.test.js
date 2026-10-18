@@ -71,6 +71,22 @@ describeIf('integración: uploads', () => {
     createdFiles.push(res.body.image);
   });
 
+  it('sube un archivo a la carpeta indicada y devuelve url relativa + fileName (201)', async () => {
+    const res = await request
+      .post('/api/uploads/')
+      .set('Authorization', `Bearer ${token}`)
+      .field('folder', 'team')
+      .attach('file', PNG_1X1, { filename: 'member.png', contentType: 'image/png' });
+    expect(res.status).toBe(201);
+    expect(res.body.url).toMatch(/^team\//);
+    expect(res.body.url).not.toMatch(/^\//);
+    expect(res.body.fileName).toBeTruthy();
+    expect(res.body.file).toBeDefined();
+    expect(res.body.file.url).toBe(`/${res.body.url}`);
+    expect(fs.existsSync(path.join(uploadBase, res.body.url))).toBe(true);
+    createdFiles.push(res.body.file);
+  });
+
   it('rechaza un tipo de archivo no permitido (400)', async () => {
     const res = await request
       .post('/api/uploads/')

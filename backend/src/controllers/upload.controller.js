@@ -18,7 +18,19 @@ const uploadController = {
       }
 
       const fieldname = req.file.fieldname;
-      const urlPath = `${fieldname}s/${req.file.filename}`;
+      const folder =
+        String(req.body.folder || `${fieldname}s`).replace(/[^A-Za-z0-9_-]/g, '') || `${fieldname}s`;
+
+      const destDir = path.join(uploadBase, folder);
+      if (!fs.existsSync(destDir)) {
+        fs.mkdirSync(destDir, { recursive: true });
+      }
+      const destPath = path.join(destDir, req.file.filename);
+      if (path.resolve(req.file.path) !== path.resolve(destPath)) {
+        fs.renameSync(req.file.path, destPath);
+      }
+
+      const urlPath = `${folder}/${req.file.filename}`;
 
       const file = await prisma.mediaFile.create({
         data: {
@@ -29,12 +41,12 @@ const uploadController = {
           path: urlPath,
           url: `/${urlPath}`,
           fieldname,
-          folder: `${fieldname}s`,
+          folder,
           uploadedBy: req.user?.id || null
         }
       });
 
-      res.status(201).json({ file });
+      res.status(201).json({ url: urlPath, fileName: req.file.filename, file });
     } catch (error) {
       next(error);
     }
