@@ -13,20 +13,20 @@ test.describe('Sitio público', () => {
     await page.waitForLoadState('networkidle');
     await expect(page.locator('.spinner').first()).toBeHidden({ timeout: 10_000 }).catch(() => {});
     const empty = page.getByText('No hay publicaciones aún', { exact: false });
-    const cards = page.locator('article.blog-card');
+    const cards = page.locator('a.card-blog');
     await expect(empty.or(cards.first())).toBeVisible({ timeout: 10_000 });
   });
 
   test('abre un post desde la lista del blog', async ({ page }) => {
     await page.goto('blog');
     await page.waitForLoadState('networkidle');
-    const card = page.locator('article.blog-card').first();
+    const card = page.locator('a.card-blog').first();
     const count = await card.count();
     if (count === 0) {
       test.skip(true, 'No hay publicaciones publicadas');
       return;
     }
-    await card.locator('.blog-title').click();
+    await card.click();
     await expect(page).toHaveURL(/\/blog\/.+/);
   });
 

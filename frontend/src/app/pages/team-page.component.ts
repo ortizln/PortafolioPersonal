@@ -6,12 +6,13 @@ import { SeoService } from '../core/services/seo.service';
 import { TeamMember } from '../core/models';
 import { environment } from '../../environments/environment';
 import { ContactCtaComponent } from '../shared/components/contact-cta.component';
+import { AvatarComponent } from '../shared/components/avatar.component';
 import { ScrollRevealDirective } from '../core/directives/scroll-reveal.directive';
 
 @Component({
   selector: 'app-team-page',
   standalone: true,
-  imports: [NgIf, NgFor, RouterLink, ContactCtaComponent, ScrollRevealDirective],
+  imports: [NgIf, NgFor, RouterLink, ContactCtaComponent, AvatarComponent, ScrollRevealDirective],
   template: `
     <div class="page-wrapper">
       <header class="page-hero page-hero--center">
@@ -35,7 +36,7 @@ import { ScrollRevealDirective } from '../core/directives/scroll-reveal.directiv
           <div class="grid-team">
             <a class="card-member" *ngFor="let m of members" [routerLink]="['/equipo', m.slug]" appScrollReveal>
               <div class="member-photo">
-                <img [src]="getPhoto(m) || 'assets/avatar-placeholder.svg'" [alt]="m.fullName" loading="lazy" />
+                <app-avatar [src]="getPhoto(m)" [name]="m.fullName" [size]="128"></app-avatar>
               </div>
               <h2>{{ m.fullName }}</h2>
               <span class="member-role">{{ m.professionalTitle }}</span>

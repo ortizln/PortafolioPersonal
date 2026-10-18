@@ -1,4 +1,4 @@
-import { Component, HostListener, OnInit, OnDestroy, inject } from '@angular/core';
+import { Component, HostListener, OnInit, OnDestroy, AfterViewInit, ChangeDetectorRef, inject } from '@angular/core';
 import { RouterOutlet, RouterLink, RouterLinkActive, Router } from '@angular/router';
 import { NgFor, NgIf, DatePipe } from '@angular/common';
 import { AuthService } from '../../core/services/auth.service';
@@ -145,13 +145,14 @@ interface NavGroup {
   `,
   styleUrls: ['./admin-layout.component.scss'],
 })
-export class AdminLayoutComponent implements OnInit, OnDestroy {
+export class AdminLayoutComponent implements OnInit, OnDestroy, AfterViewInit {
   private authService = inject(AuthService);
   private apiService = inject(ApiService);
   private router = inject(Router);
+  private cdr = inject(ChangeDetectorRef);
 
   getRouteAnimationData(outlet: RouterOutlet) {
-    return outlet?.activatedRouteData?.['animation'];
+    return outlet?.activatedRouteData?.['animation'] ?? '';
   }
 
   isSidebarCollapsed = false;
@@ -213,6 +214,8 @@ export class AdminLayoutComponent implements OnInit, OnDestroy {
       items: [
         { label: 'Contactos / Leads', route: '/admin/leads', icon: 'bi-envelope-open', permission: 'messages.read' },
         { label: 'Mensajes', route: '/admin/messages', icon: 'bi-envelope', permission: 'messages.read' },
+        { label: 'Chats', route: '/admin/chats', icon: 'bi-chat-dots', permission: 'messages.read' },
+        { label: 'Cotizaciones', route: '/admin/quotes', icon: 'bi-receipt', permission: 'messages.read' },
       ],
     },
     {
@@ -273,6 +276,10 @@ export class AdminLayoutComponent implements OnInit, OnDestroy {
   ngOnDestroy(): void {
     if (this.notifTimer) clearInterval(this.notifTimer);
     if (this.userSub) this.userSub.unsubscribe();
+  }
+
+  ngAfterViewInit(): void {
+    this.cdr.detectChanges();
   }
 
   loadNotifications(): void {

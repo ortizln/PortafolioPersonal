@@ -3,7 +3,7 @@ const crypto = require('crypto');
 const prisma = require('../config/database');
 const { generateAccessToken, generateRefreshToken, verifyRefreshToken } = require('../auth/jwt');
 const { AppError } = require('../middlewares/errorHandler');
-const { sendMail } = require('../helpers/mailer');
+const { sendTemplate } = require('../helpers/mailer');
 
 const PUBLIC_BASE = process.env.PUBLIC_BASE_URL || 'http://localhost:4200';
 const MAX_LOGIN_ATTEMPTS = 5;
@@ -216,10 +216,15 @@ const authController = {
         });
 
         const resetUrl = `${PUBLIC_BASE}/auth/reset-password?token=${token}`;
-        await sendMail({
+        await sendTemplate({
           to: user.email,
           subject: 'Restablecer contraseña — ALANTEK',
-          html: `<p>Hola ${user.name},</p><p>Recibimos una solicitud para restablecer tu contraseña.</p><p>Haz clic en el siguiente enlace (válido por ${RESET_TOKEN_TTL_HOURS} horas):</p><p><a href="${resetUrl}">${resetUrl}</a></p><p>Si no solicitaste este cambio, ignora este correo.</p>`
+          heading: 'Restablece tu contraseña',
+          intro: `Hola ${user.name}, recibimos una solicitud para restablecer tu contraseña.`,
+          rows: [{ label: 'Validez del enlace', value: `${RESET_TOKEN_TTL_HOURS} horas` }],
+          ctaLabel: 'Restablecer contraseña',
+          ctaUrl: resetUrl,
+          outro: 'Si no solicitaste este cambio, ignora este correo. Tu contraseña actual seguirá funcionando.'
         });
       }
 

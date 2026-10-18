@@ -85,6 +85,7 @@ import { ScrollRevealDirective } from '../core/directives/scroll-reveal.directiv
                   class="project-image"
                   [src]="getPrimaryImage(project) || 'assets/project-placeholder.svg'"
                   [alt]="'Captura del proyecto ' + project.title"
+                  (error)="onImgError($event)"
                   loading="lazy" decoding="async"
                 />
                 <span class="project-featured-badge" *ngIf="project.isFeatured">
@@ -635,6 +636,12 @@ export class ProjectsPageComponent implements OnInit {
     if (!url) return null;
     if (url.startsWith('http://') || url.startsWith('https://') || url.startsWith('data:')) return url;
     return `${environment.uploadUrl}/${url}`;
+  }
+
+  onImgError(event: Event): void {
+    const el = event.target as HTMLImageElement;
+    const fallback = 'assets/project-placeholder.svg';
+    if (el && !el.src.endsWith(fallback)) el.src = fallback;
   }
 
   getImageUrl(image: any): string {

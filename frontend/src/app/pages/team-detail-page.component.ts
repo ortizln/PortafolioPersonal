@@ -6,12 +6,13 @@ import { SeoService } from '../core/services/seo.service';
 import { TeamMember } from '../core/models';
 import { environment } from '../../environments/environment';
 import { ContactCtaComponent } from '../shared/components/contact-cta.component';
+import { AvatarComponent } from '../shared/components/avatar.component';
 import { ScrollRevealDirective } from '../core/directives/scroll-reveal.directive';
 
 @Component({
   selector: 'app-team-detail-page',
   standalone: true,
-  imports: [NgIf, NgFor, DatePipe, RouterLink, ContactCtaComponent, ScrollRevealDirective],
+  imports: [NgIf, NgFor, DatePipe, RouterLink, ContactCtaComponent, AvatarComponent, ScrollRevealDirective],
   template: `
     <div class="page-wrapper">
       <div *ngIf="loading" class="page-loading"><div class="spinner"></div></div>
@@ -26,7 +27,7 @@ import { ScrollRevealDirective } from '../core/directives/scroll-reveal.directiv
         <header class="page-hero page-hero--split">
           <div class="container-alantek page-hero-inner">
             <div class="detail-banner">
-              <img [src]="getPhoto() || 'assets/avatar-placeholder.svg'" [alt]="member.fullName" loading="lazy" decoding="async" />
+              <app-avatar [src]="getPhoto()" [name]="member.fullName" [size]="220"></app-avatar>
             </div>
             <div>
               <a routerLink="/equipo" class="back-link">&larr; Volver al equipo</a>

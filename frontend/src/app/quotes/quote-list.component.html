@@ -1,0 +1,141 @@
+<div class="quotes-header">
+  <h2>Cotizaciones</h2>
+</div>
+
+<div class="status-bar">
+  <button class="status-chip" [class.active]="statusFilter === 'ALL'" (click)="filterStatus('ALL')">
+    Todas <span class="count">{{ total }}</span>
+  </button>
+  <button
+    class="status-chip"
+    *ngFor="let s of statuses"
+    [class.active]="statusFilter === s"
+    (click)="filterStatus(s)"
+  >
+    {{ statusLabels[s] || s }} <span class="count">{{ statusCounts[s] || 0 }}</span>
+  </button>
+</div>
+
+<div class="toolbar">
+  <div class="search-box">
+    <i class="bi bi-search"></i>
+    <input type="text" [(ngModel)]="search" (keyup.enter)="applyFilters()" placeholder="Buscar por código, nombre, correo..." />
+    <button *ngIf="search" (click)="search = ''; applyFilters()" aria-label="Limpiar"><i class="bi bi-x-lg"></i></button>
+  </div>
+</div>
+
+<div class="toast-stack">
+  <div class="toast" *ngFor="let t of toasts" [class.error]="t.type === 'error'">
+    <i class="bi" [ngClass]="t.type === 'success' ? 'bi-check-circle' : 'bi-exclamation-circle'"></i>
+    {{ t.message }}
+  </div>
+</div>
+
+<div class="quotes-table-wrap" *ngIf="!loading">
+  <table class="quotes-table">
+    <thead>
+      <tr>
+        <th>Código</th>
+        <th>Contacto</th>
+        <th>Tipo / Descripción</th>
+        <th>Presupuesto</th>
+        <th>Estado</th>
+        <th>Fecha</th>
+        <th></th>
+      </tr>
+    </thead>
+    <tbody>
+      <tr *ngFor="let q of quotes">
+        <td><span class="code-badge">{{ q.code }}</span></td>
+        <td>
+          <button class="quote-contact" (click)="openDetail(q)">
+            {{ q.contactName || 'Sin nombre' }}
+            <span class="quote-email">{{ q.contactEmail || '—' }}</span>
+          </button>
+        </td>
+        <td class="quote-desc">{{ q.projectDescription || '—' }}</td>
+        <td class="quote-budget">{{ q.budgetRange || '—' }}</td>
+        <td>
+          <select class="status-select" [value]="q.status" (change)="changeStatus(q, $any($event.target).value)" *appHasPermission="'messages.update'">
+            <option *ngFor="let s of statuses" [value]="s">{{ statusLabels[s] || s }}</option>
+          </select>
+        </td>
+        <td class="quote-date">{{ q.createdAt | date: 'dd/MM/yyyy HH:mm' }}</td>
+        <td>
+          <button class="delete-btn" (click)="deleteQuote(q)" *appHasPermission="'messages.update'" aria-label="Eliminar"><i class="bi bi-trash"></i></button>
+        </td>
+      </tr>
+      <tr *ngIf="quotes.length === 0">
+        <td colspan="7" class="empty-row">No hay cotizaciones{{ search ? ' que coincidan' : '' }}.</td>
+      </tr>
+    </tbody>
+  </table>
+</div>
+
+<div class="empty-row" *ngIf="loading">Cargando...</div>
+
+<div class="pagination" *ngIf="totalPages() > 1">
+  <button [disabled]="page === 1" (click)="goPage(page - 1)" aria-label="Anterior"><i class="bi bi-chevron-left"></i></button>
+  <span>Página {{ page }} de {{ totalPages() }} · {{ total }} cotizaciones</span>
+  <button [disabled]="page === totalPages()" (click)="goPage(page + 1)" aria-label="Siguiente"><i class="bi bi-chevron-right"></i></button>
+</div>
+
+<!-- Detail modal -->
+<div class="modal-overlay" *ngIf="selected" (click)="closeDetail()">
+  <div class="modal-content" (click)="$event.stopPropagation()">
+    <button class="modal-close" (click)="closeDetail()" aria-label="Cerrar"><i class="bi bi-x-lg"></i></button>
+    <div class="detail-head">
+      <span class="code-badge">{{ selected.code }}</span>
+      <h3>{{ selected.contactName || 'Sin nombre' }}</h3>
+      <p class="detail-email"><a [href]="'mailto:' + selected.contactEmail">{{ selected.contactEmail }}</a></p>
+      <p class="detail-phone" *ngIf="selected.contactPhone"><i class="bi bi-telephone"></i> {{ selected.contactPhone }}</p>
+    </div>
+
+    <div class="detail-meta">
+      <span class="badge">{{ statusLabels[selected.status] || selected.status }}</span>
+      <span class="badge-secondary">{{ selected.createdAt | date: 'dd/MM/yyyy HH:mm' }}</span>
+      <span class="badge-secondary" *ngIf="selected.budgetRange">Presupuesto: {{ selected.budgetRange }}</span>
+      <span class="badge-secondary" *ngIf="selected.deadline">Plazo: {{ selected.deadline }}</span>
+    </div>
+
+    <div class="detail-block">
+      <label>Descripción</label>
+      <p class="detail-message">{{ selected.projectDescription || '—' }}</p>
+    </div>
+
+    <div class="detail-block" *ngIf="features(selected).length">
+      <label>Funcionalidades</label>
+      <div class="feature-chips">
+        <span class="feature-chip" *ngFor="let f of features(selected)">{{ f }}</span>
+      </div>
+    </div>
+
+    <div class="detail-section">
+      <label>Estado</label>
+      <select class="form-control" [value]="selected.status" (change)="changeStatus(selected, $any($event.target).value)" *appHasPermission="'messages.update'">
+        <option *ngFor="let s of statuses" [value]="s">{{ statusLabels[s] || s }}</option>
+      </select>
+    </div>
+
+    <div class="detail-grid">
+      <div class="detail-section">
+        <label>Nombre</label>
+        <input class="form-control" [(ngModel)]="selected.contactName" />
+      </div>
+      <div class="detail-section">
+        <label>Correo</label>
+        <input class="form-control" [(ngModel)]="selected.contactEmail" />
+      </div>
+      <div class="detail-section">
+        <label>Teléfono</label>
+        <input class="form-control" [(ngModel)]="selected.contactPhone" />
+      </div>
+      <div class="detail-section">
+        <label>Presupuesto</label>
+        <input class="form-control" [(ngModel)]="selected.budgetRange" />
+      </div>
+    </div>
+
+    <button class="btn-primary" (click)="saveFields(selected)" *appHasPermission="'messages.update'">Guardar cambios</button>
+  </div>
+</div>

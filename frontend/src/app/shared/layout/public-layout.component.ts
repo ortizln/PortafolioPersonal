@@ -1,4 +1,4 @@
-import { Component, HostListener, inject, OnInit, OnDestroy } from '@angular/core';
+import { Component, HostListener, inject, OnInit, OnDestroy, AfterViewInit, ChangeDetectorRef } from '@angular/core';
 import { RouterOutlet, RouterLink, RouterLinkActive, Router, NavigationEnd } from '@angular/router';
 import { NgIf, NgFor } from '@angular/common';
 import { ApiService } from '../../core/services/api.service';
@@ -7,13 +7,14 @@ import { Company, Service } from '../../core/models';
 import { applyCompanyBrand } from '../../core/utils/brand.util';
 import { environment } from '../../../environments/environment';
 import { NeonBackgroundComponent } from '../neon-bg.component';
+import { ChatWidgetComponent } from '../components/chat-widget.component';
 import { routeAnimations } from '../../core/animations/route.animations';
 import { filter, Subscription } from 'rxjs';
 
 @Component({
   selector: 'app-public-layout',
   standalone: true,
-  imports: [RouterOutlet, NgIf, NgFor, RouterLink, RouterLinkActive, NeonBackgroundComponent],
+  imports: [RouterOutlet, NgIf, NgFor, RouterLink, RouterLinkActive, NeonBackgroundComponent, ChatWidgetComponent],
   animations: [routeAnimations],
   template: `
     <app-neon-bg></app-neon-bg>
@@ -113,17 +114,20 @@ import { filter, Subscription } from 'rxjs';
     <button class="back-to-top" [class.visible]="showBackToTop" (click)="scrollToTop()" aria-label="Volver arriba">
       <i class="bi bi-arrow-up" aria-hidden="true"></i>
     </button>
+
+    <app-chat-widget></app-chat-widget>
   `,
   styleUrls: ['./public-layout.component.scss'],
 })
-export class PublicLayoutComponent implements OnInit, OnDestroy {
+export class PublicLayoutComponent implements OnInit, OnDestroy, AfterViewInit {
   private api = inject(ApiService);
   private seoService = inject(SeoService);
   private router = inject(Router);
+  private cdr = inject(ChangeDetectorRef);
   private routerSub!: Subscription;
 
   getRouteAnimationData(outlet: RouterOutlet) {
-    return outlet?.activatedRouteData?.['animation'];
+    return outlet?.activatedRouteData?.['animation'] ?? '';
   }
 
   isScrolled = false;
@@ -171,6 +175,10 @@ export class PublicLayoutComponent implements OnInit, OnDestroy {
 
   ngOnDestroy(): void {
     this.routerSub?.unsubscribe();
+  }
+
+  ngAfterViewInit(): void {
+    this.cdr.detectChanges();
   }
 
   private loadCompany(): void {

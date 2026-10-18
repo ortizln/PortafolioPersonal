@@ -136,3 +136,55 @@
 
 ### README.md
 - Reescribido completamente con análisis y resumen total del sistema
+
+---
+
+## Ampliación funcional — Noticias, Chatbot y Cotizaciones (Fases A–E)
+
+### Fase A — Noticias en Home
+- `public-portfolio/portfolio.component.ts|html|scss`: sección "Nuevas noticias" con 1 post destacado + 2 secundarios, badge "Nuevo" y chip de categoría, con fallback de imagen (`onPostImageError`).
+- Consumo de `GET /api/public/blog?limit=3`.
+
+### Fase B — Chatbot flotante
+- `shared/components/chat-widget.component.ts|scss`: burbuja + panel, máquina de estados determinista (`start` / `services` / `projects` / `faq` / `handoff` + flujo de cotización `q_type → q_desc → q_features → q_budget → q_name → q_email → q_summary → q_submit → q_done` / `q_error`), indicador de "escribiendo", respuestas rápidas y cierre con **Esc**.
+- Montado en `public-layout`; botón `.back-to-top` movido a la izquierda.
+
+### Fase C — Persistencia, API y CRM
+- **Prisma**: modelos `ChatSession`, `ChatMessage`, `QuoteRequest`, `ChatHandoff` + enums; migración `20261016220822_add_chat_quote_tables`.
+- **Backend**: `services/whatsapp.service.js` (puente OpenWA con fallback a enlaces `wa.me`), `middlewares/chatAuth.js` (token anónimo vía cabecera `x-chat-token`, hash sha256), `helpers/notify.js`.
+- **Controladores**: `chat.controller.js`, `quote.controller.js`, `whatsapp.controller.js` y rutas públicas/admin (`/api/public/chat`, `/api/public/quotes`, `/api/admin/chat`, `/api/admin/quotes`, `/api/integrations/whatsapp`).
+- **Rate limiting**: `chatLimiter` (60/15min) y `quoteLimiter` (10/hora).
+- **Widget**: sesión persistida en `sessionStorage` (`alantek-chat-session`), historial restaurado al reabrir, envío de cotización con código `COT-YYYYMMDD-XXXX` y escalado a WhatsApp (`requestChatHandoff`).
+- **Frontend core**: métodos de chat/cotización en `core/services/api.service.ts` y modelos en `core/models/index.ts`.
+
+### Fase C4 — Vistas de administración
+- `chat/chat-admin.component.*`: master-detail de conversaciones, polling cada 20s, respuesta como agente, cambio de estado, asignación y aceptar/cerrar handoff.
+- `quotes/quote-list.component.*`: listado con filtros por estado, búsqueda, paginación y modal de detalle/edición/eliminación.
+- Rutas `/admin/chats` y `/admin/quotes` (permiso `messages.read`) + entradas de sidebar "Chats" y "Cotizaciones".
+
+### Fase D — Escalado a WhatsApp
+- `POST /api/integrations/whatsapp/webhook` (OpenWA) con verificación opcional por `x-openwa-secret`; crea/retoma sesión con hash sintético `wa:<número>` e ingestión de mensajes entrantes.
+- Verificación E2E (Playwright): flujo completo de cotización, persistencia (18 mensajes), creación de cotización, apertura de WhatsApp con el número `593986056366` y handoff en estado `REQUESTED`.
+
+### Fase E — SEO / accesibilidad / build
+- SEO cubierto por `SeoService` en páginas públicas y layout; ARIA y cierre con **Esc** en el widget.
+- `ng build` productivo **OK** (sin errores); verificación E2E **11/11** y handoff **7/7** con 0 errores de consola.
+
+### Notificaciones por email (plan #21)
+- `helpers/mailer.js`: plantillas HTML corporativas ALANTEK (`renderEmail` / `sendTemplate`, paleta verde/cobre), con degradación a consola cuando no hay `SMTP_HOST` configurado.
+- `helpers/notify.js`: `notifyAdmins` ahora crea la notificación in-app **y** envía un correo a los administradores (destinatarios = `ADMIN_NOTIFY_EMAIL` o los emails de los usuarios activos).
+- Correos transaccionales conectados:
+  - **Contacto** (`contact.controller.js`): confirmación al remitente + aviso a administradores.
+  - **Cotización** (`quote.controller.js`): confirmación con referencia `COT-…` y resumen + aviso a administradores.
+  - **Asesor en chat** (`chat.controller.js`): confirmación al visitante (si dejó correo) + aviso a administradores.
+  - **Recuperación de contraseña** (`auth.controller.js`): plantilla de marca con botón de acción.
+- `contact.controller.js`: eliminada la función `notifyAdmins` local duplicada (ahora usa el helper compartido).
+- Variables nuevas en `.env` / `.env.example`: `SMTP_SECURE`, `SMTP_FROM`, `PUBLIC_BASE_URL`, `ADMIN_NOTIFY_EMAIL`, `NOTIFY_EMAIL_ENABLED`.
+- Tests: `test/unit/memberScope.test.js` alineado con RBAC (`roles[]`); suite backend **30/30** en verde.
+
+### Pruebas E2E permanentes (Fase 7)
+- Nueva suite `e2e/tests/chat-quote.spec.ts`: flujo de cotización del chatbot (genera referencia `COT-…`), persistencia de la sesión tras recargar, handoff a WhatsApp (registra el POST `/public/chat/sessions/:id/handoff` y abre el popup) y las vistas admin `/admin/quotes` y `/admin/chats`.
+- `e2e/playwright.config.ts`: `serve-dist.js` ahora usa el puerto **4210** (evita el 4200 del otro proyecto) y `baseURL` con barra final.
+- `e2e/serve-dist.js`: reescribe la cabecera `Origin` a un origen permitido por CORS (`PROXY_ORIGIN`, por defecto `http://localhost:4300`), de modo que el proxy de pruebas supera el CORS del backend sin modificarlo.
+- `e2e/tests/public.spec.ts`: selectores del blog corregidos (`a.card-blog` y click sobre la tarjeta); estaban desactualizados.
+- Suite completa E2E: **14/14** (`npm test` en `e2e/`).

@@ -81,6 +81,58 @@ const idParam = [
   validate
 ];
 
+const chatSessionValidation = [
+  body('channel').optional().isIn(['WEB', 'WHATSAPP']).withMessage('Invalid channel'),
+  body('consent').optional().isBoolean().withMessage('Consent must be boolean'),
+  validate
+];
+
+const chatMessageValidation = [
+  body('body').trim().notEmpty().isLength({ max: 4000 }).withMessage('Message required (max 4000 chars)'),
+  body('senderType').optional().isIn(['VISITOR', 'BOT', 'AGENT', 'SYSTEM']).withMessage('Invalid sender type'),
+  body('clientMessageId').optional().isLength({ max: 100 }),
+  validate
+];
+
+const handoffValidation = [
+  body('reason').optional().trim().isLength({ max: 2000 }),
+  body('contactName').optional().trim().escape().isLength({ max: 150 }),
+  body('contactEmail').optional().isEmail().withMessage('Valid email required'),
+  body('contactPhone').optional().trim().isLength({ max: 40 }),
+  validate
+];
+
+const quoteValidation = [
+  body('type').trim().notEmpty().isLength({ max: 120 }).withMessage('Quote type required'),
+  body('serviceId').optional({ values: 'falsy' }).isUUID().withMessage('Invalid service id'),
+  body('description').trim().notEmpty().isLength({ max: 4000 }).withMessage('Description required (max 4000 chars)'),
+  body('features').optional().isArray({ max: 50 }).withMessage('Features must be an array'),
+  body('budget').optional().trim().isLength({ max: 120 }),
+  body('deadline').optional().trim().isLength({ max: 120 }),
+  body('name').trim().escape().notEmpty().isLength({ max: 150 }).withMessage('Name required'),
+  body('email').isEmail().withMessage('Valid email required'),
+  body('phone').optional().trim().isLength({ max: 40 }),
+  body('sessionId').optional({ values: 'falsy' }).isUUID().withMessage('Invalid session id'),
+  validate
+];
+
+const quoteUpdateValidation = [
+  body('status').optional().isIn(['NEW', 'CONTACTED', 'QUALIFIED', 'PROPOSAL', 'WON', 'LOST', 'SPAM']).withMessage('Invalid quote status'),
+  body('budgetRange').optional().trim().isLength({ max: 120 }),
+  body('deadline').optional().trim().isLength({ max: 120 }),
+  body('contactName').optional().trim().escape().isLength({ max: 150 }),
+  body('contactEmail').optional().isEmail().withMessage('Valid email required'),
+  body('contactPhone').optional().trim().isLength({ max: 40 }),
+  body('projectDescription').optional().trim().isLength({ max: 4000 }),
+  validate
+];
+
+const handoffUpdateValidation = [
+  body('status').optional().isIn(['REQUESTED', 'ACCEPTED', 'CLOSED', 'CANCELLED']).withMessage('Invalid handoff status'),
+  body('assignedToId').optional({ values: 'falsy' }).isUUID().withMessage('Invalid assignee id'),
+  validate
+];
+
 module.exports = {
   validate,
   loginValidation,
@@ -93,5 +145,11 @@ module.exports = {
   skillValidation,
   languageValidation,
   contactValidation,
-  idParam
+  idParam,
+  chatSessionValidation,
+  chatMessageValidation,
+  handoffValidation,
+  quoteValidation,
+  quoteUpdateValidation,
+  handoffUpdateValidation
 };

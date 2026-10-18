@@ -68,6 +68,8 @@ export const routes: Routes = [
       { path: 'repositories', loadComponent: () => import('./repositories/repository-list.component').then((m) => m.RepositoryListComponent), canActivate: [permissionGuard('projects.read')], data: { animation: 'page' } },
       { path: 'categories', loadComponent: () => import('./categories/category-list.component').then((m) => m.CategoryListComponent), canActivate: [permissionGuard('categories.manage')], data: { animation: 'page' } },
       { path: 'messages', loadComponent: () => import('./dashboard/contact-messages.component').then((m) => m.ContactMessagesComponent), canActivate: [permissionGuard('messages.read')], data: { animation: 'page' } },
+      { path: 'chats', loadComponent: () => import('./chat/chat-admin.component').then((m) => m.ChatAdminComponent), canActivate: [permissionGuard('messages.read')], data: { animation: 'page' } },
+      { path: 'quotes', loadComponent: () => import('./quotes/quote-list.component').then((m) => m.QuoteListComponent), canActivate: [permissionGuard('messages.read')], data: { animation: 'page' } },
       { path: 'settings', loadComponent: () => import('./settings/settings.component').then((m) => m.SettingsComponent), canActivate: [permissionGuard('settings.manage')], data: { animation: 'page' } },
       { path: 'company', loadComponent: () => import('./company/company-edit.component').then((m) => m.CompanyEditComponent), canActivate: [permissionGuard('company.update')], data: { animation: 'page' } },
       { path: 'services', loadComponent: () => import('./services/service-list.component').then((m) => m.ServiceListComponent), canActivate: [permissionGuard('services.manage')], data: { animation: 'page' } },

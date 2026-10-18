@@ -2,11 +2,12 @@ import { Component, ChangeDetectionStrategy, Input } from '@angular/core';
 import { NgFor, NgIf } from '@angular/common';
 import { Testimonial } from '../../core/models';
 import { environment } from '../../../environments/environment';
+import { AvatarComponent } from './avatar.component';
 
 @Component({
   selector: 'app-testimonial-carousel',
   standalone: true,
-  imports: [NgFor, NgIf],
+  imports: [NgFor, NgIf, AvatarComponent],
   changeDetection: ChangeDetectionStrategy.OnPush,
   template: `
     <div class="carousel" role="region" aria-roledescription="carrusel" aria-label="Testimonios">
@@ -21,16 +22,7 @@ import { environment } from '../../../environments/environment';
           </div>
           <blockquote class="testimonial-text">{{ t.content }}</blockquote>
           <figcaption class="testimonial-author">
-            <img
-              *ngIf="resolvePhoto(t.photoUrl)"
-              class="author-avatar"
-              [src]="resolvePhoto(t.photoUrl)!"
-              [alt]="t.authorName"
-              loading="lazy"
-            />
-            <span class="author-avatar" *ngIf="!resolvePhoto(t.photoUrl)" aria-hidden="true">
-              {{ t.authorName.charAt(0) }}
-            </span>
+            <app-avatar class="author-avatar" [src]="resolvePhoto(t.photoUrl)" [name]="t.authorName" [size]="48"></app-avatar>
             <span class="author-info">
               <strong>{{ t.authorName }}</strong>
               <span>{{ t.authorPosition || t.company || (t.client?.name || '') }}</span>

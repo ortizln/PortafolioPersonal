@@ -8,7 +8,7 @@ export default defineConfig({
   retries: process.env.CI ? 2 : 1,
   reporter: process.env.CI ? [['list'], ['html', { open: 'never' }]] : [['list']],
   use: {
-    baseURL: process.env.E2E_BASE_URL || 'http://localhost:4200/portfolio',
+    baseURL: process.env.E2E_BASE_URL || 'http://localhost:4210/portfolio/',
     trace: 'off',
     screenshot: 'off',
     video: 'off'
@@ -23,9 +23,9 @@ export default defineConfig({
       timeout: 120_000
     },
     {
-      command: 'node serve-dist.js',
+      command: process.platform === 'win32' ? 'set PORT=4210&& node serve-dist.js' : 'PORT=4210 node serve-dist.js',
       cwd: '.',
-      url: 'http://localhost:4200/portfolio',
+      url: 'http://localhost:4210/portfolio',
       reuseExistingServer: true,
       timeout: 120_000
     }

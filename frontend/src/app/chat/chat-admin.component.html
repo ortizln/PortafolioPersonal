@@ -1,0 +1,134 @@
+<div class="chat-admin">
+  <div class="chat-admin-header">
+    <div>
+      <h2>Conversaciones</h2>
+      <p class="subtitle">
+        {{ total }} conversaciones · {{ openCount }} abiertas
+        <span class="wa-status" *ngIf="whatsapp">
+          <i class="bi" [ngClass]="whatsapp.connected ? 'bi-whatsapp' : 'bi-whatsapp-off'"></i>
+          {{ whatsapp.connected ? 'WhatsApp conectado' : (whatsapp.configured ? 'WhatsApp desconectado' : 'WhatsApp no configurado') }}
+        </span>
+      </p>
+    </div>
+    <button class="btn-refresh" (click)="loadSessions()" aria-label="Actualizar">
+      <i class="bi bi-arrow-clockwise"></i> Actualizar
+    </button>
+  </div>
+
+  <div class="status-bar">
+    <button class="status-chip" [class.active]="statusFilter === 'ALL'" (click)="filterStatus('ALL')">
+      Todas <span class="count">{{ total }}</span>
+    </button>
+    <button class="status-chip" [class.active]="statusFilter === 'OPEN'" (click)="filterStatus('OPEN')">
+      Abiertas <span class="count">{{ openCount }}</span>
+    </button>
+    <button class="status-chip" [class.active]="statusFilter === 'CLOSED'" (click)="filterStatus('CLOSED')">
+      Cerradas
+    </button>
+  </div>
+
+  <div class="toolbar">
+    <div class="search-box">
+      <i class="bi bi-search"></i>
+      <input type="text" [(ngModel)]="search" (keyup.enter)="applyFilters()" placeholder="Buscar por mensaje o asesor..." />
+      <button *ngIf="search" (click)="search = ''; applyFilters()" aria-label="Limpiar"><i class="bi bi-x-lg"></i></button>
+    </div>
+  </div>
+
+  <div class="toast-stack">
+    <div class="toast" *ngFor="let t of toasts" [class.error]="t.type === 'error'">
+      <i class="bi" [ngClass]="t.type === 'success' ? 'bi-check-circle' : 'bi-exclamation-circle'"></i>
+      {{ t.message }}
+    </div>
+  </div>
+
+  <div class="chat-layout">
+    <!-- Master list -->
+    <aside class="session-list" [class.loading]="loading">
+      <div class="session-item" *ngFor="let s of sessions" [class.active]="selected?.id === s.id" (click)="selectSession(s)">
+        <div class="session-top">
+          <span class="channel-badge" [ngClass]="'channel--' + s.channel">
+            <i class="bi" [ngClass]="s.channel === 'WHATSAPP' ? 'bi-whatsapp' : 'bi-globe2'"></i>
+            {{ channelLabels[s.channel] }}
+          </span>
+          <span class="session-status" [class.closed]="s.status === 'CLOSED'">{{ s.status === 'OPEN' ? 'Abierta' : 'Cerrada' }}</span>
+        </div>
+        <p class="session-preview">{{ s.lastMessage?.body || 'Sin mensajes' }}</p>
+        <div class="session-meta">
+          <span>{{ s.lastMessageAt | date: 'dd/MM HH:mm' }}</span>
+          <span class="session-counts">
+            <i class="bi bi-chat"></i> {{ s.counts?.messages || 0 }}
+            <i class="bi bi-person-up" *ngIf="s.counts?.handoffs"></i> {{ s.counts?.handoffs || 0 }}
+            <i class="bi bi-receipt" *ngIf="s.counts?.quoteRequests"></i> {{ s.counts?.quoteRequests || 0 }}
+          </span>
+        </div>
+      </div>
+      <div class="empty-row" *ngIf="!loading && sessions.length === 0">No hay conversaciones.</div>
+      <div class="empty-row" *ngIf="loading">Cargando...</div>
+    </aside>
+
+    <!-- Detail -->
+    <section class="session-detail">
+      <div class="detail-empty" *ngIf="!selected && !loadingDetail">
+        <i class="bi bi-chat-dots"></i>
+        <p>Selecciona una conversación para ver el historial.</p>
+      </div>
+      <div class="detail-empty" *ngIf="loadingDetail">Cargando...</div>
+
+      <ng-container *ngIf="selected">
+        <header class="detail-head">
+          <div class="detail-head-info">
+            <span class="channel-badge" [ngClass]="'channel--' + selected.channel">
+              <i class="bi" [ngClass]="selected.channel === 'WHATSAPP' ? 'bi-whatsapp' : 'bi-globe2'"></i>
+              {{ channelLabels[selected.channel] }}
+            </span>
+            <span class="detail-assignee">
+              <i class="bi bi-person-circle"></i>
+              {{ selected.assignedTo?.name || 'Sin asignar' }}
+            </span>
+          </div>
+          <div class="detail-actions">
+            <button class="btn-ghost" (click)="assignToMe()" *appHasPermission="'messages.update'">
+              <i class="bi bi-person-plus"></i> Asignarme
+            </button>
+            <ng-container *appHasPermission="'messages.update'">
+              <button class="btn-ghost" *ngIf="selected.status === 'OPEN'" (click)="setStatus('CLOSED')">
+                <i class="bi bi-x-circle"></i> Cerrar
+              </button>
+              <button class="btn-ghost" *ngIf="selected.status === 'CLOSED'" (click)="setStatus('OPEN')">
+                <i class="bi bi-arrow-counterclockwise"></i> Reabrir
+              </button>
+            </ng-container>
+          </div>
+        </header>
+
+        <div class="handoff-banner" *ngIf="activeHandoff() as h">
+          <i class="bi bi-person-up"></i>
+          <span>Solicitud de asesor {{ h.status === 'REQUESTED' ? 'pendiente' : 'aceptada' }}</span>
+          <div class="handoff-actions" *appHasPermission="'messages.update'">
+            <button *ngIf="h.status === 'REQUESTED'" class="btn-mini" (click)="acceptHandoff(h)">Aceptar</button>
+            <button class="btn-mini" (click)="closeHandoff(h)">Cerrar</button>
+          </div>
+        </div>
+
+        <div class="thread">
+          <div class="msg" *ngFor="let m of messages()" [ngClass]="senderClass(m)">
+            <div class="msg-body">{{ m.body }}</div>
+            <div class="msg-meta">
+              <span>{{ senderLabels[m.senderType] }}</span>
+              <span>{{ m.createdAt | date: 'dd/MM HH:mm' }}</span>
+            </div>
+          </div>
+          <div class="empty-row" *ngIf="messages().length === 0">Sin mensajes en esta conversación.</div>
+        </div>
+
+        <form class="reply-bar" (ngSubmit)="sendReply()" *appHasPermission="'messages.update'">
+          <input type="text" class="reply-input" name="reply" [(ngModel)]="replyDraft" placeholder="Escribe una respuesta como asesor..." autocomplete="off" />
+          <button type="submit" class="btn-primary" [disabled]="!replyDraft.trim() || sending">
+            <i class="bi bi-send-fill"></i>
+          </button>
+        </form>
+      </ng-container>
+    </section>
+  </div>
+</div>

@@ -1255,7 +1255,7 @@ Fases:
 
 - [ ] Unit tests.
 - [ ] Integration tests.
-- [ ] E2E.
+- [x] E2E (Playwright en `e2e/`: público, admin, chatbot/cotizaciones/handoff — `npm test`; suite **14/14**).
 - [ ] Pruebas de permisos.
 - [ ] Pruebas de uploads.
 - [ ] Lighthouse.

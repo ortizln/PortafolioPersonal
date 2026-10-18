@@ -195,8 +195,7 @@
             appScrollReveal
           >
             <div class="team-avatar">
-              <img *ngIf="m.photoUrl" [src]="resolveAsset(m.photoUrl)" [alt]="m.fullName" loading="lazy" />
-              <i *ngIf="!m.photoUrl" class="bi bi-person" aria-hidden="true"></i>
+              <app-avatar [src]="resolveAsset(m.photoUrl)" [name]="m.fullName" [size]="82"></app-avatar>
             </div>
             <h3 class="team-name">{{ m.fullName }}</h3>
             <span class="team-role">{{ m.professionalTitle }}</span>
@@ -223,33 +222,55 @@
       </div>
     </section>
 
-    <!-- BLOG -->
+    <!-- ACTUALIDAD / NOTICIAS -->
     <section class="section section--alt" id="blog" *ngIf="recentPosts.length">
       <div class="container">
         <div class="section-head" appScrollReveal>
-          <span class="eyebrow">Insights</span>
-          <h2 class="section-title">Últimas publicaciones</h2>
-          <p class="section-subtitle">Artículos y novedades de nuestro blog.</p>
+          <span class="eyebrow">Actualidad</span>
+          <h2 class="section-title">Nuevas noticias</h2>
+          <p class="section-subtitle">Lo último de nuestro blog, proyectos y novedades de ALANTEK.</p>
         </div>
-        <div class="blog-grid">
-          <a
-            class="blog-card"
-            *ngFor="let p of recentPosts; trackBy: trackByPost"
-            [routerLink]="['/blog', p.slug]"
-            appScrollReveal
-          >
-            <div class="blog-body">
-              <span class="blog-date">
+
+        <div class="news-layout" *ngIf="featuredPost">
+          <a class="news-featured" [routerLink]="['/blog', featuredPost.slug]" appScrollReveal>
+            <div class="news-media">
+              <img [src]="postImage(featuredPost)" [alt]="featuredPost.title" loading="lazy" decoding="async"
+                (error)="onPostImageError($event)" />
+              <span class="news-badge" *ngIf="isNew(featuredPost)">Nuevo</span>
+            </div>
+            <div class="news-content">
+              <span class="news-category" *ngIf="featuredPost.categories?.length">{{ featuredPost.categories?.[0]?.name }}</span>
+              <h3 class="news-title">{{ featuredPost.title }}</h3>
+              <p class="news-excerpt">{{ featuredPost.excerpt }}</p>
+              <span class="news-date">
                 <i class="bi bi-calendar3" aria-hidden="true"></i>
-                {{ p.publishedAt | date: "dd 'de' MMM, yyyy" }}
+                {{ featuredPost.publishedAt | date: "dd 'de' MMM, yyyy" }}
               </span>
-              <h3 class="blog-title">{{ p.title }}</h3>
-              <p class="blog-excerpt">{{ p.excerpt }}</p>
             </div>
           </a>
+
+          <div class="news-secondary" *ngIf="secondaryPosts.length">
+            <a class="news-card" *ngFor="let p of secondaryPosts; trackBy: trackByPost"
+              [routerLink]="['/blog', p.slug]" appScrollReveal>
+              <div class="news-media news-media--sm">
+                <img [src]="postImage(p)" [alt]="p.title" loading="lazy" decoding="async"
+                  (error)="onPostImageError($event)" />
+                <span class="news-badge" *ngIf="isNew(p)">Nuevo</span>
+              </div>
+              <div class="news-content">
+                <span class="news-category" *ngIf="p.categories?.length">{{ p.categories?.[0]?.name }}</span>
+                <h3 class="news-title">{{ p.title }}</h3>
+                <span class="news-date">
+                  <i class="bi bi-calendar3" aria-hidden="true"></i>
+                  {{ p.publishedAt | date: "dd 'de' MMM, yyyy" }}
+                </span>
+              </div>
+            </a>
+          </div>
         </div>
+
         <div class="section-cta" appScrollReveal>
-          <a class="btn-alantek btn-alantek-outline" routerLink="/blog">Ver el blog</a>
+          <a class="btn-alantek btn-alantek-outline" routerLink="/blog">Ver todas las noticias</a>
         </div>
       </div>
     </section>

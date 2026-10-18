@@ -7,12 +7,13 @@ import { Company, TeamMember } from '../core/models';
 import { applyCompanyBrand } from '../core/utils/brand.util';
 import { environment } from '../../environments/environment';
 import { ContactCtaComponent } from '../shared/components/contact-cta.component';
+import { AvatarComponent } from '../shared/components/avatar.component';
 import { ScrollRevealDirective } from '../core/directives/scroll-reveal.directive';
 
 @Component({
   selector: 'app-nosotros-page',
   standalone: true,
-  imports: [NgIf, NgFor, RouterLink, ContactCtaComponent, ScrollRevealDirective],
+  imports: [NgIf, NgFor, RouterLink, ContactCtaComponent, AvatarComponent, ScrollRevealDirective],
   template: `
     <div class="page-wrapper">
       <header class="page-hero page-hero--center">
@@ -65,12 +66,7 @@ import { ScrollRevealDirective } from '../core/directives/scroll-reveal.directiv
             </div>
             <div class="grid-team">
               <a class="card-member" *ngFor="let m of team" [routerLink]="['/equipo', m.slug]" appScrollReveal>
-                <img
-                  class="member-photo"
-                  [src]="getPhoto(m) || 'assets/avatar-placeholder.svg'"
-                  [alt]="m.fullName"
-                  loading="lazy"
-                />
+                <app-avatar class="member-photo" [src]="getPhoto(m)" [name]="m.fullName" [size]="128"></app-avatar>
                 <h3>{{ m.fullName }}</h3>
                 <span class="member-role">{{ m.professionalTitle }}</span>
               </a>

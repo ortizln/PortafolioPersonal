@@ -10,6 +10,7 @@ import { ProjectCarouselComponent } from '../shared/components/project-carousel.
 import { TechnologyMarqueeComponent } from '../shared/components/technology-marquee.component';
 import { TestimonialCarouselComponent } from '../shared/components/testimonial-carousel.component';
 import { ContactCtaComponent } from '../shared/components/contact-cta.component';
+import { AvatarComponent } from '../shared/components/avatar.component';
 import { ScrollRevealDirective } from '../core/directives/scroll-reveal.directive';
 
 @Component({
@@ -25,6 +26,7 @@ import { ScrollRevealDirective } from '../core/directives/scroll-reveal.directiv
     TechnologyMarqueeComponent,
     TestimonialCarouselComponent,
     ContactCtaComponent,
+    AvatarComponent,
     ScrollRevealDirective,
   ],
   changeDetection: ChangeDetectionStrategy.OnPush,
@@ -174,6 +176,30 @@ export class PortfolioComponent implements OnInit {
     if (!client.logoUrl) return null;
     if (client.logoUrl.startsWith('http://') || client.logoUrl.startsWith('https://') || client.logoUrl.startsWith('data:')) return client.logoUrl;
     return `${environment.uploadUrl}/${client.logoUrl}`;
+  }
+
+  get featuredPost(): Post | null {
+    return this.recentPosts.length ? this.recentPosts[0] : null;
+  }
+
+  get secondaryPosts(): Post[] {
+    return this.recentPosts.slice(1, 3);
+  }
+
+  isNew(post: Post): boolean {
+    if (!post?.publishedAt) return false;
+    const diff = Date.now() - new Date(post.publishedAt).getTime();
+    return diff >= 0 && diff < 7 * 24 * 60 * 60 * 1000;
+  }
+
+  postImage(post: Post): string {
+    return this.resolveAsset(post?.coverImage) || 'assets/project-placeholder.svg';
+  }
+
+  onPostImageError(event: Event): void {
+    const img = event.target as HTMLImageElement;
+    const fallback = 'assets/project-placeholder.svg';
+    if (img && !img.src.endsWith(fallback)) img.src = fallback;
   }
 
   trackByClient = (i: number, c: any) => c.id || i;

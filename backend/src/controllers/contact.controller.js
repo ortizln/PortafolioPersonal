@@ -1,23 +1,9 @@
 const prisma = require('../config/database');
 const { AppError } = require('../middlewares/errorHandler');
+const { notifyAdmins } = require('../helpers/notify');
+const { sendTemplate } = require('../helpers/mailer');
 
 const LEAD_STATUSES = ['NEW', 'CONTACTED', 'QUALIFIED', 'PROPOSAL', 'WON', 'LOST', 'CLOSED'];
-
-async function notifyAdmins(title, message, link) {
-  try {
-    const admins = await prisma.user.findMany({
-      where: { deletedAt: null, isActive: true },
-      select: { id: true },
-      take: 50
-    });
-    if (admins.length === 0) return;
-    await prisma.notification.createMany({
-      data: admins.map((a) => ({ userId: a.id, title, message, link, type: 'MESSAGE' }))
-    });
-  } catch (error) {
-    // no romper el flujo
-  }
-}
 
 const contactController = {
   async getAll(req, res, next) {
@@ -96,6 +82,19 @@ const contactController = {
       });
 
       await notifyAdmins(`Nuevo mensaje de ${name}`, email, '/admin/leads');
+
+      try {
+        await sendTemplate({
+          to: email,
+          subject: 'Recibimos tu mensaje - ALANTEK',
+          heading: '¡Gracias por escribirnos!',
+          intro: `Hola ${name}, recibimos tu mensaje y nuestro equipo te responderá lo antes posible.`,
+          rows: subject ? [{ label: 'Asunto', value: subject }] : [],
+          outro: 'Conservamos tus datos únicamente para dar seguimiento a tu solicitud.'
+        });
+      } catch (error) {
+        // no romper el flujo por fallos de correo
+      }
 
       res.status(201).json({ contact });
     } catch (error) {

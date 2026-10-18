@@ -1293,7 +1293,7 @@ tar xzf uploads_*.tar.gz   # en el volumen backend_uploads
 
 - [x] Unit tests (backend Vitest: jwt, memberScope — `npm test` en `backend/`).
 - [x] Integration/smoke tests (supertest sobre la app real con BD: rutas públicas, blog, sitemap, robots, 401 en protegidas; se saltan si la BD no está disponible).
-- [ ] E2E (pendiente: e.g. Playwright/Cypress).
+- [x] E2E (Playwright en `e2e/`: público, admin, chatbot/cotizaciones/handoff — `npm test`; suite **14/14** con backend + `serve-dist.js` en el puerto 4210).
 - [x] Pruebas de permisos (integración RBAC por rol en `backend/test/integration/rbac.test.js`).
 - [x] Pruebas de uploads (integración en `backend/test/integration/upload.test.js`: tipos válidos, tipos rechazados, límite de tamaño, 401/403).
 - [ ] Lighthouse (manual sobre producción).

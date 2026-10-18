@@ -7,12 +7,13 @@ import { Project, ProjectMember } from '../core/models';
 import { environment } from '../../environments/environment';
 import { ContactCtaComponent } from '../shared/components/contact-cta.component';
 import { ProjectCarouselComponent } from '../shared/components/project-carousel.component';
+import { AvatarComponent } from '../shared/components/avatar.component';
 import { ScrollRevealDirective } from '../core/directives/scroll-reveal.directive';
 
 @Component({
   selector: 'app-project-detail-page',
   standalone: true,
-  imports: [DatePipe, NgIf, NgFor, RouterLink, ContactCtaComponent, ProjectCarouselComponent, ScrollRevealDirective],
+  imports: [DatePipe, NgIf, NgFor, RouterLink, ContactCtaComponent, ProjectCarouselComponent, AvatarComponent, ScrollRevealDirective],
   template: `
     <div class="page-wrapper">
       <div class="page-loading" *ngIf="loading"><div class="spinner"></div></div>
@@ -59,6 +60,7 @@ import { ScrollRevealDirective } from '../core/directives/scroll-reveal.directiv
               *ngIf="getPrimaryImage(project)"
               [src]="getPrimaryImage(project)"
               [alt]="'Portada de ' + project.title"
+              (error)="onImgError($event)"
             />
 
             <div class="detail-meta">
@@ -123,7 +125,7 @@ import { ScrollRevealDirective } from '../core/directives/scroll-reveal.directiv
               <h2 class="gallery-title">Equipo que participó</h2>
               <div class="grid-team">
                 <a class="card-member" *ngFor="let member of project.members" [routerLink]="'/equipo/' + member.teamMember?.slug" appScrollReveal>
-                  <img class="member-photo" [src]="getMemberAvatar(member)" [alt]="member.teamMember?.name" loading="lazy" decoding="async" />
+                  <app-avatar class="member-photo" [src]="getMemberAvatar(member)" [name]="member.teamMember?.fullName" [size]="96"></app-avatar>
                   <h3>{{ member.teamMember?.fullName }}</h3>
                   <span class="member-role">{{ member.isLead ? 'Líder · ' : '' }}{{ member.role || member.teamMember?.professionalTitle || 'Miembro del equipo' }}</span>
                 </a>
@@ -302,9 +304,15 @@ export class ProjectDetailPageComponent implements OnInit {
     return `${environment.uploadUrl}/${url}`;
   }
 
-  getMemberAvatar(member: ProjectMember): string {
+  onImgError(event: Event): void {
+    const el = event.target as HTMLImageElement;
+    const fallback = 'assets/project-placeholder.svg';
+    if (el && !el.src.endsWith(fallback)) el.src = fallback;
+  }
+
+  getMemberAvatar(member: ProjectMember): string | null {
     const avatar = member.teamMember?.photoUrl;
-    if (!avatar) return 'assets/avatar-placeholder.svg';
+    if (!avatar) return null;
     if (avatar.startsWith('http://') || avatar.startsWith('https://') || avatar.startsWith('data:')) return avatar;
     return `${environment.uploadUrl}/${avatar}`;
   }

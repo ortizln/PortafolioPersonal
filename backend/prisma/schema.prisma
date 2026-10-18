@@ -93,6 +93,8 @@ model User {
   rbacRole      Role?    @relation("UserRbacRole", fields: [roleId], references: [id])
   assignedContacts ContactMessage[] @relation("ContactAssignedUser")
   posts         Post[]   @relation("PostAuthor")
+  chatSessions  ChatSession[] @relation("ChatAssignedUser")
+  chatHandoffs  ChatHandoff[] @relation("HandoffAssignedUser")
 
   @@map("users")
 }
@@ -588,6 +590,7 @@ model ContactMessage {
   userId        String?
   user          User?    @relation(fields: [userId], references: [id])
   assignedUser  User?    @relation("ContactAssignedUser", fields: [assignedToId], references: [id])
+  quoteRequests QuoteRequest[]
 
   @@index([status])
   @@index([createdAt])
@@ -857,4 +860,125 @@ model ProjectMember {
   @@unique([projectId, teamMemberId])
   @@index([teamMemberId])
   @@map("project_members")
+}
+
+enum ChatChannel {
+  WEB
+  WHATSAPP
+}
+
+enum ChatSessionStatus {
+  OPEN
+  CLOSED
+}
+
+enum ChatDirection {
+  INBOUND
+  OUTBOUND
+}
+
+enum ChatSenderType {
+  VISITOR
+  BOT
+  AGENT
+  SYSTEM
+}
+
+enum HandoffStatus {
+  REQUESTED
+  ACCEPTED
+  CLOSED
+  CANCELLED
+}
+
+enum QuoteRequestStatus {
+  NEW
+  CONTACTED
+  QUALIFIED
+  PROPOSAL
+  WON
+  LOST
+  SPAM
+}
+
+model ChatSession {
+  id                 String            @id @default(uuid())
+  anonymousTokenHash String
+  channel            ChatChannel       @default(WEB)
+  status             ChatSessionStatus @default(OPEN)
+  assignedToId       String?
+  assignedTo         User?             @relation("ChatAssignedUser", fields: [assignedToId], references: [id])
+  consentAt          DateTime?
+  lastMessageAt      DateTime          @default(now())
+  createdAt          DateTime          @default(now())
+  updatedAt          DateTime          @updatedAt
+
+  messages      ChatMessage[]
+  quoteRequests QuoteRequest[]
+  handoffs      ChatHandoff[]
+
+  @@index([status])
+  @@index([lastMessageAt])
+  @@index([createdAt])
+  @@map("chat_sessions")
+}
+
+model ChatMessage {
+  id                String         @id @default(uuid())
+  sessionId         String
+  session           ChatSession    @relation(fields: [sessionId], references: [id], onDelete: Cascade)
+  direction         ChatDirection
+  senderType        ChatSenderType
+  body              String         @db.Text
+  channel           ChatChannel    @default(WEB)
+  externalMessageId String?
+  deliveryStatus    String?
+  createdAt         DateTime       @default(now())
+
+  @@index([sessionId])
+  @@index([createdAt])
+  @@map("chat_messages")
+}
+
+model QuoteRequest {
+  id                 String             @id @default(uuid())
+  code               String             @unique
+  leadId             String?
+  lead               ContactMessage?    @relation(fields: [leadId], references: [id], onDelete: SetNull)
+  sessionId          String?
+  session            ChatSession?       @relation(fields: [sessionId], references: [id], onDelete: SetNull)
+  serviceId          String?
+  projectDescription String?            @db.Text
+  requirementsJson   Json?
+  budgetRange        String?
+  deadline           String?
+  contactName        String?
+  contactEmail       String?
+  contactPhone       String?
+  status             QuoteRequestStatus @default(NEW)
+  createdAt          DateTime           @default(now())
+  updatedAt          DateTime           @updatedAt
+
+  @@index([status])
+  @@index([createdAt])
+  @@index([sessionId])
+  @@map("quote_requests")
+}
+
+model ChatHandoff {
+  id                     String        @id @default(uuid())
+  sessionId              String
+  session                ChatSession   @relation(fields: [sessionId], references: [id], onDelete: Cascade)
+  leadId                 String?
+  requestedAt            DateTime      @default(now())
+  acceptedAt             DateTime?
+  closedAt               DateTime?
+  assignedToId           String?
+  assignedTo             User?         @relation("HandoffAssignedUser", fields: [assignedToId], references: [id])
+  status                 HandoffStatus @default(REQUESTED)
+  whatsappConversationId String?
+
+  @@index([status])
+  @@index([sessionId])
+  @@map("chat_handoffs")
 }

@@ -3,7 +3,7 @@ import { isPlatformBrowser } from '@angular/common';
 
 interface Star {
   x: number; y: number; r: number; a: number; speed: number; phase: number;
-  baseX: number; baseY: number;
+  vx: number; vy: number;
 }
 
 interface NeonLine {
@@ -44,7 +44,7 @@ export class NeonBackgroundComponent implements AfterViewInit, OnDestroy {
     this.resize();
     window.addEventListener('resize', () => this.resize());
     this.bindMouse();
-    this.initStars(100);
+    this.initStars(150);
     this.initLines(20);
     this.animate();
   }
@@ -76,13 +76,22 @@ export class NeonBackgroundComponent implements AfterViewInit, OnDestroy {
 
   private initStars(count: number): void {
     this.stars = [];
+    const layers = [
+      { rMin: 0.3, rMax: 0.9, vMin: 0.02, vMax: 0.05, aMin: 0.18, aMax: 0.45 },
+      { rMin: 0.9, rMax: 1.5, vMin: 0.05, vMax: 0.12, aMin: 0.35, aMax: 0.7 },
+      { rMin: 1.5, rMax: 2.4, vMin: 0.12, vMax: 0.25, aMin: 0.45, aMax: 0.95 },
+    ];
     for (let i = 0; i < count; i++) {
-      const x = Math.random() * this.w;
-      const y = Math.random() * this.h;
+      const layer = layers[i % layers.length];
+      const dir = Math.random() * Math.PI * 2;
+      const speed = layer.vMin + Math.random() * (layer.vMax - layer.vMin);
       this.stars.push({
-        x, y, baseX: x, baseY: y,
-        r: Math.random() * 2 + 0.4,
-        a: Math.random() * 0.8 + 0.2,
+        x: Math.random() * this.w,
+        y: Math.random() * this.h,
+        r: layer.rMin + Math.random() * (layer.rMax - layer.rMin),
+        a: layer.aMin + Math.random() * (layer.aMax - layer.aMin),
+        vx: Math.cos(dir) * speed,
+        vy: Math.sin(dir) * speed * 0.6,
         speed: Math.random() * 0.025 + 0.008,
         phase: Math.random() * Math.PI * 2,
       });
@@ -258,31 +267,32 @@ export class NeonBackgroundComponent implements AfterViewInit, OnDestroy {
       ctx.shadowBlur = 0;
     }
 
-    // ── STARS (twinkle + mouse push) ──
+    // ── STARS (drift + twinkle + mouse push) ──
     for (const star of this.stars) {
       star.phase += star.speed;
+      star.x += star.vx;
+      star.y += star.vy;
 
-      // Mouse push
+      // Mouse push (gentle parallax)
       if (mouseActive) {
         const dx = star.x - mx;
         const dy = star.y - my;
         const dist = Math.sqrt(dx * dx + dy * dy);
         if (dist < 120) {
           const force = (120 - dist) / 120;
-          star.x += (dx / (dist || 1)) * force * 1.2;
-          star.y += (dy / (dist || 1)) * force * 1.2;
+          star.x += (dx / (dist || 1)) * force * 1.1;
+          star.y += (dy / (dist || 1)) * force * 1.1;
         }
       }
 
-      // Drift back toward base position
-      star.x += (star.baseX - star.x) * 0.003;
-      star.y += (star.baseY - star.y) * 0.003;
-      // Slow base drift
-      star.baseX += Math.sin(time * 0.3 + star.phase) * 0.05;
-      star.baseY += Math.cos(time * 0.2 + star.phase) * 0.05;
+      // Wrap around edges so the field keeps flowing
+      if (star.x > this.w + 4) star.x = -4;
+      else if (star.x < -4) star.x = this.w + 4;
+      if (star.y > this.h + 4) star.y = -4;
+      else if (star.y < -4) star.y = this.h + 4;
 
       const twinkle = (Math.sin(star.phase) + 1) / 2;
-      const alpha = star.a * (0.25 + twinkle * 0.75);
+      const alpha = star.a * (0.35 + twinkle * 0.65);
       const color = isDark
         ? `rgba(255, 255, 255, ${alpha})`
         : `rgba(100, 116, 139, ${alpha * 0.35})`;

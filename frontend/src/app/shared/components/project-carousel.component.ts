@@ -49,6 +49,7 @@ import { environment } from '../../../environments/environment';
             class="project-image"
             [src]="getPrimaryImage(p) || 'assets/project-placeholder.svg'"
             [alt]="'Portada de ' + p.title"
+            (error)="onImgError($event)"
             loading="lazy"
             decoding="async"
           />
@@ -183,6 +184,12 @@ export class ProjectCarouselComponent implements AfterViewInit, OnDestroy {
     if (!url) return null;
     if (url.startsWith('http://') || url.startsWith('https://') || url.startsWith('data:')) return url;
     return `${environment.uploadUrl}/${url}`;
+  }
+
+  onImgError(event: Event): void {
+    const el = event.target as HTMLImageElement;
+    const fallback = 'assets/project-placeholder.svg';
+    if (el && !el.src.endsWith(fallback)) el.src = fallback;
   }
 
   trackById = (i: number, p: any) => p.id || i;

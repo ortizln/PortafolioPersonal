@@ -1,5 +1,5 @@
 import { Injectable, inject } from '@angular/core';
-import { HttpClient, HttpParams } from '@angular/common/http';
+import { HttpClient, HttpHeaders, HttpParams } from '@angular/common/http';
 import { Observable, map } from 'rxjs';
 import { environment } from '../../../environments/environment';
 import {
@@ -8,6 +8,7 @@ import {
   SocialLink, Repository, ContactMessage, Category,
   Setting, CertificateFile, Company, Service, Client, Testimonial, TeamMember,
   Role, Permission, MediaFile, Notification, AuditLog, Post, PostCategory, PostTag,
+  ChatSession, ChatSessionSummary, ChatMessage, ChatHandoff, QuoteRequest,
 } from '../models';
 
 @Injectable({ providedIn: 'root' })
@@ -937,5 +938,105 @@ export class ApiService {
 
   getSeoInfo(path: string): Observable<{ seo: Record<string, any> }> {
     return this.http.get<{ seo: Record<string, any> }>(`${this.apiUrl}/public/seo`, { params: new HttpParams().set('path', path) });
+  }
+
+  // ===== Chat público (Fase C) =====
+  createChatSession(payload?: { channel?: string; consent?: boolean }): Observable<{ session: ChatSessionSummary; token: string }> {
+    return this.http.post<{ session: ChatSessionSummary; token: string }>(`${this.apiUrl}/public/chat/sessions`, payload || {});
+  }
+
+  getChatMessages(sessionId: string, token: string): Observable<{ session: ChatSessionSummary; messages: ChatMessage[] }> {
+    return this.http.get<{ session: ChatSessionSummary; messages: ChatMessage[] }>(
+      `${this.apiUrl}/public/chat/sessions/${sessionId}/messages`,
+      { headers: new HttpHeaders({ 'x-chat-token': token }) }
+    );
+  }
+
+  postChatMessage(sessionId: string, token: string, payload: { body: string; senderType?: string; clientMessageId?: string }): Observable<{ message: ChatMessage }> {
+    return this.http.post<{ message: ChatMessage }>(
+      `${this.apiUrl}/public/chat/sessions/${sessionId}/messages`,
+      payload,
+      { headers: new HttpHeaders({ 'x-chat-token': token }) }
+    );
+  }
+
+  requestChatHandoff(sessionId: string, token: string, payload: { reason?: string; contactName?: string; contactEmail?: string; contactPhone?: string }): Observable<{ handoff: ChatHandoff; waLink: string }> {
+    return this.http.post<{ handoff: ChatHandoff; waLink: string }>(
+      `${this.apiUrl}/public/chat/sessions/${sessionId}/handoff`,
+      payload,
+      { headers: new HttpHeaders({ 'x-chat-token': token }) }
+    );
+  }
+
+  createQuote(payload: {
+    type: string; description: string; features?: string[]; budget?: string; deadline?: string;
+    name: string; email: string; phone?: string; serviceId?: string; sessionId?: string;
+  }): Observable<{ quote: QuoteRequest; code: string }> {
+    return this.http.post<{ quote: QuoteRequest; code: string }>(`${this.apiUrl}/public/quotes`, payload);
+  }
+
+  // ===== Chat admin (Fase C) =====
+  getChatSessions(params?: { page?: number; limit?: number; status?: string; channel?: string; search?: string }): Observable<{
+    sessions: ChatSessionSummary[]; total: number; page: number; limit: number; openCount: number;
+  }> {
+    let httpParams = new HttpParams();
+    if (params?.page) httpParams = httpParams.set('page', String(params.page));
+    if (params?.limit) httpParams = httpParams.set('limit', String(params.limit));
+    if (params?.status) httpParams = httpParams.set('status', params.status);
+    if (params?.channel) httpParams = httpParams.set('channel', params.channel);
+    if (params?.search) httpParams = httpParams.set('search', params.search);
+    return this.http.get<any>(`${this.apiUrl}/admin/chat/sessions`, { params: httpParams });
+  }
+
+  getChatSession(id: string): Observable<{ session: ChatSession }> {
+    return this.http.get<{ session: ChatSession }>(`${this.apiUrl}/admin/chat/sessions/${id}`);
+  }
+
+  postAgentMessage(id: string, body: string): Observable<{ message: ChatMessage; delivery: any }> {
+    return this.http.post<{ message: ChatMessage; delivery: any }>(`${this.apiUrl}/admin/chat/sessions/${id}/messages`, { body });
+  }
+
+  updateChatSession(id: string, data: { status?: string; assignedToId?: string }): Observable<{ session: ChatSession }> {
+    return this.http.patch<{ session: ChatSession }>(`${this.apiUrl}/admin/chat/sessions/${id}`, data);
+  }
+
+  getChatHandoffs(params?: { page?: number; limit?: number; status?: string }): Observable<{ handoffs: ChatHandoff[]; total: number; page: number; limit: number }> {
+    let httpParams = new HttpParams();
+    if (params?.page) httpParams = httpParams.set('page', String(params.page));
+    if (params?.limit) httpParams = httpParams.set('limit', String(params.limit));
+    if (params?.status) httpParams = httpParams.set('status', params.status);
+    return this.http.get<any>(`${this.apiUrl}/admin/chat/handoffs`, { params: httpParams });
+  }
+
+  updateChatHandoff(id: string, data: { status?: string; assignedToId?: string }): Observable<{ handoff: ChatHandoff }> {
+    return this.http.patch<{ handoff: ChatHandoff }>(`${this.apiUrl}/admin/chat/handoffs/${id}`, data);
+  }
+
+  getWhatsappStatus(): Observable<{ whatsapp: { configured: boolean; connected: boolean; defaultNumber: string } }> {
+    return this.http.get<{ whatsapp: { configured: boolean; connected: boolean; defaultNumber: string } }>(`${this.apiUrl}/admin/chat/whatsapp/status`);
+  }
+
+  // ===== Cotizaciones admin (Fase C) =====
+  getQuotes(params?: { page?: number; limit?: number; status?: string; search?: string }): Observable<{
+    quotes: QuoteRequest[]; total: number; page: number; limit: number; statusCounts: Record<string, number>; statuses: string[];
+  }> {
+    let httpParams = new HttpParams();
+    if (params?.page) httpParams = httpParams.set('page', String(params.page));
+    if (params?.limit) httpParams = httpParams.set('limit', String(params.limit));
+    if (params?.status) httpParams = httpParams.set('status', params.status);
+    if (params?.search) httpParams = httpParams.set('search', params.search);
+    return this.http.get<any>(`${this.apiUrl}/admin/quotes`, { params: httpParams });
+  }
+
+  getQuote(id: string): Observable<{ quote: QuoteRequest }> {
+    return this.http.get<{ quote: QuoteRequest }>(`${this.apiUrl}/admin/quotes/${id}`);
+  }
+
+  updateQuote(id: string, data: Partial<QuoteRequest>): Observable<{ quote: QuoteRequest }> {
+    return this.http.patch<{ quote: QuoteRequest }>(`${this.apiUrl}/admin/quotes/${id}`, data);
+  }
+
+  deleteQuote(id: string): Observable<void> {
+    return this.http.delete<void>(`${this.apiUrl}/admin/quotes/${id}`);
   }
 }

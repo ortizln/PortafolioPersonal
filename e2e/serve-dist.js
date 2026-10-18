@@ -7,6 +7,7 @@ const port = parseInt(process.env.PORT || '4200', 10);
 const base = '/portfolio';
 const apiHost = process.env.API_HOST || 'localhost';
 const apiPort = parseInt(process.env.API_PORT || '3000', 10);
+const proxyOrigin = process.env.PROXY_ORIGIN || 'http://localhost:4300';
 
 const MIME = {
   '.html': 'text/html; charset=utf-8',
@@ -34,7 +35,7 @@ function proxy(req, res, targetPath) {
       port: apiPort,
       method: req.method,
       path: targetPath,
-      headers: { ...req.headers, host: `${apiHost}:${apiPort}` }
+      headers: { ...req.headers, host: `${apiHost}:${apiPort}`, origin: proxyOrigin }
     },
     (upRes) => {
       res.writeHead(upRes.statusCode, upRes.headers);

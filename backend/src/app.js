@@ -32,6 +32,18 @@ const contactLimiter = rateLimit({
   message: { error: 'Too many contact submissions, please try again later.' }
 });
 
+const chatLimiter = rateLimit({
+  windowMs: 15 * 60 * 1000,
+  max: 60,
+  message: { error: 'Too many chat messages, please try again later.' }
+});
+
+const quoteLimiter = rateLimit({
+  windowMs: 60 * 60 * 1000,
+  max: 10,
+  message: { error: 'Too many quote requests, please try again later.' }
+});
+
 app.use(helmet({
   crossOriginResourcePolicy: { policy: 'cross-origin' },
   contentSecurityPolicy: {
@@ -105,6 +117,11 @@ const mediaRoutes = require('./routes/media.routes');
 const auditRoutes = require('./routes/audit.routes');
 const notificationRoutes = require('./routes/notification.routes');
 const postRoutes = require('./routes/post.routes');
+const chatRoutes = require('./routes/chat.routes');
+const chatAdminRoutes = require('./routes/chatAdmin.routes');
+const quoteRoutes = require('./routes/quote.routes');
+const quoteAdminRoutes = require('./routes/quoteAdmin.routes');
+const whatsappRoutes = require('./routes/whatsapp.routes');
 
 app.use('/api/auth', authRoutes);
 app.use('/api/users', userRoutes);
@@ -134,6 +151,12 @@ app.use('/api/roles', roleRoutes);
 app.use('/api/audit', auditRoutes);
 app.use('/api/notifications', notificationRoutes);
 app.use('/api/posts', postRoutes);
+
+app.use('/api/public/chat', chatLimiter, chatRoutes);
+app.use('/api/public/quotes', quoteLimiter, quoteRoutes);
+app.use('/api/admin/chat', chatAdminRoutes);
+app.use('/api/admin/quotes', quoteAdminRoutes);
+app.use('/api/integrations/whatsapp', whatsappRoutes);
 
 // SEO: sitemap.xml y robots.txt a nivel raíz (para proxy en nginx si se desea)
 app.get('/sitemap.xml', publicController.getSitemap);

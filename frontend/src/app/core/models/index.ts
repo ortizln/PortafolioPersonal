@@ -507,3 +507,75 @@ export interface TeamMember {
   socialLinks?: SocialLink[];
   _count?: { experiences?: number; educations?: number; certifications?: number; skills?: number; languages?: number; socialLinks?: number };
 }
+
+// ===== Chat & Cotizaciones =====
+export type ChatChannel = 'WEB' | 'WHATSAPP';
+export type ChatSessionStatus = 'OPEN' | 'CLOSED';
+export type ChatDirection = 'INBOUND' | 'OUTBOUND';
+export type ChatSenderType = 'VISITOR' | 'BOT' | 'AGENT' | 'SYSTEM';
+export type HandoffStatus = 'REQUESTED' | 'ACCEPTED' | 'CLOSED' | 'CANCELLED';
+export type QuoteRequestStatus = 'NEW' | 'CONTACTED' | 'QUALIFIED' | 'PROPOSAL' | 'WON' | 'LOST' | 'SPAM';
+
+export interface ChatMessage {
+  id: string;
+  sessionId: string;
+  direction: ChatDirection;
+  senderType: ChatSenderType;
+  body: string;
+  channel: ChatChannel;
+  externalMessageId?: string | null;
+  deliveryStatus?: string | null;
+  createdAt: string;
+}
+
+export interface ChatSessionSummary {
+  id: string;
+  channel: ChatChannel;
+  status: ChatSessionStatus;
+  createdAt: string;
+  lastMessageAt: string;
+  assignedTo?: { id: string; name: string; email: string } | null;
+  counts?: { messages?: number; handoffs?: number; quoteRequests?: number };
+  lastMessage?: ChatMessage | null;
+}
+
+export interface ChatSession extends ChatSessionSummary {
+  assignedToId?: string | null;
+  messages?: ChatMessage[];
+  handoffs?: ChatHandoff[];
+  quoteRequests?: QuoteRequest[];
+}
+
+export interface ChatHandoff {
+  id: string;
+  sessionId: string;
+  leadId?: string | null;
+  requestedAt: string;
+  acceptedAt?: string | null;
+  closedAt?: string | null;
+  assignedToId?: string | null;
+  assignedTo?: { id: string; name: string; email: string } | null;
+  status: HandoffStatus;
+  whatsappConversationId?: string | null;
+  session?: { id: string; channel: ChatChannel; status: ChatSessionStatus };
+}
+
+export interface QuoteRequest {
+  id: string;
+  code: string;
+  leadId?: string | null;
+  sessionId?: string | null;
+  serviceId?: string | null;
+  projectDescription?: string | null;
+  requirementsJson?: { features?: string[] } | null;
+  budgetRange?: string | null;
+  deadline?: string | null;
+  contactName?: string | null;
+  contactEmail?: string | null;
+  contactPhone?: string | null;
+  status: QuoteRequestStatus;
+  createdAt: string;
+  updatedAt: string;
+  session?: { id: string; channel: ChatChannel; status: ChatSessionStatus; messages?: ChatMessage[] } | null;
+  lead?: { id: string; name: string; email: string; status: LeadStatus } | null;
+}

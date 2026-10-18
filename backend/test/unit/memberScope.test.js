@@ -1,8 +1,8 @@
 import { describe, it, expect } from 'vitest';
 import { isAdmin, buildProfileWhere, canManage, memberIdFromBody } from '../../src/utils/memberScope';
 
-const adminReq = (over = {}) => ({ user: { id: 'a-1', role: 'ADMIN' }, query: {}, body: {}, ...over });
-const userReq = (over = {}) => ({ user: { id: 'u-1', role: 'USER' }, query: {}, body: {}, ...over });
+const adminReq = (over = {}) => ({ user: { id: 'a-1', roles: ['ADMIN'] }, query: {}, body: {}, ...over });
+const userReq = (over = {}) => ({ user: { id: 'u-1', roles: ['USER'] }, query: {}, body: {}, ...over });
 
 describe('memberScope', () => {
   it('isAdmin solo para rol ADMIN', () => {
@@ -20,11 +20,11 @@ describe('memberScope', () => {
     expect(buildProfileWhere(req)).toEqual({ userId: 'u-1' });
   });
 
-  it('canManage: propietario, o admin sobre entidad con memberId', () => {
+  it('canManage: propietario siempre, admin sobre cualquier entidad, otro usuario no', () => {
     expect(canManage(userReq(), { userId: 'u-1' })).toBe(true);
     expect(canManage(userReq(), { userId: 'otro' })).toBe(false);
     expect(canManage(adminReq(), { userId: 'otro', memberId: 'm-1' })).toBe(true);
-    expect(canManage(adminReq(), { userId: 'otro' })).toBe(false);
+    expect(canManage(adminReq(), { userId: 'otro' })).toBe(true);
     expect(canManage(userReq(), null)).toBe(false);
   });
 
